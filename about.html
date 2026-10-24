@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About WSA | Woody Space Agency</title>
+    <script src="page-init.js?v=2"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="kgoss.html">KGOSS</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head" style="padding: 3rem 2rem 2rem;">
+        <div class="container">
+            <h1 style="margin-bottom: 0.5rem;">About Woody Space Agency</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 3rem;">
+                A small, independent aerospace organization pursuing ambitious spaceflight through incremental engineering and reusable systems.
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Engineering Philosophy</h2>
+            <p style="font-size: 1.05rem; margin-bottom: 2rem; max-width: 800px;">
+                WSA's core principle is to develop engineering solutions step-by-step, learning from each test and iteration rather than immediately reaching for third-party automation. This approach demands patience, rigorous documentation, honest failure analysis, and continuous improvement.
+            </p>
+
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>Incremental Development</h3>
+                    <p>Systems are built through successive refinement. Each test flight, mission, or experiment teaches something about the vehicle, the control system, or the mission profile. Failures are documented as learning opportunities, not setbacks.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Homemade Guidance & Control</h3>
+                    <p>Rather than delegating all autonomous tasks to external mods, WSA develops custom flight controllers and guidance systems (like AutoLand) to understand how spacecraft actually behave and respond to control inputs.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Reusable-First Design</h3>
+                    <p>Boosters are designed for recovery, refurbishment, and reuse. This drives engineering decisions about structure, landing systems, and operational procedures that would not exist in expendable designs.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Reliable Operations</h3>
+                    <p>WSA prioritizes systems that can repeat their performance consistently. A vehicle that lands safely once proves a concept; a vehicle that lands safely 47+ times proves a capability.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Mission-Focused</h3>
+                    <p>Development is driven by real mission objectives: reaching the Mun, assembling an orbital station, recovering boosters, supporting crew transport. Technology is built to serve these goals.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Documented Learning</h3>
+                    <p>Flight records, engineering decisions, problems, and solutions are documented. This archive allows WSA to review progress, avoid repeating mistakes, and make informed decisions about future programs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Core Interests</h2>
+            <p style="margin-bottom: 2rem;">WSA's engineering work focuses on these interconnected technical areas:</p>
+
+            <div class="module-list">
+                <div class="module-card">
+                    <div class="module-name">Reusable Booster Development & Recovery</div>
+                    <p>Designing boosters that survive descent, landing, and recovery. This includes structural design for reuse, thermal management, landing-gear systems, and operational procedures for refurbishment.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Autonomous Descent, Guidance & Landing Control</div>
+                    <p>Building guidance systems that predict trajectories, manage throttle, and guide vehicles to precision landings. AutoLand represents the flagship effort in this area—a custom kOS system for reliable booster recovery.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Orbital Station Construction & Logistics</div>
+                    <p>Assembling modular orbital infrastructure (KGOSS), managing docking, transferring fuel, and supporting sustained space operations. Station work drives requirements for reliable rendezvous and crew transportation.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Crew Transport, Rendezvous, Docking & Rescue</div>
+                    <p>Developing systems for human spaceflight: reliable crew capsules, safe entry and recovery, rendezvous and docking with orbital stations, and rescue capability for contingency scenarios.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Aircraft & Spaceplane Experimentation</div>
+                    <p>Testing flight-control concepts, atmospheric performance, high-speed flight, and reusable transportation. Programs like Swift-1X and SSTO development explore aerodynamic and orbital-transition challenges.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Mun, Minmus, Duna & Planetary Exploration</div>
+                    <p>Extending mission capability beyond Kerbin orbit. FAMMOK develops lander systems, precision-landing guidance, entry profiles, and return capability for distant destinations.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Mission Planning & Operations</div>
+                    <p>Understanding orbital mechanics, planning transfer trajectories, managing consumables, coordinating multi-vehicle operations, and preparing contingency responses for unexpected situations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>What WSA Is Not</h2>
+            <p style="margin-bottom: 2rem; max-width: 800px;">
+                To be clear about WSA's scope and nature:
+            </p>
+
+            <ul style="max-width: 800px; color: var(--text-secondary); line-height: 2;">
+                <li><strong>Not a real aerospace corporation.</strong> WSA is a fictional organization developed within Kerbal Space Program. Its achievements exist in simulation.</li>
+                <li><strong>Not a commercial spaceflight company.</strong> WSA pursues engineering and exploration, not profit or mass transport.</li>
+                <li><strong>Not a government agency.</strong> WSA operates as an independent organization focused on research and development.</li>
+                <li><strong>Not an autopilot mod.</strong> AutoLand is a custom-written kOS script, not a complete replacement for pilot decision-making.</li>
+                <li><strong>Not a single monolithic system.</strong> WSA is a collection of programs, vehicles, and experimental efforts that evolve independently.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Organization & Structure</h2>
+            <p style="margin-bottom: 2rem; max-width: 800px;">
+                WSA operates through several interconnected program areas, each pursuing specific engineering goals while contributing to the broader mission architecture:
+            </p>
+
+            <div style="max-width: 900px;">
+                <div class="overview-card" style="margin-bottom: 1.5rem;">
+                    <h3>Aegis Program</h3>
+                    <p>Development and operation of the Aegis reusable booster family. Includes multiple configurations, autonomous landing research, and recovery operations. Serves as the foundation for many WSA missions.</p>
+                </div>
+
+                <div class="overview-card" style="margin-bottom: 1.5rem;">
+                    <h3>Lyra Program</h3>
+                    <p>Next-generation reusable launcher family. Represents a new direction in vehicle design with focus on capacity, reliability, and supporting more ambitious mission architectures like KGOSS expansion.</p>
+                </div>
+
+                <div class="overview-card" style="margin-bottom: 1.5rem;">
+                    <h3>AutoLand Engineering</h3>
+                    <p>Autonomous guidance and control system development. Spans all booster families and represents WSA's commitment to understanding how to reliably land spacecraft without human intervention.</p>
+                </div>
+
+                <div class="overview-card" style="margin-bottom: 1.5rem;">
+                    <h3>KGOSS Orbital Operations</h3>
+                    <p>Construction and operation of the KGOSS orbital station. Drives requirements for crew transport, logistics, docking systems, and rescue capability. Central hub for sustained space operations.</p>
+                </div>
+
+                <div class="overview-card" style="margin-bottom: 1.5rem;">
+                    <h3>FAMMOK Exploration Program</h3>
+                    <p>Planetary lander development and deep-space mission planning. Focuses on Mun, Minmus, and Duna capabilities, including precision landing and return vehicle development.</p>
+                </div>
+
+                <div class="overview-card" style="margin-bottom: 1.5rem;">
+                    <h3>Aircraft & Flight Systems</h3>
+                    <p>Atmospheric and spaceplane research. Includes Swift-1X test aircraft and SSTO development. Explores flight control, aerodynamics, and reusable orbital transportation concepts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=3"></script>
+    <script src="navigation.js?v=5"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+</body>
+</html>

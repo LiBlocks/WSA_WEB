@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woody Space Agency</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #fafaf9;
+            --bg-secondary: #f5f5f4;
+            --text-primary: #1c1917;
+            --text-secondary: #78716f;
+            --border: #e7e5e4;
+            --accent: #3b82f6;
+            --accent-dark: #1e40af;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica',
+                'Arial', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header & Navigation */
+        header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(250, 250, 249, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .stat-card {
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Section Container */
+        section {
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            letter-spacing: -0.02em;
+        }
+
+        /* Goals Section */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .goal-card {
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .goal-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .goal-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .goal-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Timeline / Milestones */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background-color: var(--border);
+        }
+
+        .timeline-item {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .milestone-content {
+            margin-left: 0;
+            margin-right: 50%;
+            padding-right: 2rem;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) .milestone-content {
+            margin-left: 50%;
+            margin-right: 0;
+            padding-left: 2rem;
+            text-align: left;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background-color: var(--accent);
+            border: 3px solid var(--bg-primary);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .milestone-content {
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .milestone-content:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .milestone-date {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .milestone-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .milestone-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .milestone-details {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .milestone-content.active .milestone-details {
+            display: block;
+        }
+
+        /* Projects Section */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .project-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .project-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .project-status {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.35rem 0.75rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+        }
+
+        .project-status.active {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .project-status.dev {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .project-description {
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .project-details {
+            display: none;
+            padding: 0 2rem 2rem;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .project-card.expanded .project-details {
+            display: block;
+        }
+
+        .project-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .spec {
+            padding: 1rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .spec-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .spec-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Vehicles Section */
+        .vehicle-families {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 3rem;
+        }
+
+        .vehicle-family {
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .family-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .family-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .variants {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .variant {
+            padding: 1rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .variant:hover {
+            border-color: var(--accent);
+        }
+
+        .variant-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .variant-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.25rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .timeline::before {
+                left: 8px;
+            }
+
+            .timeline-item:nth-child(odd) .milestone-content,
+            .timeline-item:nth-child(even) .milestone-content {
+                margin-left: 40px;
+                margin-right: 0;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                text-align: left;
+            }
+
+            .timeline-dot {
+                left: 0;
+            }
+
+            .vehicle-families {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        /* Utility */
+        .placeholder {
+            opacity: 0.6;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Woody Space Agency</div>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#goals">Goals</a></li>
+                <li><a href="#achievements">Achievements</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#vehicles">Vehicles</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Woody Space Agency</h1>
+        <p class="subtitle">Developing reusable spacecraft, autonomous flight systems, and space infrastructure.</p>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">2025</div>
+                <div class="stat-label">Founded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Active Projects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">47</div>
+                <div class="stat-label">Successful Recoveries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12+</div>
+                <div class="stat-label">Major Milestones</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2>About WSA</h2>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 800px; line-height: 1.8;">
+                WSA is a small, independent aerospace organization focused on developing reliable,
+                reusable launch vehicles and autonomous flight systems. Founded in 2025, WSA pursues incremental
+                engineering excellence through iterative vehicle development, rigorous testing, and continuous improvement.
+                Our mission is to make reliable spaceflight accessible and demonstrate that autonomous systems can
+                safely manage complex aerospace operations.
+            </p>
+        </div>
+    </section>
+
+    <section id="goals">
+        <div class="container">
+            <h2>Strategic Goals</h2>
+            <div class="goals-grid">
+                <div class="goal-card">
+                    <h3>Reusable Launch Vehicles</h3>
+                    <p>Develop booster families designed for full recovery and rapid reuse, reducing the cost and environmental impact of spaceflight.</p>
+                </div>
+                <div class="goal-card">
+                    <h3>Autonomous Landing Technology</h3>
+                    <p>Advance automated guidance and control systems capable of precision landings in varied conditions without human intervention.</p>
+                </div>
+                <div class="goal-card">
+                    <h3>Orbital Infrastructure</h3>
+                    <p>Establish modular orbital platforms and docking capabilities to support sustained space operations and collaborative missions.</p>
+                </div>
+                <div class="goal-card">
+                    <h3>Crewed Spaceflight</h3>
+                    <p>Develop reliable systems for human spaceflight, prioritizing safety through extensive testing and redundancy.</p>
+                </div>
+                <div class="goal-card">
+                    <h3>Deep-Space Exploration</h3>
+                    <p>Extend WSA capabilities to beyond-Earth-orbit missions, developing advanced landing and precision navigation systems.</p>
+                </div>
+                <div class="goal-card">
+                    <h3>Incremental Engineering</h3>
+                    <p>Pursue continuous improvement through methodical development cycles, learning from each test and flight iteration.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="achievements">
+        <div class="container">
+            <h2>Milestones & Achievements</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2025</div>
+                        <div class="milestone-title">WSA Founded</div>
+                        <div class="milestone-description">Woody Space Agency established with focus on reusable spacecraft development.</div>
+                        <div class="milestone-details">Initial team formation and facility setup in preparation for first vehicle development program.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2020</div>
+                        <div class="milestone-title">Aegis Program Launch</div>
+                        <div class="milestone-description">Development begins on Aegis reusable booster family with autonomous landing capability.</div>
+                        <div class="milestone-details">First subscale tests conducted. Landing guidance algorithms prototyped and initial control authority verified.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2021</div>
+                        <div class="milestone-title">First Booster Recovery</div>
+                        <div class="milestone-description">Aegis booster successfully recovered after first full-scale powered flight test.</div>
+                        <div class="milestone-details">Multiple test flights conducted. Landing guidance validated. Booster structural design proven in flight.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2022</div>
+                        <div class="milestone-title">KGOSS Program Initiated</div>
+                        <div class="milestone-description">Orbital infrastructure development begins with KGOSS space station program.</div>
+                        <div class="milestone-details">Modular station architecture designed. Docking capabilities prototyped. First module designs validated.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2023</div>
+                        <div class="milestone-title">Lyra Development Begins</div>
+                        <div class="milestone-description">Work starts on Lyra family—next-generation reusable launch vehicle for higher-capacity missions.</div>
+                        <div class="milestone-details">Vehicle trades conducted. Three-variant architecture established (Selene, Sol, Astra). Initial systems specifications drafted.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2024</div>
+                        <div class="milestone-title">FAMMOK Deep-Space Program</div>
+                        <div class="milestone-description">Deep-space exploration and precision landing systems development commences.</div>
+                        <div class="milestone-details">Advanced guidance algorithms developed. Testing with subscale models ongoing. Landing site analysis for multi-body missions completed.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2025</div>
+                        <div class="milestone-title">Aegis Maturation</div>
+                        <div class="milestone-description">Aegis program reaches high reliability. 47+ successful recoveries achieved across all test campaigns.</div>
+                        <div class="milestone-details">Vehicle family now transitioning toward operational status. Preparations begin for crewed certification tests.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="milestone-content">
+                        <div class="milestone-date">2026</div>
+                        <div class="milestone-title">Lyra First Flight</div>
+                        <div class="milestone-description"><span class="placeholder">[Planned - pending vehicle integration]</span></div>
+                        <div class="milestone-details">Next major milestone in WSA's development roadmap. Lyra Selene demonstrator flight scheduled.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <div class="container">
+            <h2>Active Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">Aegis</div>
+                        <div class="project-status active">Operational</div>
+                    </div>
+                    <div class="project-description">
+                        Reusable booster family with autonomous landing capability. Multiple successful test flights and recoveries. Now preparing for crewed certification.
+                    </div>
+                    <div class="project-details">
+                        <div class="project-specs">
+                            <div class="spec">
+                                <div class="spec-label">Status</div>
+                                <div class="spec-value">Mature</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Flights</div>
+                                <div class="spec-value">47+ successful</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Recovery Rate</div>
+                                <div class="spec-value">100%</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Next Phase</div>
+                                <div class="spec-value">Crewed tests</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem;">Aegis represents the culmination of WSA's initial development efforts. The booster has proven autonomous landing capability and structural reliability across dozens of flight tests.</p>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">Lyra</div>
+                        <div class="project-status dev">In Development</div>
+                    </div>
+                    <div class="project-description">
+                        Next-generation reusable launch vehicle family designed for higher-capacity missions and orbital infrastructure deployment. Three planned capability variants.
+                    </div>
+                    <div class="project-details">
+                        <div class="project-specs">
+                            <div class="spec">
+                                <div class="spec-label">Status</div>
+                                <div class="spec-value">Integration</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Variants</div>
+                                <div class="spec-value">3 planned</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Target Lift</div>
+                                <div class="spec-value">Higher than Aegis</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">First Flight</div>
+                                <div class="spec-value">2026 (projected)</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem;">Lyra builds on lessons learned from Aegis while introducing increased payload capacity and advanced staging architecture. All three variants share common core systems.</p>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">KGOSS</div>
+                        <div class="project-status dev">In Development</div>
+                    </div>
+                    <div class="project-description">
+                        Orbital infrastructure program developing modular space station architecture, docking systems, and persistent orbital platforms for research and operations.
+                    </div>
+                    <div class="project-details">
+                        <div class="project-specs">
+                            <div class="spec">
+                                <div class="spec-label">Status</div>
+                                <div class="spec-value">Design phase</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Architecture</div>
+                                <div class="spec-value">Modular</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Docking Ports</div>
+                                <div class="spec-value">Multiple</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Deployment</div>
+                                <div class="spec-value">Multi-phase</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem;">KGOSS represents WSA's commitment to sustained orbital operations. Modular design allows phased deployment and collaborative mission architecture.</p>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">FAMMOK</div>
+                        <div class="project-status dev">In Development</div>
+                    </div>
+                    <div class="project-description">
+                        Deep-space exploration and precision landing program. Advanced guidance and autonomous navigation systems for beyond-Earth-orbit missions.
+                    </div>
+                    <div class="project-details">
+                        <div class="project-specs">
+                            <div class="spec">
+                                <div class="spec-label">Focus</div>
+                                <div class="spec-value">Deep space</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Key Tech</div>
+                                <div class="spec-value">Precision landing</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Status</div>
+                                <div class="spec-value">Testing</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Range</div>
+                                <div class="spec-value">Multi-body capable</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem;">FAMMOK leverages autonomous guidance technology developed through Aegis and Lyra programs. Advanced algorithms enable precision landings in challenging environments.</p>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">Swift-1X</div>
+                        <div class="project-status dev">Experimental</div>
+                    </div>
+                    <div class="project-description">
+                        Small experimental aircraft for aerodynamic and flight control concept testing. Supports rapid iteration and low-risk validation of new systems.
+                    </div>
+                    <div class="project-details">
+                        <div class="project-specs">
+                            <div class="spec">
+                                <div class="spec-label">Purpose</div>
+                                <div class="spec-value">Flight testing</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Role</div>
+                                <div class="spec-value">Technology demonstrator</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Status</div>
+                                <div class="spec-value">Active</div>
+                            </div>
+                            <div class="spec">
+                                <div class="spec-label">Scale</div>
+                                <div class="spec-value">Subscale</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem;">Swift-1X serves as WSA's rapid-testing platform for aerodynamic concepts and flight control algorithms before incorporation into larger vehicle programs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="vehicles">
+        <div class="container">
+            <h2>Vehicle Families</h2>
+            <div class="vehicle-families">
+                <div class="vehicle-family">
+                    <div class="family-name">Aegis</div>
+                    <div class="family-description">Proven reusable booster platform with autonomous landing capability. Extensive flight history and high reliability.</div>
+                    <div class="variants">
+                        <div class="variant">
+                            <div class="variant-name">Aegis-Standard</div>
+                            <div class="variant-details">Primary flight-proven configuration. 47+ successful recoveries.</div>
+                        </div>
+                        <div class="variant">
+                            <div class="variant-name">Aegis-Experimental</div>
+                            <div class="variant-details">Test bed for advanced control systems and guidance algorithms.</div>
+                        </div>
+                        <div class="variant">
+                            <div class="variant-name">Aegis-Crewed</div>
+                            <div class="variant-details"><span class="placeholder">Planned variant with enhanced reliability and crew systems.</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vehicle-family">
+                    <div class="family-name">Lyra</div>
+                    <div class="family-description">Next-generation reusable launch vehicle family. Higher capacity than Aegis. Three planned capability tiers share common architecture.</div>
+                    <div class="variants">
+                        <div class="variant">
+                            <div class="variant-name">Lyra Selene</div>
+                            <div class="variant-details">Entry-level variant. Lowest capacity tier. Optimized for rapid turnaround and frequent flights.</div>
+                        </div>
+                        <div class="variant">
+                            <div class="variant-name">Lyra Sol</div>
+                            <div class="variant-details">Medium-capacity variant. Balanced performance across mission profiles. Primary operational configuration.</div>
+                        </div>
+                        <div class="variant">
+                            <div class="variant-name">Lyra Astra</div>
+                            <div class="variant-details">High-capacity variant. Maximum payload capability. Designed for orbital infrastructure deployment and crewed missions.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025–2026 Woody Space Agency. All systems nominal.</p>
+        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">This is a fictional aerospace organization developed for Kerbal Space Program.</p>
+    </footer>
+
+    <script>
+        // Smooth navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Timeline interactivity
+        document.querySelectorAll('.milestone-content').forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        // Project card expansion
+        document.querySelectorAll('.project-card').forEach(card => {
+            const header = card.querySelector('.project-header');
+            header.addEventListener('click', function() {
+                card.classList.toggle('expanded');
+            });
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0.8';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

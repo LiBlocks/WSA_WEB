@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goals & Achievements | Woody Space Agency</title>
+    <script src="page-init.js?v=2"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="kgoss.html">KGOSS</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head" style="padding: 3rem 2rem 2rem;">
+        <div class="container">
+            <h1 style="margin-bottom: 0.5rem;">Goals & Achievements</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 3rem;">
+                Long-term objectives and verified accomplishments that define WSA's progress toward sustainable spaceflight.
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Strategic Objectives</h2>
+            <p style="margin-bottom: 2rem;">These long-term goals guide WSA's engineering work:</p>
+
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>Reliable Booster Recovery</h3>
+                    <p>Develop reusable boosters that routinely survive descent, land on target, and return to service. Not just surviving—consistently landing safely and protecting vehicle integrity for reflight.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Autonomous Precision Landing</h3>
+                    <p>Build guidance systems capable of landing spacecraft at designated locations with minimal landing error, gentle touchdown speeds, and no pilot intervention required.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Sustained Orbital Operations</h3>
+                    <p>Establish persistent orbital infrastructure and capability for regular crew rotation, logistics, docking, fuel transfer, and on-orbit assembly without ground support for every maneuver.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Planetary Exploration</h3>
+                    <p>Extend landing capability to the Mun, Minmus, and Duna. Develop systems for surface operations, return capability, and increasingly ambitious mission profiles.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Crewed Spaceflight</h3>
+                    <p>Reliably transport crew to orbit and beyond. Provide safe return, rescue capability, and redundant systems for human missions. Make crewed spaceflight routine and safe.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Incremental Technology Development</h3>
+                    <p>Build WSA's own guidance systems, control algorithms, and mission-planning tools. Understand the principles behind reliable spaceflight rather than outsourcing complex decisions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="timeline">
+        <div class="container">
+            <h2>Development Timeline</h2>
+            <p class="section-intro">WSA's engineering progression, organised by development stage rather than date. Select a milestone for its description, status and project page. Order is exact within each program (for example AutoLand V1.6 → A1–A4 → V2.x) and approximate between programs.</p>
+            <div id="timeline-root">
+                <noscript><p class="muted">The interactive timeline needs JavaScript.</p></noscript>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Status Categories</h2>
+            <p style="margin-bottom: 2rem;">WSA uses these labels to distinguish the maturity and confirmation status of achievements and programs:</p>
+
+            <div class="status-grid" id="status-legend-root"></div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=3"></script>
+    <script src="navigation.js?v=5"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+</body>
+</html>

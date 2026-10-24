@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoLand Engineering | Woody Space Agency</title>
+    <script src="page-init.js?v=2"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="kgoss.html">KGOSS</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head" style="padding: 3rem 2rem 2rem;">
+        <div class="container">
+            <h1 style="margin-bottom: 0.5rem;">AutoLand Engineering</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                WSA's autonomous guidance and control system for reliable booster landing. Developed in kOS. Central to all reusable-booster operations.
+            </p>
+            <div style="padding: 1rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>What AutoLand Is:</strong> A homemade autonomous landing controller written in kOS (Kerbal Scripting) for Kerbal Space Program. It enables reusable boosters to descend, control attitude, manage throttle, and land at designated locations without human pilot input.
+                </p>
+                <p style="margin-top: 1rem; margin-bottom: 0; color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>Why It Matters:</strong> Reusable boosters are only truly reusable if they can land reliably, repeatedly, and safely. AutoLand is the system that makes this possible for WSA's entire launch-vehicle fleet.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="history">
+        <div class="container">
+            <h2>Development History</h2>
+            <p style="margin-bottom: 2rem;">AutoLand has evolved through multiple versions, each iteration addressing landing challenges and improving performance:</p>
+
+            <div class="module-list">
+                <div class="module-card">
+                    <div class="module-name">V1.6</div>
+                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Legacy baseline</div>
+                    <p style="margin-top: 0.75rem;">The last stable baseline before experimental A/B builds. Demonstrated automated landings including water landings, but boosters could tip after touchdown. Served as foundation for more advanced versions.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">B1</div>
+                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Failed experimental</div>
+                    <p style="margin-top: 0.75rem;">An experimental build that failed badly in testing. The exact root cause is not definitively documented. This failure was recorded honestly as a learning opportunity, not hidden from the development record.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">A1 through A4</div>
+                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Experimental improvements</div>
+                    <p style="margin-top: 0.75rem;">Iterative improvements following B1 failure. A1–A4 builds progressively improved throttle smoothing and semi-autonomous over-land landing capability. Each iteration was tested and evaluated for performance.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">V2.0</div>
+                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Standardized version</div>
+                    <p style="margin-top: 0.75rem;">The intended stable version designation after A4 experimental work. Represents consolidation of successful improvements and establishment of a reliable baseline for operational use.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">V2.x Development</div>
+                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Active R&D</div>
+                    <p style="margin-top: 0.75rem;">Ongoing improvements exploring predictive targeting, empirical drag modeling, entry-burn logic, glide and powered-glide guidance, and redesigned landing burn. Some tests improved guidance but showed landing errors and rough touchdowns.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                <h4 style="margin-bottom: 1rem;">Test Performance Observations</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">Later versions improved guidance but revealed remaining challenges:</p>
+                <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                    <li><strong>Landing Accuracy:</strong> Some test flights landed roughly 700 m from target. Other tests showed approximately 1.9 km landing error.</li>
+                    <li><strong>Touchdown Issues:</strong> Rough landings occasionally damaged engines or caused propulsion-system anomalies after touchdown.</li>
+                    <li><strong>Stability on Landing:</strong> Varying results on touchdown stability and vehicle integrity immediately after landing.</li>
+                </ul>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    These observations represent test results, not guaranteed performance specifications. Each test flight provided data for iterating the guidance system.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>How AutoLand Works</h2>
+            <p style="margin-bottom: 2rem; max-width: 900px;">
+                AutoLand operates through a series of control stages that transition from atmospheric descent through final touchdown. Understanding each stage helps explain why autonomous landing is challenging.
+            </p>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Stage 1: Arming & Activation</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">AutoLand waits for specific conditions before engagement:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                        <li>Booster must be descending (negative vertical velocity)</li>
+                        <li>Altitude must be above the activation threshold (prevents false triggers)</li>
+                        <li>Vehicle must have sufficient fuel and propellant reserves</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">Once conditions are met, AutoLand activates and begins active landing control.</p>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Stage 2: Guidance Preparation</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Establish the necessary telemetry and vehicle state:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                        <li>Determine vehicle attitude (pitch, yaw, roll)</li>
+                        <li>Measure current velocity (vertical and horizontal)</li>
+                        <li>Read terrain altitude and current position</li>
+                        <li>Calculate available thrust from engines and mass</li>
+                        <li>Establish local gravity</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">All these measurements feed into the landing guidance calculations. Accurate telemetry is essential for safe landing.</p>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Stage 3: Descent Prediction</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">AutoLand estimates whether the booster can safely descend with current trajectory and available thrust:</p>
+
+                    <div style="background-color: var(--bg-primary); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1.5rem;">
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem;"><strong>The Stopping Distance Approach:</strong></p>
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                            AutoLand calculates how much altitude is needed to reduce vertical velocity to zero using available thrust and current mass. The calculation accounts for:
+                        </p>
+                        <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                            <li>Current vertical velocity (how fast the booster is descending)</li>
+                            <li>Available thrust from engines at current throttle</li>
+                            <li>Current vehicle mass</li>
+                            <li>Local gravitational acceleration</li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                            This produces an estimate of stopping distance. If remaining altitude exceeds stopping distance, controlled descent is possible. If not, the booster needs to reduce descent rate (or gain altitude if possible).
+                        </p>
+                    </div>
+
+                    <p style="color: var(--text-secondary);">If descent appears sustainable with available thrust, AutoLand proceeds to active landing control. If margin is insufficient, throttle is increased to slow descent.</p>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Stage 4: Landing Control & Throttle Management</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Actively manage throttle to maintain controlled descent:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Continuous Monitoring:</strong> AutoLand continuously recalculates stopping distance as altitude decreases.</li>
+                        <li><strong>Throttle Smoothing:</strong> Rather than making sudden full-throttle changes, AutoLand uses smooth throttle adjustments to maintain stable descent rate.</li>
+                        <li><strong>Descent Rate Target:</strong> The system aims for a target vertical velocity (not too fast, not oscillating). This produces a smooth, predictable descent.</li>
+                        <li><strong>Fuel Management:</strong> AutoLand monitors remaining fuel/propellant and adjusts landing approach if reserves become marginal.</li>
+                    </ul>
+                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
+                        <strong>Critical Challenge:</strong> Smooth throttle control is more complex than it sounds. Sudden changes can cause oscillation or loss of control. AutoLand must balance rapid response (catching drift) with smoothness (avoiding oscillation).
+                    </p>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Stage 5: Final Approach & Touchdown</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">As the booster nears the surface, the guidance approach transitions toward touchdown:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Vertical Descent Phase:</strong> Transition toward a more vertical attitude to reduce horizontal velocity and prepare for landing.</li>
+                        <li><strong>Gentle Touchdown Approach:</strong> Reduce vertical velocity further as altitude becomes very small.</li>
+                        <li><strong>Touchdown Velocity Management:</strong> Aim for a gentle vertical touchdown—typically a few meters per second or less to avoid damage.</li>
+                        <li><strong>Horizontal Velocity Reduction:</strong> Minimize horizontal velocity before touchdown to maintain target landing zone.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Stage 6: Post-Landing Evaluation</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">After touchdown, AutoLand collects data on landing performance:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                        <li>Touchdown location relative to target</li>
+                        <li>Vertical velocity at impact</li>
+                        <li>Horizontal velocity at impact</li>
+                        <li>Vehicle stability after landing (tipping, shifting)</li>
+                        <li>Engine or structural damage from rough landing</li>
+                        <li>Fuel/propellant remaining</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">This data is recorded and used to evaluate guidance performance and identify areas for improvement in next iteration.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>kOS Technical Conventions</h2>
+            <p style="margin-bottom: 2rem;">AutoLand uses specific kOS conventions and telemetry sources:</p>
+
+            <div class="technical-details">
+<strong>Telemetry Variables & Functions:</strong><br/>
+<br/>
+ALT:RADAR<br/>
+&nbsp;&nbsp;Terrain-relative landing altitude (height above ground)<br/>
+<br/>
+SHIP:ALTITUDE<br/>
+&nbsp;&nbsp;Absolute altitude used in gravity calculations<br/>
+<br/>
+SHIP:VERTICALSPEED<br/>
+&nbsp;&nbsp;Vertical component of velocity (positive = ascending)<br/>
+<br/>
+SHIP:MASS<br/>
+&nbsp;&nbsp;Current vehicle mass (varies as fuel burns)<br/>
+<br/>
+SHIP:MAXTHRUST<br/>
+&nbsp;&nbsp;Total available thrust at current throttle setting<br/>
+<br/>
+CONSTANT:G<br/>
+&nbsp;&nbsp;Local gravitational acceleration
+            </div>
+
+            <p style="margin-top: 2rem; color: var(--text-secondary);">
+                <strong>Landing Calculation:</strong> The stopping-distance calculation uses vertical velocity, mass, thrust, and gravity to estimate how much altitude is required to reduce descent velocity to zero. This estimate guides throttle adjustments throughout descent.
+            </p>
+
+            <p style="margin-top: 1rem; color: var(--text-secondary);">
+                <strong>Throttle Smoothing:</strong> Rather than setting throttle to 0 or 1.0 (full), AutoLand uses incremental adjustments to throttle value (0.0–1.0 range) to maintain stable descent without oscillation or sudden attitude changes.
+            </p>
+        </div>
+    </section>
+
+    <section id="glide">
+        <div class="container">
+            <h2>Glide & Landing Guidance</h2>
+            <p style="margin-bottom: 2rem; max-width: 900px;">
+                A developing concept within AutoLand research is the use of a glide or powered-glide phase before the final vertical landing.
+            </p>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Glide Phase Concept</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Instead of descending vertically from high altitude, a glide approach would:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Lateral Guidance:</strong> Guide the booster toward the target landing area while managing horizontal velocity.</li>
+                        <li><strong>Altitude Management:</strong> Descend at a shallow angle rather than steep vertical drop.</li>
+                        <li><strong>Approach Phase:</strong> As the vehicle approaches the landing area, progressively transition toward vertical attitude.</li>
+                        <li><strong>Final Vertical Phase:</strong> The last phase prioritizes gentle vertical touchdown above the target.</li>
+                    </ul>
+
+                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">This approach could reduce landing error and allow better management of approach trajectory.</p>
+                </div>
+            </div>
+
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <h3>Development Status</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        <strong>Status:</strong> The glide guidance approach is experimental. It has been tested and shows promise, but is not yet a proven feature guaranteed to work in all conditions.
+                    </p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                        <li><strong>Testing:</strong> Flight tests of glide concepts are ongoing within the V2.x development phase.</li>
+                        <li><strong>Challenges:</strong> Balancing lateral guidance, vertical descent, fuel efficiency, and thrust vectoring is complex.</li>
+                        <li><strong>Integration:</strong> Glide concepts may eventually be integrated into a future stable version if validation is successful.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="test-log" style="background-color: var(--bg-secondary);">
+        <div class="container">
+            <h2>AutoLand Test Log</h2>
+            <p style="margin-bottom: 2rem;">
+                This section documents AutoLand test flights and performance. Flight data helps identify patterns and guide continued development.
+            </p>
+
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Version</th>
+                            <th>Vehicle / Config</th>
+                            <th>Landing Error</th>
+                            <th>Touchdown Speed (V)</th>
+                            <th>Stability</th>
+                            <th>Damage</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>V1.6</td>
+                            <td>Aegis-Quintet</td>
+                            <td class="placeholder">On-target / nominal</td>
+                            <td class="placeholder">Gentle</td>
+                            <td>Occasional tip-over</td>
+                            <td class="placeholder">Fin damage</td>
+                            <td>Baseline performance. Post-landing stability issue drove later improvements.</td>
+                        </tr>
+                        <tr>
+                            <td>B1</td>
+                            <td>Aegis-Quintet</td>
+                            <td class="placeholder">Significant error</td>
+                            <td class="placeholder">High</td>
+                            <td>Failed control</td>
+                            <td>Severe</td>
+                            <td>Experimental build. Poor performance led to failure analysis and A-series development.</td>
+                        </tr>
+                        <tr>
+                            <td>A1–A4</td>
+                            <td>Aegis-Quintet / Heavy</td>
+                            <td class="placeholder">Improved gradually</td>
+                            <td class="placeholder">Smoother</td>
+                            <td>Improving</td>
+                            <td>Reduced</td>
+                            <td>Iterative refinement. Throttle smoothing improved. Prepared for V2.0 standardization.</td>
+                        </tr>
+                        <tr>
+                            <td>V2.0</td>
+                            <td>Aegis-Heavy / Nonet</td>
+                            <td class="placeholder">Consistent</td>
+                            <td class="placeholder">Controlled</td>
+                            <td>Good</td>
+                            <td>Minimal</td>
+                            <td>Stable version. Used for operational booster recovery. 47+ successful recoveries achieved.</td>
+                        </tr>
+                        <tr>
+                            <td>V2.x (ongoing)</td>
+                            <td>Aegis / Lyra prototypes</td>
+                            <td>~700 m to ~1.9 km</td>
+                            <td>Variable</td>
+                            <td>Variable</td>
+                            <td>Occasional engine damage</td>
+                            <td>Development phase. Glide guidance, predictive targeting, improved drag modeling under test.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p style="margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
+                <strong>Note:</strong> Placeholder entries indicate typical or nominal performance that has not yet been formally documented. Specific test flight data is recorded as missions are conducted and analyzed.
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Why AutoLand Matters to WSA</h2>
+            <p style="margin-bottom: 2rem; max-width: 900px;">
+                AutoLand is more than just a landing system. It represents WSA's commitment to understanding how spacecraft actually work and developing homemade solutions rather than outsourcing complex decisions.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                <div style="padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Reusability Enabled</h4>
+                    <p style="color: var(--text-secondary);">Boosters are only truly reusable if they can land reliably. AutoLand makes this possible, unlocking the benefits of reusable launch vehicles.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Operational Reliability</h4>
+                    <p style="color: var(--text-secondary);">47+ successful recoveries prove that autonomous guidance can work consistently, not just in ideal conditions but across varied scenarios.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Engineering Learning</h4>
+                    <p style="color: var(--text-secondary);">Developing AutoLand forced WSA to understand guidance algorithms, control theory, telemetry, thrust prediction, and how spacecraft respond to control inputs.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Future Capability</h4>
+                    <p style="color: var(--text-secondary);">AutoLand technology extends beyond boosters. The same principles apply to planetary landers (FAMMOK), orbital operations (KGOSS), and future spacecraft.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Documented Expertise</h4>
+                    <p style="color: var(--text-secondary);">By developing AutoLand in-house, WSA builds expertise and documentation that serves future projects. This is not outsourced knowledge.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Independence</h4>
+                    <p style="color: var(--text-secondary);">WSA is not dependent on external flight controllers or autopilots for core mission functions. This improves mission flexibility and reduces external dependencies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Current Challenges & Future Work</h2>
+            <p style="margin-bottom: 2rem;">AutoLand continues to face engineering challenges that drive ongoing development:</p>
+
+            <div class="module-list">
+                <div class="module-card">
+                    <div class="module-name">Landing Accuracy</div>
+                    <p>Achieving consistent landing within small target areas. Current performance ranges from on-target to ~2 km error. Improving predictive targeting and glide guidance aims to reduce this spread.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Touchdown Velocity</div>
+                    <p>Managing gentle touchdown without causing vehicle damage. Rough landings can damage engines or cause propulsion anomalies. V2.x development focuses on improved final-approach velocity control.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Vehicle Stability</div>
+                    <p>Preventing post-landing tipping or shifting. Early versions occasionally tipped. Landing-gear design and touchdown-velocity management help, but remain areas for improvement.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Environmental Adaptation</div>
+                    <p>Performance in varied conditions: water landings, rough terrain, high winds, varying atmospheric density. AutoLand must handle these without recalibration.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Scalability to Larger Vehicles</div>
+                    <p>Applying AutoLand to Lyra family (which is faster and more powerful than Aegis). Guidance algorithms may need tuning for different thrust-to-weight ratios and descent profiles.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Fuel Efficiency</div>
+                    <p>Optimizing propellant consumption during landing burn. Landing is fuel-expensive. Reducing propellant requirements extends mission reach and improves vehicle performance.</p>
+                </div>
+            </div>
+
+            <p style="margin-top: 2rem; color: var(--text-secondary);">
+                Each test flight contributes data toward solving these challenges. WSA's commitment to incremental improvement means AutoLand will continue evolving as experience accumulates.
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=3"></script>
+    <script src="navigation.js?v=5"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+</body>
+</html>

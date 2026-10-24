@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woody Space Agency</title>
+    <script src="page-init.js?v=2"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="kgoss.html">KGOSS</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <img class="hero-logo" src="images/wsa-logo.png" alt="Woody Space Agency insignia" width="132" height="132">
+            <h1>Woody Space Agency</h1>
+            <p class="hero-subtitle">Developing reusable spacecraft, autonomous flight systems, and space infrastructure.</p>
+
+            <div class="featured-stats">
+                <div class="stat-card">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Active Programs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">47+</div>
+                    <div class="stat-label">Successful Recoveries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12+</div>
+                    <div class="stat-label">Major Milestones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Celestial Destinations</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="overview">
+        <div class="container">
+            <h2>What WSA Does</h2>
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>Reusable Launch Vehicles</h3>
+                    <p>Aegis and Lyra families enable rapid, cost-effective spaceflight through proven recovery and reflight capability.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Autonomous Landing</h3>
+                    <p>AutoLand is a homemade kOS guidance system that enables reliable, repeatable booster landings without external assistance.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Orbital Infrastructure</h3>
+                    <p>KGOSS station provides docking, logistics, and assembly capabilities for sustained orbital operations.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Planetary Exploration</h3>
+                    <p>FAMMOK lander program extends WSA capabilities to the Mun, Minmus, and Duna with precision landing and return.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Aircraft & Spaceplanes</h3>
+                    <p>Swift-1X, SSTO development, and atmospheric programs test flight-control concepts and reusable transportation.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>Incremental Engineering</h3>
+                    <p>WSA learns from each test, documents failures honestly, and improves designs through rigorous iteration.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-programs">
+        <div class="container">
+            <h2>Featured Programs</h2>
+            <div class="program-cards">
+                <div class="program-card">
+                    <h3>Aegis</h3>
+                    <div class="status operational">Operational</div>
+                    <p>Proven reusable booster family with autonomous landing. Multiple configurations tested. 47+ successful recoveries.</p>
+                    <a href="vehicles-programs.html#aegis" class="card-link">View Program →</a>
+                </div>
+
+                <div class="program-card">
+                    <h3>Lyra</h3>
+                    <div class="status development">In Development</div>
+                    <p>Next-generation reusable launcher. Three capability tiers (Selene, Sol, Astra). Lyra P-1E prototype under development.</p>
+                    <a href="vehicles-programs.html#lyra" class="card-link">View Program →</a>
+                </div>
+
+                <div class="program-card">
+                    <h3>AutoLand</h3>
+                    <div class="status development">Active R&D</div>
+                    <p>Autonomous landing controller written in kOS. Guidance, throttle control, landing accuracy. V2.0+ development ongoing.</p>
+                    <a href="autoland.html" class="card-link">View Engineering →</a>
+                </div>
+
+                <div class="program-card">
+                    <h3>KGOSS Station</h3>
+                    <div class="status operational">Operational</div>
+                    <p>Orbital assembly hub at ~200 km orbit. Docking, logistics, crew operations, and future expansion platform.</p>
+                    <a href="kgoss.html" class="card-link">View Station →</a>
+                </div>
+
+                <div class="program-card">
+                    <h3>FAMMOK</h3>
+                    <div class="status development">Advancing</div>
+                    <p>Planetary exploration and lander development. Mun, Minmus, and Duna operations. FAMMOK-3 in planning phase.</p>
+                    <a href="missions-archive.html#fammok" class="card-link">View Missions →</a>
+                </div>
+
+                <div class="program-card">
+                    <h3>Aircraft Program</h3>
+                    <div class="status development">Experimental</div>
+                    <p>Swift-1X, SSTO development, and atmospheric flight-control research. High-speed and orbital-transition testing.</p>
+                    <a href="vehicles-programs.html#aircraft" class="card-link">View Program →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="quick-achievements">
+        <div class="container">
+            <h2>Recent Milestones</h2>
+            <div class="achievement-list">
+                <div class="achievement">
+                    <div class="achievement-marker operational">Completed</div>
+                    <h4>Aegis Maturation Milestone</h4>
+                    <p>Booster family achieved high reliability with 47+ successful recoveries across all test campaigns. Preparing for crewed certification.</p>
+                </div>
+                <div class="achievement">
+                    <div class="achievement-marker development">In Progress</div>
+                    <h4>Lyra Development</h4>
+                    <p>P-1E prototype integration underway. Three-tier architecture (Selene, Sol, Astra) established. First flight targeted.</p>
+                </div>
+                <div class="achievement">
+                    <div class="achievement-marker development">In Progress</div>
+                    <h4>AutoLand V2.x Development</h4>
+                    <p>Glide guidance, improved landing accuracy, and predictive targeting under active development. Test flights ongoing.</p>
+                </div>
+                <div class="achievement">
+                    <div class="achievement-marker operational">Completed</div>
+                    <h4>KGOSS Operational Status</h4>
+                    <p>Station assembly and docking operations proven. Seraph SPC-1 "Haven" rescue capability integrated. Ready for logistics missions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Explore WSA</h2>
+            <p>Learn more about our engineering philosophy, detailed mission records, and the systems driving our spaceflight programs.</p>
+            <div class="cta-buttons">
+                <a href="about.html" class="btn btn-primary">About WSA</a>
+                <a href="missions-archive.html" class="btn btn-secondary">Mission Archive</a>
+                <a href="autoland.html" class="btn btn-secondary">AutoLand Details</a>
+                <a href="vehicles-programs.html#hangar" class="btn btn-secondary">Vehicle Hangar</a>
+                <a href="gallery.html" class="btn btn-secondary">Flight Gallery</a>
+                <a href="support.html" class="btn btn-secondary">Support WSA</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=3"></script>
+    <script src="navigation.js?v=5"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+</body>
+</html>

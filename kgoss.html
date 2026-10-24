@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KGOSS Station | Woody Space Agency</title>
+    <script src="page-init.js?v=2"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="kgoss.html">KGOSS</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head" style="padding: 3rem 2rem 2rem;">
+        <div class="container">
+            <h1 style="margin-bottom: 0.5rem;">KGOSS Station</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                WSA's orbital infrastructure hub. Central assembly platform for sustained space operations, crew logistics, and future mission expansion.
+            </p>
+            <div style="padding: 1rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>Station Role:</strong> KGOSS is the primary orbital hub for crew transport, logistics, fuel transfer, module assembly, and supporting future deep-space missions.
+                </p>
+                <p style="margin-top: 1rem; margin-bottom: 0; color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>Operational Status:</strong> Active. Station supports ongoing logistics missions, crew operations, and infrastructure expansion.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="kgoss-1">
+        <div class="container">
+            <h2>KGOSS-1: Current Station Configuration</h2>
+            <p style="margin-bottom: 2rem; max-width: 900px;">
+                KGOSS-1 is the active orbital station. It operates in a working orbit of approximately 200 km altitude, with higher orbits around 250 km considered as operational alternatives.
+            </p>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Station Purpose & Mission</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">KGOSS provides essential infrastructure for:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Crew Operations:</strong> Crewed missions arrive at KGOSS for crew rotation, rest, and operations planning.</li>
+                        <li><strong>Logistics Hub:</strong> Supply missions dock to transfer cargo, fuel, water, and consumables.</li>
+                        <li><strong>Fuel Transfer:</strong> Propellant is transferred between vehicles and stored on the station for future missions.</li>
+                        <li><strong>Orbital Assembly:</strong> Station modules are docked and integrated on-orbit, enabling construction that could not be launched fully assembled.</li>
+                        <li><strong>Scientific Operations:</strong> Research platforms and experiments operate from the station.</li>
+                        <li><strong>Mission Planning Base:</strong> Deep-space missions may be planned and staged from KGOSS.</li>
+                        <li><strong>Rescue Operations:</strong> Station serves as refuge and rescue staging point for contingency scenarios.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Known Modules & Components</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 2rem;">KGOSS is a modular station with the following documented components:</p>
+
+                    <div class="module-list">
+                        <div class="module-card">
+                            <div class="module-name">Seraph SPC-1 "Haven" Rescue & Return Craft</div>
+                            <p>A Dragon-like capsule for crew rescue and return to Kerbin. Provides emergency return capability and crew transport redundancy.</p>
+                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Role:</strong> Crewed return and rescue vehicle. Docked at station.</div>
+                        </div>
+
+                        <div class="module-card">
+                            <div class="module-name">Centrifuge Module</div>
+                            <p>Large rotating module providing artificial gravity research capability. Approximately 43 tonnes of mass and rotational infrastructure.</p>
+                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Purpose:</strong> Scientific research and crew-health research in simulated gravity.</div>
+                        </div>
+
+                        <div class="module-card">
+                            <div class="module-name">Three Attached Cabins</div>
+                            <p>Crew quarters and operational modules providing living space, workstations, and storage.</p>
+                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Capacity:</strong> Support for visiting crew and permanent station personnel.</div>
+                        </div>
+
+                        <div class="module-card">
+                            <div class="module-name">Planned Fuel Tanks (Proposed Expansion)</div>
+                            <p>Two matching fuel tanks (approximately 84 tonnes each) planned for symmetrical expansion and increased propellant storage.</p>
+                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Status:</strong> Designed but not yet launched. Planned for future logistics missions.</div>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 2rem; color: var(--text-secondary);">
+                        <strong>Station Mass Note:</strong> Current configuration (without planned fuel tanks) represents a significant orbital structure. Future expansion will increase station capability and propellant reserves.
+                    </p>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Docking & Rendezvous Operations</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">KGOSS operations depend on successful rendezvous and docking:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Docking Ports:</strong> Multiple docking ports support simultaneous crew return capsules, logistics vehicles, and module expansion.</li>
+                        <li><strong>Port Compatibility:</strong> All WSA vehicles must have compatible docking systems. Project Silver Bridge's docking failure led to strict compatibility requirements.</li>
+                        <li><strong>Approach Procedures:</strong> Rendezvous requires precise orbital maneuvering, careful approach control, and automated docking procedures.</li>
+                        <li><strong>Undocking:</strong> Return vehicles undock for the return journey to Kerbin. This procedure must be choreographed to avoid collision.</li>
+                        <li><strong>Contingency Planning:</strong> Station must maintain rescue capability for unexpected docking or crew situations.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Fuel & Propellant Operations</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">KGOSS supports critical propellant management:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Fuel Transfer Capability:</strong> Propellant can be transferred between docked vehicles and station storage.</li>
+                        <li><strong>In-Orbit Refueling:</strong> Visiting spacecraft can refuel at KGOSS, extending their range and enabling longer missions.</li>
+                        <li><strong>Storage Capacity:</strong> Current storage supports regular logistics operations. Planned fuel tanks would significantly increase reserve capacity.</li>
+                        <li><strong>Safety Procedures:</strong> Propellant transfer requires careful pressure management, isolation procedures, and contingency response for leaks or spills.</li>
+                        <li><strong>Future Expansion:</strong> Advanced transfer systems and boiloff management may evolve with station expansion.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Station Assembly & Evolution</h2>
+            <p style="margin-bottom: 2rem;">KGOSS was not launched as a complete vehicle. It was assembled in orbit through multiple logistics missions:</p>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Assembly Approach</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">Building a station on-orbit requires solving multiple challenges that differ from ground-based assembly:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Individual Module Launches:</strong> Each station module was launched separately and docked on-orbit rather than assembled on the ground.</li>
+                        <li><strong>Rendezvous Skill:</strong> Assembly required reliable rendezvous and docking procedures. Multiple vehicles had to meet in orbit precisely.</li>
+                        <li><strong>Staging & Docking Port Compatibility:</strong> Every module required compatible docking hardware. Project Silver Bridge's failure demonstrated why compatibility matters.</li>
+                        <li><strong>Orbital Mechanics:</strong> Each module had to be launched into compatible orbits and maneuvered to rendezvous with the growing station.</li>
+                        <li><strong>Propellant & Logistics:</strong> Ongoing station operations require logistics support (fuel, water, supplies) to remain operational.</li>
+                        <li><strong>Station-Keeping:</strong> The station requires periodic orbital reboosts to maintain altitude as atmospheric drag gradually lowers its orbit.</li>
+                    </ul>
+
+                    <p style="margin-top: 2rem; padding: 1rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary);">
+                        <strong>Key Insight:</strong> Launching a complete space station in one piece is not feasible. Modular assembly on-orbit is the only practical approach for large infrastructure. This requires confident spacecraft handling, reliable docking, and proven rendezvous procedures.
+                    </p>
+                </div>
+            </div>
+
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <h3>Future Expansion Plans</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">KGOSS will continue to grow as WSA's capabilities expand:</p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
+                        <li><strong>Fuel Tank Modules:</strong> Two planned fuel tanks (~84 tonnes each) will increase propellant reserves and refueling capacity.</li>
+                        <li><strong>Additional Cabins:</strong> More crew quarters and laboratory modules to support expanded crew and research.</li>
+                        <li><strong>Power Generation:</strong> Solar arrays or other power systems to support growing station load.</li>
+                        <li><strong>Advanced Docking:</strong> Additional docking ports and/or more sophisticated docking systems for higher-traffic operations.</li>
+                        <li><strong>Deorbit Infrastructure:</strong> KGOSS-3 future work on deorbit-safety systems and controlled end-of-life procedures (see below).</li>
+                    </ul>
+                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">Station expansion will be coordinated with growth in KGOSS-capable launch vehicles, particularly Lyra family development and expansion.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="kgoss-3">
+        <div class="container">
+            <h2>KGOSS-3: Future Deorbit-Safety Research</h2>
+            <p style="margin-bottom: 2rem; max-width: 900px;">
+                KGOSS-3 is a future research direction focused on safe end-of-life procedures for large orbital structures.
+            </p>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Deorbit Safety Program</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1.5rem;"><strong>Current Status:</strong> Planned future research direction. Not yet implemented.</p>
+
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                        As orbital infrastructure grows, questions about end-of-life operations become important. KGOSS-3 will research how to safely deorbit large structures to avoid creating debris or threatening ground infrastructure.
+                    </p>
+
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);"><strong>Research Areas:</strong></p>
+                    <ul style="margin-left: 2rem; color: var(--text-secondary);">
+                        <li><strong>Controlled Deorbit Procedures:</strong> How to manage the controlled reentry of large structures.</li>
+                        <li><strong>Debris Minimization:</strong> Engineering approaches to ensure that deorbited structures break up safely during reentry rather than creating ground hazards.</li>
+                        <li><strong>Staging Separation:</strong> Techniques for separating components to distribute reentry loads.</li>
+                        <li><strong>Contingency Procedures:</strong> What to do if deorbit systems fail or require alternative approaches.</li>
+                    </ul>
+
+                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">This research becomes relevant as orbital infrastructure becomes larger and more complex. It represents long-term sustainability planning for orbital operations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: var(--bg-secondary);">
+        <div class="container">
+            <h2>KGOSS Connections to Other WSA Programs</h2>
+            <p style="margin-bottom: 2rem;">The station is not isolated. It connects multiple WSA programs and projects:</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Aegis & Lyra Launch Vehicles</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">KGOSS exists because Aegis proved reliable booster recovery. Lyra will enable higher-capacity logistics missions and station expansion. Station operations drive demand for launch vehicles.</p>
+                    <p style="margin-top: 0.75rem;"><a href="vehicles-programs.html" style="color: var(--accent);">View Vehicles →</a></p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>AutoLand Guidance</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Booster recovery capability (via AutoLand) enables reliable logistics supply to KGOSS. Every resupply mission depends on successful booster landings for reflight.</p>
+                    <p style="margin-top: 0.75rem;"><a href="autoland.html" style="color: var(--accent);">View AutoLand →</a></p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Crew Transport & Seraph Rescue</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">KGOSS provides the orbital hub for crewed missions. Seraph SPC-1 "Haven" rescue capsule docked at station provides return capability for crews in orbit.</p>
+                    <p style="margin-top: 0.75rem;"><a href="missions-archive.html" style="color: var(--accent);">View Missions →</a></p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>FAMMOK Deep-Space Missions</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">KGOSS may serve as staging point for deep-space exploration missions like FAMMOK-3. Propellant transfer and crew rotation can happen at the station before departure.</p>
+                    <p style="margin-top: 0.75rem;"><a href="missions-archive.html#fammok" style="color: var(--accent);">View FAMMOK →</a></p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Project Silver Bridge</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Silver Bridge's docking incompatibility demonstrated why KGOSS port compatibility is critical. That mission drove subsequent design requirements for all docking vehicles.</p>
+                    <p style="margin-top: 0.75rem;"><a href="missions-archive.html#silver-bridge" style="color: var(--accent);">View Project Silver Bridge →</a></p>
+                </div>
+
+                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
+                    <h4>Orbital Operations & Infrastructure</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">KGOSS represents WSA's first major permanent orbital structure. Future stations, fuel depots, and orbital bases will build on lessons learned from KGOSS operations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Station Operations & Challenges</h2>
+            <p style="margin-bottom: 2rem;">Operating a space station involves ongoing engineering challenges:</p>
+
+            <div class="module-list">
+                <div class="module-card">
+                    <div class="module-name">Orbital Decay & Reboosts</div>
+                    <p>Atmospheric drag gradually lowers the station's orbit. Periodic reboost missions use visiting spacecraft to maintain altitude. This is an ongoing operational requirement.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Micrometeorite & Debris Protection</div>
+                    <p>Station must withstand impacts from orbital debris and micrometeorites. Design includes shielding and structural redundancy to prevent catastrophic damage.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Thermal Management</div>
+                    <p>Radiators manage heat from electrical systems and crew activities. Orbital thermal environment (sun-to-shade transitions every 45 minutes) creates challenging conditions.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Life Support & Consumables</div>
+                    <p>Crew requires regular delivery of oxygen, water, food, and other consumables. Station life-support must be robust and fail-safe for crew safety.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Power Generation & Storage</div>
+                    <p>Solar arrays provide primary power. Battery systems handle eclipse periods (nighttime passes). Power management must support growing station load and future expansion.</p>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-name">Communication & Telemetry</div>
+                    <p>Station must maintain continuous communication with ground control. Telemetry systems monitor all station systems and provide data for mission planning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=3"></script>
+    <script src="navigation.js?v=5"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+</body>
+</html>
