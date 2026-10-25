@@ -1,0 +1,879 @@
+/* Experimental Liquid Glass appearance (driven by liquid-glass.js).
+   Everything visual is scoped to :root[data-liquid-glass], so removing that one attribute
+   restores the regular light/dark site exactly. styles.css is not modified. */
+
+/* Read by liquid-glass.js: if this file failed to load, the mode never switches on */
+:root {
+    --lg-ready: 1;
+}
+
+/* Pointer-driven light and tilt values (set inline by liquid-glass.js). Registered so they can
+   animate smoothly; every use also carries a fallback for browsers without @property. They inherit
+   so each pane's rim (a ::before) follows its pane; every glass surface re-declares the resting
+   values, so a button inside a lit card keeps its own light. */
+@property --lg-nx { syntax: '<number>'; inherits: true; initial-value: -0.4; }
+@property --lg-ny { syntax: '<number>'; inherits: true; initial-value: -1; }
+@property --lg-glow { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --lg-angle { syntax: '<angle>'; inherits: true; initial-value: 158deg; }
+
+/* ---------- Toggle button (always present, next to the light/dark switch) ---------- */
+
+.lg-toggle {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background-color 0.3s;
+}
+
+/* Sits 0.5rem from the light/dark switch so the two read as one group */
+.navbar > .lg-toggle {
+    margin-left: -0.75rem;
+}
+
+.lg-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.lg-toggle svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.lg-toggle .lg-lens {
+    transition: fill 0.2s;
+}
+
+.lg-toggle[aria-pressed="true"] {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.lg-toggle[aria-pressed="true"] .lg-lens {
+    fill: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* Tooltip: shown on hover and keyboard focus (the accessible name comes from aria-label) */
+.lg-toggle[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 10px);
+    right: -6px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--bg-primary);
+    background-color: var(--text-primary);
+    border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-3px);
+    transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+    pointer-events: none;
+}
+
+.lg-toggle:hover::after,
+.lg-toggle:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0.35s;
+}
+
+/* Mobile drawer row under "Dark mode" */
+.lg-drawer-row {
+    margin-top: 0;
+    padding-top: 0.9rem;
+}
+
+.lg-drawer-row small {
+    margin-left: 0.35rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.lg-drawer-row .lg-toggle::after {
+    display: none;
+}
+
+/* The top-bar copy follows the light/dark switch into the drawer on smaller screens */
+@media (max-width: 1080px) {
+    .js .navbar > .lg-toggle {
+        display: none;
+    }
+}
+
+/* The wide top bar has 32px to spare; use the link spacing the site already uses at 1081–1199px */
+@media (min-width: 1200px) {
+    .navbar:has(> .lg-toggle) > .nav-menu {
+        gap: 1.25rem;
+    }
+}
+
+/* ---------- Confirmation dialog ---------- */
+
+.lg-confirm {
+    width: min(440px, calc(100% - 2rem));
+}
+
+.lg-confirm-body {
+    padding: 1.6rem 1.6rem 0.4rem;
+}
+
+.lg-confirm-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.9rem;
+    color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: 50%;
+}
+
+.lg-confirm-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.lg-confirm h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+.lg-confirm p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.lg-confirm .lg-confirm-note {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+}
+
+.lg-confirm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 1.1rem 1.6rem 1.4rem;
+}
+
+/* ---------- Liquid Glass tokens ---------- */
+
+/* Blur stays low on cards so the sky remains legible through them (controls have none); bars and dialogs
+   sit over scrolling text and need more */
+:root[data-liquid-glass] {
+    --lg-blur: 4px;
+    --lg-blur-bar: 14px;
+    --lg-blur-dialog: 18px;
+}
+
+/* Light: pale silver-blue sky, clear glass with a frosted rim, slate diagrams */
+:root[data-liquid-glass],
+:root[data-liquid-glass][data-theme="light"] {
+    color-scheme: light;
+    --bg-primary: #f3f6fa;
+    --bg-secondary: #e8edf4;
+    --text-primary: #151c2b;
+    --text-secondary: #4f5b70;
+    --border: rgba(30, 41, 59, 0.13);
+    --accent: #2c64c9;
+    --accent-dark: #1d4a9c;
+    --grid-line: rgba(30, 41, 59, 0.05);
+
+    --lg-space: #e6ebf2;
+    --lg-space-image:
+        radial-gradient(1100px 760px at 88% -8%, rgba(255, 255, 255, 0.9), transparent 62%),
+        radial-gradient(900px 700px at -8% 108%, rgba(190, 203, 223, 0.6), transparent 62%),
+        linear-gradient(180deg, #edf1f6 0%, #e1e7ef 100%);
+    --lg-ink: 52 70 102;
+    --lg-ink-accent: 58 98 168;
+    --lg-star: 66 82 110;
+    --lg-occlude: #e5eaf1;
+    --lg-shade-lit: rgba(255, 255, 255, 0.8);
+    --lg-shade-mid: rgba(214, 223, 235, 0.45);
+    --lg-shade-dark: rgba(150, 166, 190, 0.4);
+    --lg-horizon: #c3ccd8;
+
+    --lg-tint: 255 255 255;
+    --lg-bar-tint: 255 255 255;
+    --lg-accent-rgb: 44 100 201;
+    --lg-fill: 0.1;
+    --lg-fill-control: 0;
+    --lg-edge-control: 0.95;
+    --lg-hairline-control: 0.13;
+    --lg-fill-bar: 0.62;
+    --lg-fill-dialog: 0.84;
+    --lg-fill-nested: 0.22;
+    --lg-rim-a: 0.4;
+    --lg-hi: 255 255 255;
+    --lg-lo: 30 41 59;
+    --lg-spec: 0.7;
+    --lg-sheen: 0.18;
+    --lg-edge-hi: 1;
+    --lg-edge-lo: rgb(30 41 59 / 0.1);
+    --lg-bevel: 0.9;
+    --lg-bevel-shade: 0.08;
+    --lg-outline: 0.07;
+    --lg-shadow: 0.16;
+    --lg-sat: 140%;
+    --lg-bright: 1.02;
+}
+
+/* Dark: deep navy space, clear glass catching a cool silver light */
+:root[data-liquid-glass][data-theme="dark"] {
+    color-scheme: dark;
+    --bg-primary: #0e1527;
+    --bg-secondary: #151d32;
+    --text-primary: #e8edf6;
+    --text-secondary: #b3bdcf;
+    --border: rgba(186, 200, 224, 0.16);
+    --accent: #8db2f2;
+    --accent-dark: #b4cdf8;
+    --grid-line: rgba(186, 200, 224, 0.05);
+
+    --lg-space: #090e1b;
+    --lg-space-image:
+        radial-gradient(1100px 760px at 88% -8%, rgba(40, 60, 104, 0.55), transparent 62%),
+        radial-gradient(900px 700px at -8% 108%, rgba(30, 46, 80, 0.5), transparent 62%),
+        linear-gradient(180deg, #0c1222 0%, #070b15 100%);
+    --lg-ink: 190 205 230;
+    --lg-ink-accent: 128 162 226;
+    --lg-star: 222 230 242;
+    --lg-occlude: #0b1121;
+    --lg-shade-lit: rgba(150, 172, 214, 0.16);
+    --lg-shade-mid: rgba(70, 90, 130, 0.07);
+    --lg-shade-dark: rgba(0, 0, 0, 0);
+    --lg-horizon: #03050b;
+
+    --lg-tint: 160 180 220;
+    --lg-bar-tint: 16 23 42;
+    --lg-accent-rgb: 104 146 222;
+    --lg-fill: 0.05;
+    --lg-fill-control: 0;
+    --lg-edge-control: 0.45;
+    --lg-hairline-control: 0;
+    --lg-fill-bar: 0.62;
+    --lg-fill-dialog: 0.8;
+    --lg-fill-nested: 0.05;
+    --lg-rim-a: 0.14;
+    --lg-hi: 255 255 255;
+    --lg-lo: 2 5 14;
+    --lg-spec: 0.16;
+    --lg-sheen: 0.045;
+    --lg-edge-hi: 0.55;
+    --lg-edge-lo: rgb(255 255 255 / 0.05);
+    --lg-bevel: 0.2;
+    --lg-bevel-shade: 0.5;
+    --lg-outline: 0.35;
+    --lg-shadow: 0.6;
+    --lg-sat: 130%;
+    --lg-bright: 1.14;
+}
+
+:root[data-liquid-glass] body {
+    background-color: var(--lg-space);
+}
+
+/* The page's own orbit decorations would double up with the background diagrams */
+:root[data-liquid-glass] .deco {
+    display: none;
+}
+
+/* ---------- Animated background ---------- */
+
+.lg-cosmos {
+    display: none;
+}
+
+:root[data-liquid-glass] .lg-cosmos {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: var(--lg-space);
+    background-image: var(--lg-space-image);
+}
+
+.lg-cosmos.is-entering {
+    animation: lg-fade-in 0.9s ease-out both;
+}
+
+.lg-cosmos svg {
+    position: absolute;
+    display: block;
+    overflow: visible;
+}
+
+/* Softened slightly, as if seen through glass */
+.lg-diagram {
+    filter: blur(0.5px);
+}
+
+.lg-sky {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.lg-planet-a {
+    top: clamp(40px, 8vh, 120px);
+    right: calc(-1 * clamp(40px, 5vw, 110px));
+    width: clamp(340px, 38vw, 620px);
+}
+
+/* The diagrams sit in the side margins when the window has them, and slip past the edge when it doesn't */
+.lg-planet-b {
+    top: 44vh;
+    left: max(-40px, calc((100vw - 1200px) / 2 - 170px));
+    width: clamp(120px, 10vw, 170px);
+}
+
+.lg-blackhole {
+    bottom: 6vh;
+    left: max(-110px, calc((100vw - 1200px) / 2 - 300px));
+    width: clamp(240px, 22vw, 360px);
+}
+
+.lg-line {
+    fill: none;
+    stroke: rgb(var(--lg-ink) / 0.3);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.lg-faint {
+    stroke: rgb(var(--lg-ink) / 0.14);
+}
+
+.lg-grid {
+    stroke: rgb(var(--lg-ink) / 0.16);
+}
+
+.lg-dashed {
+    stroke-dasharray: 3 7;
+}
+
+.lg-orbit {
+    stroke: rgb(var(--lg-ink-accent) / 0.32);
+}
+
+.lg-body {
+    fill: var(--lg-occlude);
+}
+
+.lg-limb {
+    fill: none;
+    stroke: rgb(var(--lg-ink) / 0.45);
+    stroke-width: 1.1;
+    vector-effect: non-scaling-stroke;
+}
+
+.lg-moon {
+    fill: var(--lg-occlude);
+    stroke: rgb(var(--lg-ink) / 0.5);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.lg-stop-lit { stop-color: var(--lg-shade-lit); }
+.lg-stop-mid { stop-color: var(--lg-shade-mid); }
+.lg-stop-dark { stop-color: var(--lg-shade-dark); }
+
+.lg-meridian {
+    fill: none;
+    stroke: rgb(var(--lg-ink) / 0.34);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: 0 50%;
+    animation:
+        lg-meridian var(--lg-dur) cubic-bezier(0.37, 0, 0.63, 1) infinite,
+        lg-meridian-fade var(--lg-dur) linear infinite;
+}
+
+/* Left limb → right limb across the near side, then back across the far side */
+@keyframes lg-meridian {
+    0% { transform: scaleX(-1); }
+    50% { transform: scaleX(1); }
+    100% { transform: scaleX(-1); }
+}
+
+@keyframes lg-meridian-fade {
+    0% { opacity: 0.25; }
+    8% { opacity: 1; }
+    42% { opacity: 1; }
+    58% { opacity: 0.25; }
+    100% { opacity: 0.25; }
+}
+
+.lg-ring {
+    fill: none;
+    stroke: rgb(var(--lg-ink) / 0.32);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: lg-spin var(--lg-dur) linear infinite;
+}
+
+.lg-horizon {
+    fill: var(--lg-horizon);
+}
+
+.lg-photon {
+    stroke: rgb(var(--lg-ink) / 0.5);
+}
+
+.lg-lens {
+    stroke: rgb(var(--lg-ink) / 0.24);
+}
+
+.lg-star {
+    fill: rgb(var(--lg-star) / 0.5);
+}
+
+.lg-star.is-dim {
+    fill: rgb(var(--lg-star) / 0.3);
+}
+
+.lg-twinkle {
+    animation: lg-twinkle var(--lg-dur) ease-in-out infinite;
+}
+
+/* Mostly steady, with a brief gentle brightening */
+@keyframes lg-twinkle {
+    0%, 70%, 100% { opacity: 0.6; }
+    85% { opacity: 1; }
+}
+
+@keyframes lg-spin {
+    to { transform: rotate(-360deg); }
+}
+
+@keyframes lg-fade-in {
+    from { opacity: 0; }
+}
+
+/* ---------- Glass surfaces ---------- */
+
+/* A nearly clear pane: the sky shows through a thin tint, the rim carries the material.
+   One recipe, tuned per group through variables and wrapped in :where() so the per-element
+   adjustments below can override it. No pseudo-elements, so existing ::after click targets and
+   positioning stay untouched. The light comes from --lg-nx/--lg-ny (resting: above, slightly
+   left; set by liquid-glass.js under the pointer) and --lg-angle (pointing away from the light).
+   Background layers: a specular spot hugging the rim nearest the pointer and a faint sheen sweep
+   (both only while hovered), over the nearly clear body tint.
+   Shadows: lit inner bevel toward the light and shaded bevel away from it (thickness), a denser
+   inner rim (clear centre), a hairline, and a soft floating shadow that leans away from the light.
+   The ::before below draws the curved rim itself. */
+:root[data-liquid-glass] :where(
+    .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
+    .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .menu-fab
+) {
+    --lg-a: var(--lg-fill);
+    --lg-r: var(--lg-rim-a);
+    --lg-rim: 22px;
+    --lg-e: var(--lg-edge-hi);
+    --lg-b: var(--lg-blur);
+    --lg-drop-y: 14px;
+    --lg-drop-blur: 34px;
+    --lg-nx: -0.4;
+    --lg-ny: -1;
+    --lg-glow: 0;
+    --lg-angle: 158deg;
+    background:
+        radial-gradient(38% 46% at calc(50% + var(--lg-nx, -0.4) * 62%) calc(50% + var(--lg-ny, -1) * 62%),
+            rgb(var(--lg-hi) / calc(var(--lg-spec) * var(--lg-glow, 0))), transparent) padding-box,
+        linear-gradient(110deg,
+            transparent calc(40% + var(--lg-nx, -0.4) * 30%),
+            rgb(var(--lg-hi) / calc(var(--lg-sheen) * var(--lg-glow, 0))) calc(50% + var(--lg-nx, -0.4) * 30%),
+            transparent calc(60% + var(--lg-nx, -0.4) * 30%)) padding-box,
+        linear-gradient(rgb(var(--lg-tint) / var(--lg-a)), rgb(var(--lg-tint) / var(--lg-a))) padding-box;
+    border-color: transparent;
+    box-shadow:
+        inset calc(var(--lg-nx, -0.4) * -1px) calc(var(--lg-ny, -1) * -1px) 0 rgb(var(--lg-hi) / var(--lg-bevel)),
+        inset calc(var(--lg-nx, -0.4) * 1.5px) calc(var(--lg-ny, -1) * 1.5px) 2px rgb(var(--lg-lo) / var(--lg-bevel-shade)),
+        inset 0 0 var(--lg-rim) calc(var(--lg-rim) * -0.25) rgb(var(--lg-tint) / var(--lg-r)),
+        0 0 0 1px rgb(var(--lg-lo) / var(--lg-outline)),
+        calc(var(--lg-nx, -0.4) * var(--lg-glow, 0) * -6px)
+        calc(var(--lg-drop-y) - var(--lg-ny, -1) * var(--lg-glow, 0) * 3px)
+        var(--lg-drop-blur) calc(var(--lg-drop-blur) * -0.5) rgb(var(--lg-lo) / var(--lg-shadow)),
+        0 1px 2px rgb(var(--lg-lo) / calc(var(--lg-shadow) * 0.35));
+    -webkit-backdrop-filter: blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+/* The rim: a 1px ring brightest toward the light, a fainter reflection on the opposite side and
+   almost nothing along the sides, so the pane reads as curving away rather than outlined.
+   Masked to the ring so the clear centre stays clear. */
+:root[data-liquid-glass] :where(
+    .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
+    .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .menu-fab
+)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    padding: 1px;
+    border-radius: inherit;
+    background: conic-gradient(from calc(var(--lg-angle, 158deg) + 180deg),
+        rgb(var(--lg-hi) / calc(var(--lg-e) * (0.75 + 0.25 * var(--lg-glow, 0)))) 0deg,
+        rgb(var(--lg-hi) / calc(var(--lg-e) * 0.3)) 50deg,
+        var(--lg-edge-lo) 95deg,
+        rgb(var(--lg-hi) / calc(var(--lg-e) * 0.38)) 180deg,
+        var(--lg-edge-lo) 265deg,
+        rgb(var(--lg-hi) / calc(var(--lg-e) * 0.3)) 310deg,
+        rgb(var(--lg-hi) / calc(var(--lg-e) * (0.75 + 0.25 * var(--lg-glow, 0)))) 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+}
+
+/* The ring is positioned against its pane; these are the panes that are otherwise unpositioned */
+:root[data-liquid-glass] :where(
+    .stat-card, .overview-card, .program-card, .wallet-card, .status-card, .expandable-section,
+    .achievement, .tl-toggle, .search-field, .module-card, .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip
+) {
+    position: relative;
+}
+
+/* Wide panels: a broad, quiet rim and a lower float, no tilt */
+:root[data-liquid-glass] :where(.expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card)) {
+    --lg-r: calc(var(--lg-rim-a) * 0.75);
+    --lg-rim: 30px;
+    --lg-e: calc(var(--lg-edge-hi) * 0.65);
+    --lg-drop-y: 10px;
+    --lg-drop-blur: 28px;
+}
+
+/* Small controls: fully clear lenses. No tint, blur, colour lift, bevel or shadow, so the middle
+   is exactly what lies behind. The edge is a 1px rim line (the ::before ring above, plus a hairline
+   in light mode where a white rim alone vanishes) and, in Chromium, refraction: --lg-refract is an
+   SVG displacement filter liquid-glass.js sizes to each control, bending the background inward
+   along the rounded rim. Capsule and circle shapes give the rim a curve to bend through (the lens
+   maps assume them). */
+:root[data-liquid-glass] :where(.btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle) {
+    --lg-a: var(--lg-fill-control);
+    --lg-e: var(--lg-edge-control);
+    --lg-spec: 0;
+    --lg-sheen: 0;
+    box-shadow: inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline-control));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: var(--lg-refract, none);
+}
+
+:root[data-liquid-glass] :where(.btn, .chip, .related-chip) {
+    border-radius: 999px;
+}
+
+:root[data-liquid-glass] .icon-button:not(.lightbox-nav) {
+    border-radius: 50%;
+}
+
+:root[data-liquid-glass] :where(.btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle):hover {
+    --lg-a: calc(var(--lg-fill-control) + 0.04);
+}
+
+/* Primary button: the same clear lens, marked by an accent rim and accent text */
+:root[data-liquid-glass] .btn-primary {
+    --lg-tint: var(--lg-accent-rgb);
+    box-shadow: inset 0 0 0 1px rgb(var(--lg-accent-rgb) / 0.6);
+    color: var(--accent);
+}
+
+:root[data-liquid-glass] :is(.chip[aria-pressed="true"], .lg-toggle[aria-pressed="true"]) {
+    --lg-tint: var(--lg-accent-rgb);
+    --lg-a: 0.08;
+    box-shadow: inset 0 0 0 1px rgb(var(--lg-accent-rgb) / 0.5);
+    color: var(--accent);
+}
+
+/* The floating menu button sits over body text, so like the top bar it stays frosted */
+:root[data-liquid-glass] .menu-fab {
+    --lg-tint: var(--lg-bar-tint);
+    --lg-a: var(--lg-fill-bar);
+    --lg-rim: 8px;
+    --lg-b: var(--lg-blur-bar);
+    --lg-spec: 0;
+    --lg-sheen: 0;
+    --lg-drop-y: 6px;
+    --lg-drop-blur: 18px;
+    -webkit-backdrop-filter: blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: var(--lg-refract,) blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+.lg-lens-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Accents the existing styles express with borders */
+:root[data-liquid-glass] .achievement {
+    border-left-color: var(--accent);
+}
+
+:root[data-liquid-glass] .tl-item.open .tl-toggle {
+    border-color: var(--accent);
+}
+
+:root[data-liquid-glass] :is(.vehicle-card, .album-card):has(:focus-visible) {
+    border-color: var(--accent);
+}
+
+/* Bars, drawer and dialogs carry text over moving content, so they keep a stronger tint,
+   with a continuous rim line instead of the directional one */
+:root[data-liquid-glass] header {
+    background: rgb(var(--lg-bar-tint) / var(--lg-fill-bar));
+    -webkit-backdrop-filter: blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+:root[data-liquid-glass] header.show {
+    box-shadow:
+        inset 0 1px 0 rgb(var(--lg-hi) / calc(var(--lg-bevel) * 0.5)),
+        inset 0 -1px 0 rgb(var(--lg-hi) / calc(var(--lg-e, var(--lg-edge-hi)) * 0.25)),
+        0 12px 30px -20px rgb(var(--lg-lo) / var(--lg-shadow));
+}
+
+:root[data-liquid-glass] .nav-drawer {
+    background: rgb(var(--lg-bar-tint) / var(--lg-fill-dialog));
+    box-shadow: inset 1px 0 0 rgb(var(--lg-hi) / calc(var(--lg-bevel) * 0.6));
+    -webkit-backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+:root[data-liquid-glass] .nav-backdrop {
+    background-color: rgb(var(--lg-lo) / 0.3);
+}
+
+:root[data-liquid-glass] .wsa-dialog {
+    background: rgb(var(--lg-bar-tint) / var(--lg-fill-dialog));
+    border-color: rgb(var(--lg-hi) / calc(var(--lg-edge-hi) * 0.3));
+    box-shadow:
+        inset 0 1px 0 rgb(var(--lg-hi) / var(--lg-bevel)),
+        inset 0 0 30px -12px rgb(var(--lg-tint) / var(--lg-rim-a)),
+        0 0 0 1px rgb(var(--lg-lo) / var(--lg-outline)),
+        0 30px 80px -24px rgb(var(--lg-lo) / calc(var(--lg-shadow) + 0.1));
+    -webkit-backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+/* ::backdrop does not inherit custom properties in every browser, so plain colours here */
+:root[data-liquid-glass] .wsa-dialog::backdrop {
+    background-color: rgba(30, 41, 59, 0.22);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+:root[data-liquid-glass][data-theme="dark"] .wsa-dialog::backdrop {
+    background-color: rgba(3, 6, 14, 0.5);
+}
+
+/* Sticky footer over scrolling dialog content: solid so nothing reads through it */
+:root[data-liquid-glass] .dialog-actions {
+    background-color: rgb(var(--lg-bar-tint));
+}
+
+:root[data-liquid-glass] .search-results [aria-selected="true"] a {
+    background-color: rgb(var(--lg-ink) / 0.08);
+}
+
+/* Panes inside other glass: a light tint and a hairline rim, no blur of their own
+   (nested backdrop blur is costly and muddy) */
+:root[data-liquid-glass] :is(.expandable-section .module-card, .technical-details, .wallet-address, .data-table th, .tl-panel-content, .empty-state) {
+    background-color: rgb(var(--lg-tint) / var(--lg-fill-nested));
+    box-shadow:
+        inset 0 1px 0 rgb(var(--lg-hi) / calc(var(--lg-bevel) * 0.5)),
+        inset 0 0 14px -6px rgb(var(--lg-tint) / var(--lg-rim-a));
+}
+
+:root[data-liquid-glass] :is(.expandable-section .module-card, .technical-details, .wallet-address, .data-table th) {
+    border-color: rgb(var(--lg-ink) / 0.14);
+}
+
+:root[data-liquid-glass] .vehicle-visual {
+    background-color: rgb(var(--lg-tint) / var(--lg-fill-nested));
+}
+
+/* Page bands become clear so the sky continues behind them */
+:root[data-liquid-glass] .cta-section {
+    background-color: transparent;
+}
+
+:root[data-liquid-glass] footer {
+    background-color: rgb(var(--lg-bar-tint) / 0.35);
+    -webkit-backdrop-filter: blur(var(--lg-blur));
+    backdrop-filter: blur(var(--lg-blur));
+}
+
+:root[data-liquid-glass] :is(button, a):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* ---------- Pointer tilt (classes set by liquid-glass.js while hovered / settling) ---------- */
+
+:root[data-liquid-glass] :is(.program-card, .overview-card, .vehicle-card, .album-card, .wallet-card, .status-card) {
+    --lg-tilt-max: 2.5deg;
+    --lg-persp: 900px;
+}
+
+:root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button, .lg-toggle) {
+    --lg-tilt-max: 4deg;
+    --lg-persp: 320px;
+}
+
+/* The pointer side recedes, so the surface turns to face the pointer. The transform exists only
+   while hovered or settling: idle cards stay flat layers, and the reveal fade keeps its own transform. */
+:root[data-liquid-glass] :is(.lg-tilt, .lg-settle) {
+    transform: perspective(var(--lg-persp, 900px))
+        rotateX(calc(var(--lg-ny, 0) * var(--lg-glow, 0) * var(--lg-tilt-max, 3deg) * -1))
+        rotateY(calc(var(--lg-nx, 0) * var(--lg-glow, 0) * var(--lg-tilt-max, 3deg)));
+    transition: --lg-nx 0.12s ease-out, --lg-ny 0.12s ease-out, --lg-angle 0.12s ease-out,
+        --lg-glow 0.25s ease, opacity 0.6s ease;
+    transition-delay: 0s !important;
+}
+
+:root[data-liquid-glass] .lg-settle {
+    transition: --lg-nx 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), --lg-ny 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+        --lg-angle 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), --lg-glow 0.5s ease, opacity 0.6s ease;
+}
+
+/* Without @property the variables jump, so smooth the transform itself instead */
+:root.lg-no-props[data-liquid-glass] :is(.lg-tilt, .lg-settle) {
+    transition: transform 0.15s ease-out, opacity 0.6s ease;
+}
+
+:root.lg-no-props[data-liquid-glass] .lg-settle {
+    transition: transform 0.45s ease, opacity 0.6s ease;
+}
+
+/* Touch screens: no tilt, just a restrained press on controls */
+@media (hover: none) {
+    :root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .lg-toggle):active {
+        transform: scale(0.97);
+    }
+}
+
+/* ---------- Fallbacks ---------- */
+
+/* Phones, tablets and small windows: lighter blur and a calmer sky */
+@media (pointer: coarse), (max-width: 768px) {
+    :root[data-liquid-glass] {
+        --lg-blur: 3px;
+        --lg-blur-bar: 10px;
+        --lg-blur-dialog: 14px;
+    }
+
+    .lg-diagram {
+        filter: none;
+    }
+
+    .lg-twinkle-extra {
+        animation: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .lg-planet-a {
+        top: 24px;
+        right: -110px;
+        width: 300px;
+    }
+
+    .lg-cosmos .lg-planet-b {
+        display: none;
+    }
+
+    .lg-blackhole {
+        bottom: 32px;
+        left: -40px;
+        width: 220px;
+    }
+}
+
+/* No backdrop-filter: near-opaque tints keep text readable */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root[data-liquid-glass][data-theme] {
+        --lg-tint: var(--lg-bar-tint);
+        --lg-fill: 0.82;
+        --lg-fill-control: 0.8;
+        --lg-fill-bar: 0.94;
+        --lg-fill-dialog: 0.96;
+        --lg-fill-nested: 0.5;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    :root[data-liquid-glass][data-theme] {
+        --lg-tint: var(--lg-bar-tint);
+        --lg-fill: 0.94;
+        --lg-fill-control: 0.92;
+        --lg-fill-bar: 0.97;
+        --lg-fill-dialog: 0.98;
+        --lg-fill-nested: 0.7;
+    }
+
+    :root[data-liquid-glass] * {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+}
+
+/* The site-wide reduced-motion rule only shortens durations, which would make these endless
+   loops flicker, so stop them outright (the diagrams keep a still pose) */
+@media (prefers-reduced-motion: reduce) {
+    .lg-cosmos,
+    .lg-cosmos * {
+        animation: none !important;
+    }
+}
+
+@media (forced-colors: active) {
+    :root[data-liquid-glass] .lg-cosmos {
+        display: none;
+    }
+}
+
+@media print {
+    :root[data-liquid-glass] .lg-cosmos {
+        display: none;
+    }
+}

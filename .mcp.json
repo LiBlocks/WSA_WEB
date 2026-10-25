@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "shadcnio": {
+      "type": "http",
+      "url": "https://www.shadcn.io/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      }
+    }
+  }
+}
