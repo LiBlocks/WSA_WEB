@@ -18,7 +18,7 @@
 
     // Slide direction follows the tab order, like swiping between tabs
     var PAGE_ORDER = ['index.html', 'about.html', 'goals-achievements.html', 'vehicles-programs.html',
-        'missions-archive.html', 'gallery.html', 'autoland.html', 'game.html', 'docking-simulator.html', 'kgoss.html', 'support.html'];
+        'missions-archive.html', 'gallery.html', 'autoland.html', 'games.html', 'game.html', 'docking-simulator.html', 'kgoss.html', 'support.html'];
 
     function pageIndex(url) {
         return PAGE_ORDER.indexOf(new URL(url, location.href).pathname.split('/').pop() || 'index.html');

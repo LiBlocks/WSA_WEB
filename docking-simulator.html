@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docking Simulator | Woody Space Agency</title>
-    <script src="page-init.js?v=4"></script>
+    <script src="page-init.js?v=5"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=13">
-    <link rel="stylesheet" href="docking-simulator.css?v=1">
+    <link rel="stylesheet" href="docking-simulator.css?v=2">
     <link rel="stylesheet" href="liquid-glass.css?v=17">
     <script src="liquid-glass.js?v=19"></script>
     <link rel="icon" type="image/png" href="images/favicon.png">
@@ -25,7 +25,7 @@
                 <li><a href="missions-archive.html">Missions</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="autoland.html">AutoLand</a></li>
-                <li><a href="game.html">Game</a></li>
+                <li><a href="games.html">Games</a></li>
             </ul>
             <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
                 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -43,7 +43,7 @@
 
     <section class="page-head sim-head" style="padding: 2.25rem 2rem 1.25rem;">
         <div class="container">
-            <p class="sim-back"><a href="game.html">&larr; Station Builder</a></p>
+            <p class="sim-back"><a href="games.html">&larr; Games</a></p>
             <h1 style="margin-bottom: 0.4rem;">Docking Simulator</h1>
             <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 800px;">
                 Fly a spacecraft to an orbital station in first person and dock with its active port. A simplified local relative-motion simulator for practising the approach, not a full orbital rendezvous model.
@@ -56,6 +56,10 @@
             <div class="sim-toolbar">
                 <p class="sim-toolbar-hint">Keyboard: translate <kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd><kbd>H</kbd><kbd>N</kbd> · rotate <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>Q</kbd><kbd>E</kbd></p>
                 <div class="sim-actions">
+                    <div class="sim-touch-mode" role="radiogroup" aria-label="Touch controls">
+                        <button type="button" role="radio" data-touch-mode="stick" aria-checked="true">Joystick</button>
+                        <button type="button" role="radio" data-touch-mode="buttons" aria-checked="false">Buttons</button>
+                    </div>
                     <button type="button" class="btn btn-primary btn-small" id="sim-pause">Start</button>
                     <button type="button" class="btn btn-secondary btn-small" id="sim-restart">Restart</button>
                     <button type="button" class="btn btn-secondary btn-small" id="sim-assist" aria-pressed="true">Flight Assist: On</button>
@@ -86,8 +90,63 @@
                     <span class="sim-chip" id="hud-fine" hidden>FINE CONTROL</span>
                 </div>
 
+                <!-- Touch controls (phones and tablets): joysticks or big buttons, chosen above the view -->
+                <div class="sim-touch">
+                    <div class="sim-touch-top">
+                        <button type="button" class="sim-touch-btn sim-touch-fine" aria-pressed="false" tabindex="-1">FINE</button>
+                    </div>
+                    <div class="sim-touch-set" data-set="stick">
+                        <div class="sim-touch-cluster">
+                            <div class="sim-stick" data-stick="move" role="img" aria-label="Move stick: translate up, down, left and right"><span class="sim-stick-knob"></span><span class="sim-stick-label">MOVE</span></div>
+                            <div class="sim-touch-col">
+                                <button type="button" class="sim-touch-btn" data-key="h" tabindex="-1" aria-label="Translate forward"><b>▲</b><small>fwd</small></button>
+                                <button type="button" class="sim-touch-btn" data-key="n" tabindex="-1" aria-label="Translate back"><b>▼</b><small>back</small></button>
+                            </div>
+                        </div>
+                        <div class="sim-touch-cluster">
+                            <div class="sim-touch-col">
+                                <button type="button" class="sim-touch-btn" data-key="q" tabindex="-1" aria-label="Roll left"><b>↺</b><small>roll</small></button>
+                                <button type="button" class="sim-touch-btn" data-key="e" tabindex="-1" aria-label="Roll right"><b>↻</b><small>roll</small></button>
+                            </div>
+                            <div class="sim-stick" data-stick="turn" role="img" aria-label="Turn stick: pitch and yaw"><span class="sim-stick-knob"></span><span class="sim-stick-label">TURN</span></div>
+                        </div>
+                    </div>
+                    <div class="sim-touch-set" data-set="buttons">
+                        <div class="sim-touch-cluster sim-touch-pad">
+                            <span class="sim-touch-label">MOVE</span>
+                            <button type="button" class="sim-touch-btn" data-key="h" tabindex="-1" aria-label="Translate forward"><b>▲</b><small>fwd</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="i" tabindex="-1" aria-label="Translate up"><b>↑</b><small>up</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="n" tabindex="-1" aria-label="Translate back"><b>▼</b><small>back</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="j" tabindex="-1" aria-label="Translate left"><b>←</b><small>left</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="k" tabindex="-1" aria-label="Translate down"><b>↓</b><small>down</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="l" tabindex="-1" aria-label="Translate right"><b>→</b><small>right</small></button>
+                        </div>
+                        <div class="sim-touch-cluster sim-touch-pad">
+                            <span class="sim-touch-label">TURN</span>
+                            <button type="button" class="sim-touch-btn" data-key="q" tabindex="-1" aria-label="Roll left"><b>↺</b><small>roll</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="w" tabindex="-1" aria-label="Pitch up"><b>↑</b><small>pitch</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="e" tabindex="-1" aria-label="Roll right"><b>↻</b><small>roll</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="a" tabindex="-1" aria-label="Yaw left"><b>←</b><small>yaw</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="s" tabindex="-1" aria-label="Pitch down"><b>↓</b><small>pitch</small></button>
+                            <button type="button" class="sim-touch-btn" data-key="d" tabindex="-1" aria-label="Yaw right"><b>→</b><small>yaw</small></button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="sim-overlay" id="sim-loading">
                     <div class="sim-card sim-card-small"><p class="sim-card-text">Loading the 3D view…</p></div>
+                </div>
+
+                <div class="sim-overlay" id="sim-mobile" hidden>
+                    <div class="sim-card sim-card-small" role="dialog" aria-labelledby="sim-mobile-title">
+                        <h2 class="sim-card-title" id="sim-mobile-title">Better on a computer</h2>
+                        <p class="sim-card-text">The Docking Simulator is made for a keyboard and a larger screen, so it plays best on a desktop or laptop.</p>
+                        <p class="sim-card-text">You can still fly it here with on-screen controls: pick a joystick or big buttons above the view. Turning your device sideways gives you more room.</p>
+                        <div class="sim-card-actions">
+                            <button type="button" class="sim-btn sim-btn-primary" id="sim-mobile-ok">Continue</button>
+                            <a class="sim-btn" href="games.html">Other games</a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="sim-overlay" id="sim-intro" hidden>
@@ -110,9 +169,10 @@
                             <div>
                                 <h3>Controls</h3>
                                 <dl class="sim-controls">
-                                    <div><dt>Translate</dt><dd><kbd>I</kbd> up · <kbd>K</kbd> down · <kbd>J</kbd> left · <kbd>L</kbd> right · <kbd>H</kbd> forward · <kbd>N</kbd> back</dd></div>
-                                    <div><dt>Rotate</dt><dd><kbd>W</kbd> pitch up · <kbd>S</kbd> pitch down · <kbd>A</kbd> yaw left · <kbd>D</kbd> yaw right · <kbd>Q</kbd> roll left · <kbd>E</kbd> roll right</dd></div>
-                                    <div><dt>Also</dt><dd>Hold <kbd>Shift</kbd> for fine thrust · <kbd>F</kbd> Flight Assist · <kbd>P</kbd> or <kbd>Esc</kbd> pause</dd></div>
+                                    <div class="sim-touch-only"><dt>Touch</dt><dd>MOVE stick or arrows: translate · ▲ fwd / ▼ back: close in or back off · TURN stick or arrows: pitch and yaw · ↺ ↻: roll · FINE: gentler thrust. Choose Joystick or Buttons above the view.</dd></div>
+                                    <div class="sim-keyboard-only"><dt>Translate</dt><dd><kbd>I</kbd> up · <kbd>K</kbd> down · <kbd>J</kbd> left · <kbd>L</kbd> right · <kbd>H</kbd> forward · <kbd>N</kbd> back</dd></div>
+                                    <div class="sim-keyboard-only"><dt>Rotate</dt><dd><kbd>W</kbd> pitch up · <kbd>S</kbd> pitch down · <kbd>A</kbd> yaw left · <kbd>D</kbd> yaw right · <kbd>Q</kbd> roll left · <kbd>E</kbd> roll right</dd></div>
+                                    <div class="sim-keyboard-only"><dt>Also</dt><dd>Hold <kbd>Shift</kbd> for fine thrust · <kbd>F</kbd> Flight Assist · <kbd>P</kbd> or <kbd>Esc</kbd> pause</dd></div>
                                 </dl>
                                 <h3>HUD symbols</h3>
                                 <ul class="sim-symbols">
@@ -148,7 +208,7 @@
                         <dl class="sim-stats"></dl>
                         <div class="sim-card-actions">
                             <button type="button" class="sim-btn sim-btn-primary" data-action="restart">Fly again</button>
-                            <a class="sim-btn" href="game.html">Station Builder</a>
+                            <a class="sim-btn" href="games.html">All games</a>
                         </div>
                     </div>
                 </div>
@@ -157,7 +217,7 @@
                     <div class="sim-card sim-card-small" role="alert">
                         <h2 class="sim-card-title"></h2>
                         <p class="sim-card-text"></p>
-                        <div class="sim-card-actions"><a class="sim-btn" href="game.html">Back to the Station Builder</a></div>
+                        <div class="sim-card-actions"><a class="sim-btn" href="games.html">Back to Games</a></div>
                     </div>
                 </div>
                 <noscript>
@@ -234,11 +294,11 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=5"></script>
-    <script src="navigation.js?v=6"></script>
+    <script src="wsa-data.js?v=6"></script>
+    <script src="navigation.js?v=7"></script>
     <script src="features.js?v=4"></script>
     <script src="decorations.js?v=3"></script>
-    <script type="module" src="docking/main.js?v=1"></script>
+    <script type="module" src="docking/main.js?v=2"></script>
     <script>
         // If the simulator's module never starts (a very old browser, a failed download), say so
         window.addEventListener('load', function () {

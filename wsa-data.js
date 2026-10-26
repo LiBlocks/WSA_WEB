@@ -671,6 +671,7 @@ window.WSA = {
         { title: 'Flight Gallery',               href: 'gallery.html',                       type: 'Gallery',  keywords: 'images screenshots photos' },
         { title: 'AutoLand Engineering',         href: 'autoland.html',                      type: 'Program',  keywords: 'kOS landing guidance V1.6 A1 A4 B1 V2.0 V2.x glide' },
         { title: 'KGOSS Station',                href: 'kgoss.html',                         type: 'Program',  keywords: 'station KGOSS-1 KGOSS-3 Haven Seraph centrifuge orbit' },
+        { title: 'Games',                        href: 'games.html',                         type: 'Page',     keywords: 'game games play minigame builder simulator' },
         { title: 'Station Builder',              href: 'game.html',                          type: 'Game',     keywords: 'game minigame build station modules docking KGOSS solar truss' },
         { title: 'Docking Simulator',            href: 'docking-simulator.html',             type: 'Game',     keywords: 'game simulator docking dock spacecraft rendezvous approach RCS first person' },
         { title: 'FAMMOK Program',               href: 'missions-archive.html#fammok',       type: 'Program',  keywords: 'Mun Minmus Duna lander' },

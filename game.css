@@ -1,60 +1,18 @@
 /* Station Builder (game.html, game.js). The assembly area is always deep space, in both themes,
    matching the exported image; the controls around it follow the site theme. */
 
-/* Launch card for the Docking Simulator, in the page head */
-.game-launch {
-    flex-direction: row;
-    align-items: center;
-    gap: 1.1rem;
-    max-width: 800px;
-    margin-top: 1.5rem;
-    padding: 1rem 1.25rem;
-    color: inherit;
-    text-decoration: none;
-}
-
-.game-launch:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-}
-
-.game-launch-icon {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    fill: none;
-    stroke: var(--success);
-    stroke-width: 2;
-    stroke-linecap: round;
-}
-
-.game-launch-text {
-    display: grid;
-    gap: 0.15rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.game-launch-kicker {
-    color: var(--accent);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.game-launch-title {
-    font-weight: 600;
-    font-size: 1.05rem;
-}
-
-.game-launch-desc {
-    color: var(--text-secondary);
+.games-back {
+    margin-bottom: 0.6rem;
     font-size: 0.9rem;
 }
 
-.game-launch-go {
-    flex-shrink: 0;
+.games-back a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.games-back a:hover {
+    text-decoration: underline;
 }
 
 .builder {
@@ -418,17 +376,6 @@
 
     .builder-result {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 560px) {
-    .game-launch {
-        flex-wrap: wrap;
-    }
-
-    .game-launch-go {
-        width: 100%;
-        text-align: center;
     }
 }
 

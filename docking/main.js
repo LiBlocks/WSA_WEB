@@ -3,9 +3,11 @@
 import { createState, step, telemetry, DOCKING } from './physics.js';
 import { advise } from './guidance.js';
 import { createHud, createDashboard } from './hud.js';
+import { createTouchControls } from './touch.js';
 
 const STEP = 1 / 120;
 const MAX_FRAME = 0.1;   // s: a longer pause between frames (a background tab) doesn't fast-forward
+const MOBILE_SEEN = 'wsa-dock-mobile-note';   // session flag: the "better on a computer" note was shown
 
 const $ = id => document.getElementById(id);
 const sim = $('sim');
@@ -13,7 +15,7 @@ const view = $('sim-view');
 const ui = {
     canvas: $('sim-canvas'), hud: $('sim-hud'), phase: $('sim-phase'), advice: $('sim-advice'),
     range: $('hud-range'), closing: $('hud-closing'), limit: $('hud-limit'), assistChip: $('hud-assist'), fineChip: $('hud-fine'),
-    intro: $('sim-intro'), paused: $('sim-paused'), result: $('sim-result'), error: $('sim-error'),
+    intro: $('sim-intro'), paused: $('sim-paused'), result: $('sim-result'), error: $('sim-error'), mobile: $('sim-mobile'),
     start: $('sim-start'), pause: $('sim-pause'), restart: $('sim-restart'), assist: $('sim-assist'), fullscreen: $('sim-fullscreen'),
     live: $('sim-live'), loading: $('sim-loading'),
 };
@@ -21,6 +23,7 @@ const ui = {
 function showError(title, text) {
     ui.loading.hidden = true;
     ui.intro.hidden = true;
+    ui.mobile.hidden = true;
     ui.error.hidden = false;
     ui.error.querySelector('.sim-card-title').textContent = title;
     ui.error.querySelector('.sim-card-text').textContent = text;
@@ -51,6 +54,7 @@ ui.canvas.addEventListener('webglcontextlost', e => {
 
 const hud = createHud(ui.hud);
 const dash = createDashboard($('sim-dash'));
+const touch = createTouchControls(sim);
 
 /* ---------- State ---------- */
 
@@ -75,11 +79,12 @@ const KEYS = {
     w: ['rot', 0, 1], s: ['rot', 0, -1], a: ['rot', 1, 1], d: ['rot', 1, -1], q: ['rot', 2, 1], e: ['rot', 2, -1],
 };
 const pressed = new Set();      // keyboard
-const touched = new Set();      // on-screen key caps
+const touched = new Set();      // on-screen key caps and touch buttons
 let fine = false;
 
 function currentInput() {
-    const input = { trans: [0, 0, 0], rot: [0, 0, 0], fine, assist: app.assist };
+    const stick = touch.input();
+    const input = { trans: stick.trans, rot: stick.rot, fine: fine || stick.fine, assist: app.assist };
     for (const k of new Set([...pressed, ...touched])) {
         const [group, axis, dir] = KEYS[k];
         input[group][axis] += dir;
@@ -90,6 +95,8 @@ function currentInput() {
 function releaseAll() {
     pressed.clear();
     touched.clear();
+    sim.querySelectorAll('[data-key].pressed').forEach(b => b.classList.remove('pressed'));
+    touch.reset();
     fine = false;
 }
 
@@ -138,17 +145,21 @@ document.addEventListener('focusin', e => {
     if (app.mode === 'running' && !sim.contains(e.target) && editable(e.target)) pause(true);
 });
 
-// The key caps double as touch (and mouse) controls
-sim.querySelectorAll('.sim-key[data-key]').forEach(button => {
+// The panel's key caps and the touch buttons hold a key down for as long as they are pressed
+sim.querySelectorAll('[data-key]').forEach(button => {
     const key = button.dataset.key;
     const down = e => {
         if (app.mode !== 'running') return;
         e.preventDefault();
         touched.add(key);
+        button.classList.add('pressed');
         // Keep the key held while a finger slides a little off it
         try { button.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
     };
-    const up = () => touched.delete(key);
+    const up = () => {
+        touched.delete(key);
+        button.classList.remove('pressed');
+    };
     button.addEventListener('pointerdown', down);
     button.addEventListener('pointerup', up);
     button.addEventListener('pointercancel', up);
@@ -159,7 +170,7 @@ sim.querySelectorAll('.sim-key[data-key]').forEach(button => {
 /* ---------- Controls ---------- */
 
 function overlay(which) {
-    for (const name of ['intro', 'paused', 'result']) ui[name].hidden = name !== which;
+    for (const name of ['mobile', 'intro', 'paused', 'result']) ui[name].hidden = name !== which;
 }
 
 function syncControls() {
@@ -171,6 +182,8 @@ function syncControls() {
     ui.assist.textContent = `Flight Assist: ${app.assist ? 'On' : 'Off'}`;
     ui.assist.setAttribute('aria-pressed', String(app.assist));
     sim.dataset.mode = m;
+    // The site's floating menu button would sit on top of the right-hand touch controls
+    document.body.classList.toggle('sim-touch-flying', m === 'running' && touch.active);
 }
 
 function announce(text) {
@@ -183,6 +196,8 @@ function begin() {
     last = performance.now();
     syncControls();
     view.focus({ preventScroll: true });
+    // On touch screens the controls sit along the bottom of the view, so bring all of it into sight
+    if (touch.active && !document.fullscreenElement) view.scrollIntoView({ block: 'end', behavior: 'smooth' });
 }
 
 function pause(auto) {
@@ -223,6 +238,11 @@ function setAssist(on) {
 }
 
 ui.start.addEventListener('click', begin);
+$('sim-mobile-ok').addEventListener('click', () => {
+    try { sessionStorage.setItem(MOBILE_SEEN, '1'); } catch (e) { /* storage blocked */ }
+    overlay('intro');
+    ui.start.focus({ preventScroll: true });
+});
 ui.pause.addEventListener('click', () => {
     if (app.mode === 'intro') begin();
     else togglePause();
@@ -280,7 +300,7 @@ function handle(ev) {
         syncControls();
         setTimeout(() => { if (app.mode === 'docked') showResult('docked', state.result); }, 900);
     } else if (ev.type === 'bounce') {
-        app.flash = { text: `Contact failed: ${ev.misses.join('; ')}. Back off with N and line up again.`, level: 'alert', until: app.clock + 6 };
+        app.flash = { text: `Contact failed: ${ev.misses.join('; ')}. Back off with ${touch.active ? '▼ BACK' : 'N'} and line up again.`, level: 'alert', until: app.clock + 6 };
         announce('Contact failed. Back off and line up again.');
     } else if (ev.type === 'bump') {
         app.flash = { text: `Bumped ${ev.what} at ${ev.speed.toFixed(2)} m/s. Back away and find the approach axis again.`, level: 'alert', until: app.clock + 6 };
@@ -327,7 +347,7 @@ function drawAdvice(tm) {
     let msg;
     if (app.flash && app.clock < app.flash.until) msg = app.flash;
     else if (app.mode === 'docked' || state.mode === 'latching') msg = { text: 'Docked. Hard latches engaged.', level: 'ok' };
-    else msg = advise(tm, { assist: app.assist });
+    else msg = advise(tm, { assist: app.assist, touch: touch.active });
     if (ui.advice.textContent !== msg.text) ui.advice.textContent = msg.text;
     ui.advice.dataset.level = msg.level;
 }
@@ -369,7 +389,10 @@ function frame(now) {
 }
 
 syncControls();
-overlay('intro');
+// On phones and tablets, first a short note that a computer suits the simulator better (once a session)
+let noteSeen = false;
+try { noteSeen = sessionStorage.getItem(MOBILE_SEEN) === '1'; } catch (e) { /* storage blocked */ }
+overlay(touch.coarse && !noteSeen ? 'mobile' : 'intro');
 requestAnimationFrame(frame);
 
 // For automated checks: read-only access to the live simulation

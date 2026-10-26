@@ -1,0 +1,46 @@
+/* Games menu (games.html): one card per game, side by side, neither one the default. The card art is
+   always deep space, like the games themselves. */
+
+.games-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+}
+
+.game-card {
+    color: inherit;
+    text-decoration: none;
+}
+
+.game-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.game-card-art {
+    display: block;
+    margin: -0.5rem -0.5rem 1.25rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: linear-gradient(160deg, #0b1220, #111a2e);
+}
+
+.game-card-art svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.game-card .game-card-meta {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.game-card-play {
+    align-self: flex-start;
+}
+
+.game-card:hover .game-card-play {
+    background-color: var(--accent-dark);
+    border-color: var(--accent-dark);
+}
