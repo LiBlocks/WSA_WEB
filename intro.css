@@ -66,7 +66,6 @@
    finish, so the word ripples in from left to right. The resting style is plain filled text, so the
    title stays readable if these animations never run. */
 .wsa-intro-title tspan {
-    --wsa-trace: 7.5em;                 /* longer than any letter's outline */
     --wsa-start: calc(0.95s + var(--i) * 0.03s);
     fill: currentColor;
     fill-opacity: 1;
@@ -74,7 +73,11 @@
     stroke-opacity: 0;
     stroke-width: 1px;
     stroke-linejoin: round;
-    stroke-dasharray: var(--wsa-trace) var(--wsa-trace);
+    /* One dash, longer than any letter's outline at the largest title size (33.6px), then a gap far
+       longer than the whole word, so no stray piece of outline can show before or after the dash
+       on any engine. Plain numbers (user units = px here): no em or custom properties, which some
+       mobile engines resolve differently inside dash patterns and keyframes. */
+    stroke-dasharray: 260 4000;
     animation:
         wsa-intro-trace 0.5s linear var(--wsa-start) both,
         wsa-intro-fill 0.15s ease-out calc(var(--wsa-start) + 0.5s) both,
@@ -92,7 +95,7 @@
 
 @keyframes wsa-intro-trace {
     from {
-        stroke-dashoffset: var(--wsa-trace);
+        stroke-dashoffset: 260;
         stroke-opacity: 1;
     }
     to {
