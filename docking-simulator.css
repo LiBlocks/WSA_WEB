@@ -1,0 +1,796 @@
+/* Docking Simulator (docking-simulator.html, docking/*.js). The cockpit (view, HUD and instrument
+   panel) is always dark, in both themes, like the Station Builder's assembly area; the page around it
+   follows the site theme. */
+
+.sim-head .sim-back {
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+}
+
+.sim-head .sim-back a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.sim-head .sim-back a:hover {
+    text-decoration: underline;
+}
+
+.sim-section {
+    padding: 0.5rem 1rem 3rem;
+}
+
+.sim {
+    --hud: #4dff91;
+    --hud-soft: #b9ffd2;
+    --hud-warn: #ffc94d;
+    --hud-alert: #ff6b6b;
+    --panel: #0b0f17;
+    --panel-line: #1d2636;
+    --panel-text: #cfd8e3;
+    --panel-muted: #7f8ea3;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.sim:fullscreen {
+    max-width: none;
+    height: 100vh;
+    padding: 0.75rem;
+    background: #05070d;
+    color: var(--panel-text);
+}
+
+.sim:fullscreen .sim-view {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+}
+
+.sim:fullscreen .sim-toolbar-hint {
+    color: var(--panel-muted);
+}
+
+.sim-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+}
+
+.sim-toolbar-hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.sim-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sim .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sim kbd {
+    display: inline-block;
+    min-width: 1.4em;
+    margin: 0 0.1em;
+    padding: 0 0.3em;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font: 600 0.78em/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-align: center;
+    opacity: 0.85;
+}
+
+/* ---------- The view ---------- */
+
+.sim-view {
+    position: relative;
+    height: min(70vh, 760px);
+    min-height: 380px;
+    overflow: hidden;
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    background: #010205;
+    color: var(--panel-text);
+    outline: none;
+}
+
+.sim-view:focus-visible {
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* The window frame of the cockpit */
+.sim-view::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 5px rgba(9, 12, 19, 0.92), inset 0 0 90px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+}
+
+.sim-canvas,
+.sim-hud {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.sim-hud {
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.sim-hud path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sim-hud .halo {
+    stroke: rgba(0, 10, 4, 0.55);
+    stroke-width: 4;
+}
+
+.sim-hud .main {
+    stroke: var(--hud);
+    stroke-width: 1.6;
+}
+
+.hud-gate .main {
+    stroke-width: 1;
+}
+
+.hud-gate .halo {
+    stroke-width: 2.6;
+    stroke: rgba(0, 10, 4, 0.3);
+}
+
+.hud-gate.warn .main {
+    stroke: var(--hud-warn);
+}
+
+.hud-axis .main {
+    stroke-width: 1.2;
+    stroke-dasharray: 10 7;
+    opacity: 0.85;
+}
+
+.hud-axis .halo {
+    stroke-width: 3;
+    stroke-dasharray: 10 7;
+}
+
+.hud-port .main {
+    stroke-width: 2.2;
+}
+
+.hud-prograde .main {
+    stroke: var(--hud-soft);
+    stroke-width: 1.8;
+}
+
+.hud-boresight .main {
+    stroke-width: 2;
+}
+
+.hud-trans .main {
+    opacity: 0.22;
+}
+
+.hud-trans.on .main {
+    opacity: 1;
+    stroke-width: 2.2;
+}
+
+.hud-trans .halo {
+    opacity: 0.4;
+}
+
+.hud-point.warn .main,
+.hud-roll.warn .main {
+    stroke: var(--hud-warn);
+}
+
+.hud-label {
+    fill: var(--hud);
+    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.12em;
+    paint-order: stroke;
+    stroke: rgba(0, 10, 4, 0.6);
+    stroke-width: 3px;
+}
+
+/* HUD text */
+.sim-status {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: min(680px, calc(100% - 2rem));
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.sim-phase {
+    font: 700 0.9rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.16em;
+    color: var(--hud);
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+}
+
+.sim-advice {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border-left: 2px solid var(--hud);
+    border-radius: 3px;
+    background: rgba(2, 6, 4, 0.62);
+    color: #eafff1;
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+.sim-advice:empty {
+    display: none;
+}
+
+.sim-phase[data-level="warn"],
+.sim-readout[data-level="warn"] .sim-readout-value {
+    color: var(--hud-warn);
+}
+
+.sim-advice[data-level="warn"] {
+    border-left-color: var(--hud-warn);
+    color: #fff3d6;
+}
+
+.sim-phase[data-level="alert"],
+.sim-readout[data-level="alert"] .sim-readout-value {
+    color: var(--hud-alert);
+}
+
+.sim-advice[data-level="alert"] {
+    border-left-color: var(--hud-alert);
+    color: #ffe1e1;
+}
+
+.sim-advice[data-level="info"] {
+    border-left-color: var(--hud-soft);
+}
+
+.sim-readout {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(2, 6, 4, 0.45);
+    transform: translateY(-50%);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--hud);
+    pointer-events: none;
+}
+
+.sim-readout-left {
+    left: 16px;
+}
+
+.sim-readout-right {
+    right: 16px;
+    text-align: right;
+}
+
+.sim-readout-label,
+.sim-readout-unit,
+.sim-readout-limit {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--hud-soft);
+    opacity: 0.85;
+}
+
+.sim-readout-value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    color: var(--hud);
+}
+
+.sim-chips {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    display: flex;
+    gap: 0.4rem;
+    pointer-events: none;
+}
+
+.sim-chip {
+    padding: 0.15rem 0.45rem;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    background: rgba(2, 6, 4, 0.55);
+    font: 700 0.66rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.1em;
+    color: var(--hud);
+}
+
+.sim-chip[data-level="warn"] {
+    color: var(--hud-warn);
+}
+
+.sim-chip[hidden] {
+    display: none;
+}
+
+.sim[data-mode="intro"] .sim-hud,
+.sim[data-mode="intro"] .sim-status,
+.sim[data-mode="intro"] .sim-readout,
+.sim[data-mode="intro"] .sim-chips,
+.sim[data-mode="docked"] .sim-readout,
+.sim[data-mode="docked"] .sim-chips,
+.sim[data-mode="error"] .sim-status,
+.sim[data-mode="error"] .sim-readout,
+.sim[data-mode="error"] .sim-chips {
+    visibility: hidden;
+}
+
+/* ---------- Overlays (instructions, pause, results, errors) ---------- */
+
+.sim-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    overflow: auto;
+    background: rgba(1, 3, 8, 0.66);
+}
+
+.sim-overlay[hidden] {
+    display: none;
+}
+
+/* After docking the card sits to one side, leaving the docked craft in view */
+#sim-result {
+    background: rgba(1, 3, 8, 0.25);
+}
+
+#sim-result[data-kind="docked"] {
+    place-items: center start;
+    padding-left: clamp(1rem, 4vw, 3rem);
+    background: linear-gradient(90deg, rgba(1, 3, 8, 0.55), rgba(1, 3, 8, 0) 60%);
+}
+
+#sim-result[data-kind="docked"] .sim-card {
+    margin: auto 0;
+}
+
+@media (max-width: 760px) {
+    #sim-result[data-kind="docked"] {
+        place-items: end center;
+        padding: 1rem;
+        background: linear-gradient(0deg, rgba(1, 3, 8, 0.6), rgba(1, 3, 8, 0) 70%);
+    }
+
+    #sim-result[data-kind="docked"] .sim-card {
+        margin: auto 0 0;
+    }
+}
+
+.sim-card {
+    width: min(760px, 100%);
+    margin: auto;
+    padding: 1.4rem 1.6rem;
+    border: 1px solid rgba(77, 255, 145, 0.28);
+    border-radius: 10px;
+    background: rgba(9, 13, 21, 0.95);
+    color: var(--panel-text);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.sim-card-small {
+    width: min(460px, 100%);
+}
+
+.sim-card-title {
+    margin: 0 0 0.6rem;
+    font: 700 1.05rem/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.12em;
+    color: var(--hud);
+}
+
+#sim-result[data-kind="collision"] .sim-card-title,
+#sim-result[data-kind="lost"] .sim-card-title,
+#sim-error .sim-card-title {
+    color: var(--hud-alert);
+}
+
+.sim-card h3 {
+    margin: 0.9rem 0 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--panel-muted);
+}
+
+.sim-card p {
+    margin: 0 0 0.6rem;
+}
+
+.sim-card-note {
+    color: var(--panel-muted);
+    font-size: 0.84rem;
+}
+
+.sim-intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1.6rem;
+}
+
+.sim-steps {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.sim-steps li {
+    margin-bottom: 0.25rem;
+}
+
+.sim-controls {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.sim-controls dt {
+    font-weight: 600;
+    color: #e8edf3;
+}
+
+.sim-controls dd {
+    margin: 0;
+}
+
+.sim-symbols {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sim-symbols li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.sim-symbols svg {
+    flex-shrink: 0;
+    width: 34px;
+    height: 20px;
+    fill: none;
+    stroke: var(--hud);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sim-symbols li:nth-child(3) svg {
+    stroke: var(--hud-soft);
+}
+
+.sim-stats {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.4rem 0 0.2rem;
+    font-size: 0.88rem;
+}
+
+.sim-stats div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid var(--panel-line);
+}
+
+.sim-stats dt {
+    color: var(--panel-muted);
+}
+
+.sim-stats dd {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    color: #eef3f8;
+}
+
+.sim-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.sim-btn {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid #34425a;
+    border-radius: 4px;
+    background: #121a28;
+    color: #e5ebf2;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sim-btn:hover {
+    border-color: var(--hud);
+}
+
+.sim-btn:focus-visible {
+    outline: 2px solid var(--hud);
+    outline-offset: 2px;
+}
+
+.sim-btn-primary {
+    border-color: var(--hud);
+    background: var(--hud);
+    color: #03130a;
+    font-weight: 700;
+}
+
+.sim-btn-primary:hover {
+    background: #8dffb8;
+}
+
+/* ---------- Instrument panel ---------- */
+
+.sim-dash {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(125px, 1fr)) auto minmax(120px, 1fr);
+    gap: 0.6rem 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    background: var(--panel);
+    color: var(--panel-text);
+}
+
+.sim-group h3 {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0 0 0.35rem;
+    font: 700 0.66rem/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--panel-muted);
+}
+
+.sim-group h3 span {
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+}
+
+.sim-group h3 b[data-state="ok"] {
+    color: var(--hud);
+}
+
+.sim-group h3 b[data-state="warn"] {
+    color: var(--hud-warn);
+}
+
+.sim-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+.sim-row span:first-child {
+    color: var(--panel-muted);
+}
+
+.sim-row span:last-child {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    color: #eef3f8;
+}
+
+.sim-row [data-state="ok"] {
+    color: var(--hud) !important;
+}
+
+.sim-row [data-state="warn"] {
+    color: var(--hud-warn) !important;
+}
+
+.sim-keys {
+    display: flex;
+    gap: 1rem;
+}
+
+.sim-pad {
+    display: grid;
+    grid-template-areas:
+        "label label label label"
+        ". up . fwd"
+        "left down right back";
+    grid-template-columns: repeat(4, 2.4rem);
+    gap: 0.25rem;
+}
+
+.sim-pad-label {
+    grid-area: label;
+    align-self: center;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--panel-muted);
+}
+
+.sim-key {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0;
+    height: 2.35rem;
+    padding: 0;
+    border: 1px solid #2c3647;
+    border-radius: 6px;
+    background: #121926;
+    color: var(--panel-text);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.sim-key b {
+    font: 700 0.85rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.sim-key small {
+    margin-top: 0.15rem;
+    font-size: 0.55rem;
+    color: var(--panel-muted);
+    white-space: nowrap;
+}
+
+.sim-key.fa {
+    border-color: rgba(77, 255, 145, 0.55);
+    box-shadow: inset 0 0 0 1px rgba(77, 255, 145, 0.25);
+}
+
+.sim-key.on {
+    border-color: var(--hud);
+    background: var(--hud);
+    color: #04120a;
+}
+
+.sim-key.on small {
+    color: #0b3a1d;
+}
+
+/* ---------- Smaller screens ---------- */
+
+@media (max-width: 1240px) {
+    .sim-dash {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .sim-rcs {
+        grid-column: span 3;
+    }
+}
+
+@media (max-width: 760px) {
+    .sim-section {
+        padding: 0.25rem 0.75rem 2rem;
+    }
+
+    .sim-toolbar-hint {
+        display: none;
+    }
+
+    .sim-view {
+        height: min(62vh, 560px);
+        min-height: 320px;
+    }
+
+    .sim-status {
+        top: 10px;
+    }
+
+    .sim-phase {
+        font-size: 0.78rem;
+    }
+
+    .sim-advice {
+        font-size: 0.76rem;
+    }
+
+    .sim-readout {
+        top: auto;
+        bottom: 40px;
+        transform: none;
+        padding: 0.3rem 0.45rem;
+    }
+
+    .sim-readout-left {
+        left: 10px;
+    }
+
+    .sim-readout-right {
+        right: 10px;
+    }
+
+    .sim-readout-value {
+        font-size: 1.15rem;
+    }
+
+    .sim-chips {
+        left: 10px;
+        bottom: 10px;
+    }
+
+    .sim-intro-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sim-card {
+        padding: 1.1rem 1.1rem;
+        font-size: 0.86rem;
+    }
+
+    .sim-dash {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0.7rem 0.8rem;
+    }
+
+    .sim-rcs {
+        grid-column: 1 / -1;
+        order: -1;
+    }
+
+    .sim-keys {
+        justify-content: space-between;
+    }
+
+    .sim-pad {
+        grid-template-columns: repeat(4, minmax(2.4rem, 3rem));
+    }
+
+    .sim-key {
+        height: 2.8rem;
+    }
+}

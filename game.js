@@ -1,4 +1,4 @@
-// KGOSS Station Builder (game.html): drag station modules into orbit and join their docking ports, then
+// Station Builder (game.html): drag station modules into orbit and join their docking ports, then
 // press Done to export the station as a PNG. The image is drawn from the build itself (module types,
 // positions, rotations and connections), never captured from the page, so no interface ends up in it.
 (function () {
@@ -18,11 +18,35 @@
     const C = {
         hull: '#dde3eb', shade: '#a9b3c1', line: '#475569', dark: '#334155',
         glass: '#7dd3fc', foil: '#d4893b', foilDark: '#a8642a', collar: '#94a3b8',
+        panel: '#f1f5f9', cell: '#1e3a8a', cellLine: '#60a5fa', stripe: '#93c5fd', tank: '#cbd5e1', cargo: '#e2b65c',
     };
+    const num = v => +v.toFixed(2);
     const rect = (x, y, w, h, fill, rx = 2) =>
         `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${C.line}" stroke-width="2"/>`;
     const circle = (cx, cy, r, fill, width = 2) =>
         `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${C.line}" stroke-width="${width}"/>`;
+    const lines = (d, stroke = C.shade, width = 3, opacity = 1) =>
+        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${width}"${opacity < 1 ? ` stroke-opacity="${opacity}"` : ''}/>`;
+
+    // Port kinds: pressurised docking ports join each other; equipment (solar arrays, radiators, antennas,
+    // the arm, truss ends) has a mounting foot (plug) that only fits a structural hardpoint (socket)
+    const dock = (x, y, dir) => ({ x, y, dir, kind: 'dock' });
+    const socket = (x, y, dir) => ({ x, y, dir, kind: 'socket' });
+    const plug = (x, y, dir) => ({ x, y, dir, kind: 'plug' });
+    const mates = (a, b) => (a === 'dock' ? b === 'dock' : a !== b && b !== 'dock');
+
+    // The fitting drawn on the box edge for a port: a docking collar or a small mounting bracket
+    function fitting(p) {
+        const across = p.dir % 180 === 0;
+        if (p.kind === 'dock') {
+            return across ? rect(p.dir === 0 ? p.x - 9 : p.x, p.y - 13, 9, 26, C.collar)
+                : rect(p.x - 13, p.dir === 90 ? p.y - 9 : p.y, 26, 9, C.collar);
+        }
+        return across ? rect(p.dir === 0 ? p.x - 7 : p.x, p.y - 7, 7, 14, C.dark, 1)
+            : rect(p.x - 7, p.dir === 90 ? p.y - 7 : p.y, 14, 7, C.dark, 1);
+    }
+    // A newer part: its body art plus a fitting for every port (unless the body draws that port itself)
+    const withFittings = (spec, body) => ({ ...spec, art: body + spec.ports.filter(p => !p.bare).map(fitting).join('') });
 
     // Each part is drawn around its centre (local units) inside a w × h box; ports sit on the box edge
     // and point outward (dir: 0 = right, 90 = down, 180 = left, 270 = up)
@@ -43,7 +67,7 @@
                 [-48, -14, 14, 48].map(x => circle(x, 0, 6, C.glass, 1.5)).join(''),
         },
         centrifuge: {
-            name: 'Centrifuge', short: 'Centrifuge', w: 200, h: 200,
+            name: 'Centrifuge Module', short: 'Centrifuge', w: 200, h: 200,
             ports: [{ x: -100, y: 0, dir: 180 }, { x: 100, y: 0, dir: 0 }],
             art: rect(-100, -9, 200, 18, C.shade) + rect(-100, -13, 9, 26, C.collar) + rect(91, -13, 9, 26, C.collar) +
                 `<path d="M -57 -57 L 57 57 M 57 -57 L -57 57" stroke="${C.shade}" stroke-width="7"/>` +
@@ -61,14 +85,91 @@
                 `<path d="M -60 -35 V 35 M 0 -35 V 35 M 60 -35 V 35" stroke="${C.foilDark}" stroke-width="6"/>` +
                 '<rect x="-84" y="-26" width="168" height="8" rx="4" fill="#ffffff" fill-opacity="0.2"/>',
         },
-        haven: {
-            name: 'Seraph SPC-1 "Haven"', short: 'Haven', w: 82, h: 72,
+        capsule: {
+            name: 'Capsule', short: 'Capsule', w: 82, h: 72,
             ports: [{ x: -41, y: 0, dir: 180 }],
             art: rect(-41, -13, 9, 26, C.collar) +
                 `<path d="M -32 -19 L 28 -36 L 28 36 L -32 19 Z" fill="${C.hull}" stroke="${C.line}" stroke-width="2" stroke-linejoin="round"/>` +
                 rect(28, -36, 13, 72, C.dark, 3) + circle(-6, -8, 4.5, C.glass, 1.5) + circle(-6, 8, 4.5, C.glass, 1.5),
         },
+        hub: withFittings({
+            name: 'Connecting Node', short: 'Junction', w: 180, h: 72,
+            ports: [dock(-90, 0, 180), dock(90, 0, 0), dock(-45, -36, 270), dock(45, -36, 270), dock(-45, 36, 90), dock(45, 36, 90)],
+        }, rect(-81, -27, 162, 54, C.hull, 14) + lines('M 0 -27 V 27') + circle(-45, 0, 10, C.shade) + circle(45, 0, 10, C.shade)),
+        hab: withFittings({
+            name: 'Habitation Module', short: 'Habitat', w: 196, h: 86,
+            ports: [dock(-98, 0, 180), dock(98, 0, 0), socket(0, -43, 270), socket(0, 43, 90)],
+        }, rect(-89, -39, 178, 78, C.hull, 36) + lines('M -46 -37 V 37 M 0 -39 V 39 M 46 -37 V 37') +
+            [-68, -23, 23, 68].map(x => circle(x, -13, 5, C.glass, 1.5)).join('') +
+            [-23, 23].map(x => circle(x, 13, 5, C.glass, 1.5)).join('')),
+        lab: withFittings({
+            name: 'Science Laboratory', short: 'Lab', w: 176, h: 66,
+            ports: [dock(-88, 0, 180), dock(88, 0, 0), socket(0, -33, 270), socket(0, 33, 90)],
+        }, rect(-79, -29, 158, 58, C.hull, 14) + lines('M -36 -29 V 29 M 36 -29 V 29') + rect(-70, 11, 140, 7, C.stripe, 1) +
+            [-58, -2, 54].map(x => rect(x, -17, 8, 8, C.glass, 2)).join('') + rect(14, -7, 14, 12, C.shade, 2)),
+        service: withFittings({
+            name: 'Service Module', short: 'Service', w: 190, h: 84,
+            ports: [dock(-95, 0, 180), dock(95, 0, 0), socket(10, -42, 270), socket(10, 42, 90)],
+        }, rect(-86, -24, 62, 48, C.hull, 10) + rect(-28, -36, 114, 72, C.hull, 12) +
+            lines('M -10 -36 V 36 M 30 -36 V 36 M 66 -36 V 36') + rect(-72, -30, 22, 6, C.dark, 1) + rect(-60, 24, 14, 6, C.dark, 1) +
+            [-42, 35].map(y => rect(58, y, 24, 7, C.dark, 1) + rect(61, y + 1.5, 6, 4, C.shade, 1) + rect(73, y + 1.5, 6, 4, C.shade, 1)).join('')),
+        dockport: withFittings({
+            name: 'Docking Port', short: 'Port', w: 50, h: 56,
+            ports: [dock(-25, 0, 180), { ...dock(25, 0, 0), bare: true }],
+        }, `<path d="M -17 -18 L 12 -24 L 12 24 L -17 18 Z" fill="${C.hull}" stroke="${C.line}" stroke-width="2" stroke-linejoin="round"/>` +
+            rect(12, -28, 8, 56, C.dark, 3) + rect(20, -12, 5, 24, C.collar, 1) +
+            `<path d="M 20 -27 L 25 -21 L 20 -17 Z M 20 27 L 25 21 L 20 17 Z" fill="${C.shade}" stroke="${C.line}" stroke-width="1.5" stroke-linejoin="round"/>`),
+        proptank: withFittings({
+            name: 'Propellant Tank', short: 'Propellant', w: 170, h: 92,
+            ports: [dock(-85, 0, 180), dock(85, 0, 0)],
+        }, rect(-76, -7, 152, 14, C.shade, 2) +
+            [-44, 10].map(y => rect(-64, y, 128, 34, C.tank, 17) + `<rect x="-48" y="${y + 6}" width="96" height="5" rx="2.5" fill="#ffffff" fill-opacity="0.45"/>`).join('') +
+            lines('M -28 -44 V -10 M 28 -44 V -10 M -28 10 V 44 M 28 10 V 44', '#94a3b8', 3) +
+            [-44, 36].map(x => rect(x, -10, 8, 3, C.dark, 1) + rect(x, 7, 8, 3, C.dark, 1)).join('')),
+        cargo: withFittings({
+            name: 'Cargo Module', short: 'Cargo', w: 116, h: 72,
+            ports: [dock(-58, 0, 180)],
+        }, rect(-49, -34, 92, 68, C.hull, 10) + rect(-49, -6, 92, 12, C.cargo, 0) +
+            lines('M -22 -34 V -6 M 6 -34 V -6 M -22 6 V 34 M 6 6 V 34') + rect(41, -30, 9, 60, C.dark, 3)),
+        truss: withFittings({
+            name: 'Truss Segment', short: 'Truss', w: 240, h: 30,
+            ports: [plug(-120, 0, 180), socket(120, 0, 0), socket(-60, -15, 270), socket(60, -15, 270), socket(-60, 15, 90), socket(60, 15, 90)],
+        }, lines(Array.from({ length: 12 }, (_, i) => `${i ? 'L' : 'M'} ${-114 + i * 19} ${i % 2 ? -9 : 9} L ${-95 + i * 19} ${i % 2 ? 9 : -9}`).join(' '), '#8b97a8', 2.5) +
+            rect(-114, -13, 228, 4, C.shade, 1) + rect(-114, 9, 228, 4, C.shade, 1) + rect(-114, -15, 5, 30, C.dark, 1) + rect(109, -15, 5, 30, C.dark, 1)),
+        solar: withFittings({
+            name: 'Solar Array', short: 'Solar', w: 72, h: 236, iconRot: 90,
+            ports: [plug(0, 118, 90)],
+        }, rect(-3, -112, 6, 224, C.shade, 1) + rect(-34, -110, 29, 200, C.cell, 2) + rect(5, -110, 29, 200, C.cell, 2) +
+            lines(Array.from({ length: 13 }, (_, i) => `M -34 ${-96 + i * 14} H -5 M 5 ${-96 + i * 14} H 34`).join(' ') + ' M -19.5 -110 V 90 M 19.5 -110 V 90', C.cellLine, 1, 0.55) +
+            rect(-36, -118, 72, 7, C.shade, 1) + rect(-9, 92, 18, 10, C.dark, 2)),
+        radiator: withFittings({
+            name: 'Radiator Panel', short: 'Radiator', w: 100, h: 160,
+            ports: [plug(0, 80, 90)],
+        }, rect(-3, 40, 6, 40, C.shade, 1) + rect(-10, 56, 20, 9, C.dark, 2) +
+            [-78, -36, 6].map(y => rect(-46, y, 92, 38, C.panel, 2) +
+                lines([1, 2, 3, 4, 5].map(k => `M -40 ${num(y + k * 6.3)} H 40`).join(' '), '#94a3b8', 1)).join('') +
+            rect(-16, -40, 32, 4, C.dark, 1) + rect(-16, 2, 32, 4, C.dark, 1)),
+        dish: withFittings({
+            name: 'Communications Dish', short: 'Dish', w: 84, h: 96,
+            ports: [plug(0, 48, 90)],
+        }, rect(-3, 0, 6, 44, C.shade, 1) + circle(0, 0, 7, C.shade) + lines('M -34 -20 L 0 -42 M 34 -20 L 0 -42', C.shade, 2) +
+            `<path d="M -40 -16 Q 0 22 40 -16 L 34 -20 Q 0 12 -34 -20 Z" fill="${C.hull}" stroke="${C.line}" stroke-width="2" stroke-linejoin="round"/>` +
+            rect(-4, -48, 8, 8, C.dark, 1)),
+        arm: withFittings({
+            name: 'Robotic Arm', short: 'Arm', w: 110, h: 130,
+            ports: [plug(0, 65, 90)],
+        }, rect(-14, 51, 28, 9, C.dark, 2) +
+            `<path d="M 0 46 L -34 -4 L 30 -40" fill="none" stroke="${C.line}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>` +
+            `<path d="M 0 46 L -34 -4 L 30 -40" fill="none" stroke="${C.hull}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>` +
+            `<g transform="translate(43 -47) rotate(-30)">${rect(-5, -11, 12, 22, C.dark, 3)}${rect(7, -11, 6, 6, C.shade, 1)}${rect(7, 5, 6, 6, C.shade, 1)}</g>` +
+            circle(0, 46, 8, C.shade) + circle(-34, -4, 8, C.shade) + circle(30, -40, 7, C.shade)),
     };
+    // The palette's categories, in display order
+    const GROUPS = [
+        { id: 'core', name: 'Core', label: 'Core modules', types: ['node', 'hub', 'cabin', 'hab', 'lab', 'service', 'dockport'] },
+        { id: 'utility', name: 'Utilities', label: 'Utilities', types: ['tank', 'proptank', 'cargo', 'truss', 'solar', 'radiator', 'dish'] },
+        { id: 'special', name: 'Special', label: 'Special modules', types: ['centrifuge', 'arm', 'capsule'] },
+    ];
 
     /* ---------- Geometry ---------- */
 
@@ -82,7 +183,7 @@
     function portsOf(m) {
         return PARTS[m.type].ports.map((p, i) => {
             const [px, py] = rotatePoint(p.x, p.y, m.rot);
-            return { key: `${m.id}:${i}`, id: m.id, x: m.x + px, y: m.y + py, dir: (p.dir + m.rot) % 360 };
+            return { key: `${m.id}:${i}`, id: m.id, x: m.x + px, y: m.y + py, dir: (p.dir + m.rot) % 360, kind: p.kind || 'dock' };
         });
     }
 
@@ -110,15 +211,18 @@
         return m;
     }
 
-    // Docked pairs: ports of different modules at the same point, facing each other
+    // Ports that can join: facing each other, and of kinds that fit together
+    const pairs = (a, b) => opposite(a.dir, b.dir) && mates(a.kind, b.kind);
+
+    // Joined pairs: matching ports of different modules at the same point
     function connections(list) {
         const ports = list.flatMap(portsOf);
         const links = [], used = new Set();
         for (let i = 0; i < ports.length; i++) {
             for (let j = i + 1; j < ports.length; j++) {
                 const a = ports[i], b = ports[j];
-                if (a.id === b.id || !opposite(a.dir, b.dir) || Math.hypot(a.x - b.x, a.y - b.y) > 0.5) continue;
-                links.push({ x: a.x, y: a.y, dir: a.dir });
+                if (a.id === b.id || !pairs(a, b) || Math.hypot(a.x - b.x, a.y - b.y) > 0.5) continue;
+                links.push({ x: a.x, y: a.y, dir: a.dir, kind: a.kind });
                 used.add(a.key);
                 used.add(b.key);
             }
@@ -134,7 +238,7 @@
         others.forEach(o => portsOf(o).forEach(b => {
             if (used.has(b.key)) return;
             mine.forEach(a => {
-                if (!opposite(a.dir, b.dir)) return;
+                if (!pairs(a, b)) return;
                 const d = Math.hypot(b.x - a.x, b.y - a.y);
                 if (d > SNAP || (best && d >= best.d)) return;
                 const pose = { ...m, x: m.x + b.x - a.x, y: m.y + b.y - a.y };
@@ -154,7 +258,7 @@
                 if (used.has(b.key)) continue;
                 for (const rot of [0, 90, 180, 270]) {
                     for (const p of part.ports) {
-                        if (!opposite((p.dir + rot) % 360, b.dir)) continue;
+                        if (!pairs({ dir: (p.dir + rot) % 360, kind: p.kind || 'dock' }, b)) continue;
                         const [px, py] = rotatePoint(p.x, p.y, rot);
                         const pose = { id: nextId, type, rot, x: b.x - px, y: b.y - py };
                         if (fits(pose, modules)) return pose;
@@ -175,10 +279,11 @@
 
     /* ---------- Drawing (shared by the canvas and the export) ---------- */
 
-    const num = v => +v.toFixed(2);
     const artOf = m => `<g transform="translate(${num(m.x)} ${num(m.y)}) rotate(${m.rot})">${PARTS[m.type].art}</g>`;
+    // A joint: a docking collar between pressurised ports, a clamp where equipment is mounted
     const collarOf = l =>
-        `<g transform="translate(${num(l.x)} ${num(l.y)}) rotate(${l.dir})">${rect(-5, -17, 10, 34, C.collar)}</g>`;
+        `<g transform="translate(${num(l.x)} ${num(l.y)}) rotate(${l.dir})">` +
+        `${l.kind === 'dock' ? rect(-5, -17, 10, 34, C.collar) : rect(-4, -10, 8, 20, C.dark, 1)}</g>`;
 
     // The same sky every time: seeded, so the canvas and each export match
     function stars(x, y, w, h) {
@@ -213,7 +318,8 @@
 
     const $ = id => document.getElementById(id);
     const canvas = $('builder-canvas'), stage = $('builder-stage'), palette = $('builder-palette');
-    const trash = $('builder-trash'), selection = $('builder-selection'), hint = $('builder-hint');
+    const trash = $('builder-trash'), selection = $('builder-selection'), selectionName = $('builder-selection-name');
+    const hint = $('builder-hint');
     const status = $('builder-status'), doneButton = $('builder-done'), newButton = $('builder-new');
     const result = $('builder-result'), preview = $('builder-preview'), download = $('builder-download');
     const shareButton = $('builder-share'), shareStatus = $('builder-share-status'), sizeNote = $('builder-result-size');
@@ -225,12 +331,47 @@
     const portsLayer = canvas.querySelector('.gm-ports');
 
     const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-    palette.innerHTML = Object.entries(PARTS).map(([type, p]) => {
-        const box = `${-p.w / 2 - 4} ${-p.h / 2 - 4} ${p.w + 8} ${p.h + 8}`;
-        return `<button type="button" class="builder-part" data-type="${type}" aria-label="Add ${esc(p.name)}">` +
-            `<svg viewBox="${box}" aria-hidden="true">${p.art}</svg>` +
+    // Palette: one tab per category, each showing its parts (tall parts are drawn lying down in the icon)
+    function partButton(type) {
+        const p = PARTS[type];
+        const [w, h] = p.iconRot ? [p.h, p.w] : [p.w, p.h];
+        return `<button type="button" class="builder-part" data-type="${type}" aria-label="Add ${esc(p.name)}" title="${esc(p.name)}">` +
+            `<svg viewBox="${-w / 2 - 4} ${-h / 2 - 4} ${w + 8} ${h + 8}" aria-hidden="true">` +
+            `${p.iconRot ? `<g transform="rotate(${p.iconRot})">${p.art}</g>` : p.art}</svg>` +
             `<span class="builder-part-name">${esc(p.name)}</span><span class="builder-part-short">${esc(p.short)}</span></button>`;
-    }).join('');
+    }
+    palette.innerHTML =
+        '<div class="builder-tabs" role="tablist" aria-label="Module categories">' +
+        GROUPS.map((g, i) => `<button type="button" class="builder-tab" role="tab" id="builder-tab-${g.id}" data-group="${g.id}" ` +
+            `aria-controls="builder-group-${g.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(g.name)}</button>`).join('') +
+        '</div>' +
+        GROUPS.map((g, i) => `<div class="builder-group" id="builder-group-${g.id}" role="tabpanel" aria-label="${esc(g.label)}"` +
+            `${i ? ' hidden' : ''}>${g.types.map(partButton).join('')}</div>`).join('');
+    const tabs = [...palette.querySelectorAll('.builder-tab')];
+
+    function showGroup(tab, focus) {
+        tabs.forEach(t => {
+            const on = t === tab;
+            t.setAttribute('aria-selected', on);
+            t.tabIndex = on ? 0 : -1;
+            $(t.getAttribute('aria-controls')).hidden = !on;
+        });
+        if (focus) tab.focus();
+    }
+    palette.querySelector('.builder-tabs').addEventListener('click', e => {
+        const tab = e.target.closest('.builder-tab');
+        if (tab) showGroup(tab, false);
+    });
+    // Arrow keys move between the tabs (and never reach the module nudging below)
+    palette.querySelector('.builder-tabs').addEventListener('keydown', e => {
+        const i = tabs.indexOf(e.target);
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (i < 0 || (!step && e.key !== 'Home' && e.key !== 'End')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + step + tabs.length) % tabs.length;
+        showGroup(tabs[next], true);
+    });
 
     const STALE_NOTE = 'Build changed. Press Done to export a fresh image.';
 
@@ -263,10 +404,17 @@
         }).join('');
         const { links, used } = connections(list);
         linksLayer.innerHTML = links.map(collarOf).join('');
-        portsLayer.innerHTML = list.flatMap(portsOf).filter(p => !used.has(p.key)).map(p =>
-            `<circle class="gm-port${drag && drag.target === p.key ? ' target' : ''}" cx="${num(p.x)}" cy="${num(p.y)}" r="6"/>`).join('');
+        // Free ports: circles for docking ports, small squares for equipment mounts
+        portsLayer.innerHTML = list.flatMap(portsOf).filter(p => !used.has(p.key)).map(p => {
+            const target = drag && drag.target === p.key ? ' target' : '';
+            return p.kind === 'dock'
+                ? `<circle class="gm-port${target}" cx="${num(p.x)}" cy="${num(p.y)}" r="6"/>`
+                : `<rect class="gm-port gm-mount${target}" x="${num(p.x - 4.5)}" y="${num(p.y - 4.5)}" width="9" height="9" rx="1.5"/>`;
+        }).join('');
         trash.classList.toggle('armed', !!(drag && drag.overTrash));
         selection.hidden = !selectedId || !!drag;
+        const chosen = selectedId && modules.find(m => m.id === selectedId);
+        selectionName.textContent = chosen ? PARTS[chosen.type].name : '';
         if (focused && selectedId) {
             const el = modulesLayer.querySelector(`[data-id="${selectedId}"]`);
             if (el) el.focus({ preventScroll: true });
@@ -283,7 +431,7 @@
             hint.textContent = 'Drag a module into orbit to start.';
         } else {
             const links = connections(modules).links.length;
-            hint.textContent = `${count} module${count === 1 ? '' : 's'}, ${links} docking connection${links === 1 ? '' : 's'}.`;
+            hint.textContent = `${count} module${count === 1 ? '' : 's'}, ${links} connection${links === 1 ? '' : 's'}.`;
         }
     }
 
@@ -625,8 +773,8 @@
     shareButton.addEventListener('click', async () => {
         if (!exported || sharing) return;
         const file = new File([exported.blob], FILE_NAME, { type: 'image/png' });
-        const title = 'My KGOSS station';
-        const text = 'A station I built in the WSA KGOSS Station Builder.';
+        const title = 'My space station';
+        const text = 'A station I built in the WSA Station Builder.';
         sharing = true;
         try {
             if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {

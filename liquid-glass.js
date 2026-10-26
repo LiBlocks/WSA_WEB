@@ -712,7 +712,7 @@
     // between RIM_LIGHT.fade side weights, so it follows the tilt and tapers off round the corners.
     // Chromium draws it as an image on the pane's ::after, faded per side by a mask (.lg-rim in
     // liquid-glass.css): inside its backdrop filter it would cost most of the frame rate.
-    const RIM_LIGHT = { at: 2, split: 0.55, width: 0.6, fade: [0.6, 0.95] };    // px, except fade
+    const RIM_LIGHT = { at: 2, split: 0.55, width: 0.7, fade: [0.6, 0.95] };    // px, except fade
     const RIM_RANGE = 8;        // px of edge distance the map's blue channel covers
     const RIM_STEPS = 64;
     const rimStrength = () => parseFloat(getComputedStyle(root).getPropertyValue('--lg-rim-light')) || 0.35;

@@ -233,7 +233,7 @@
     --lg-fill-dialog: 0.84;
     --lg-fill-nested: 0.08;
     --lg-soften: 1.2px;       /* glass softens what lies behind it a touch */
-    --lg-rim-light: 0.3;      /* the faint split line of light along the rim (liquid-glass.js) */
+    --lg-rim-light: 0.42;      /* the faint split line of light along the rim (liquid-glass.js) */
     --lg-rim-a: 0.4;
     --lg-hi: 255 255 255;
     --lg-lo: 30 41 59;
@@ -282,7 +282,7 @@
     --lg-fill-nested: 0.03;
     --lg-soften: 1.2px;
     --lg-rim-a: 0.14;
-    --lg-rim-light: 0.28;
+    --lg-rim-light: 0.4;
     --lg-hi: 255 255 255;
     --lg-lo: 2 5 14;
     --lg-edge-hi: 0.55;

@@ -125,7 +125,10 @@ function onScroll() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    // Pages without their own nav entry light up the section they belong to
+    const SECTION = { 'docking-simulator.html': 'game.html' };
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const currentPage = SECTION[page] || page;
 
     document.querySelectorAll('.nav-menu a').forEach(link => {
         link.classList.toggle('active', link.getAttribute('href') === currentPage);

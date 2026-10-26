@@ -1,5 +1,61 @@
-/* KGOSS Station Builder (game.html, game.js). The assembly area is always deep space, in both themes,
+/* Station Builder (game.html, game.js). The assembly area is always deep space, in both themes,
    matching the exported image; the controls around it follow the site theme. */
+
+/* Launch card for the Docking Simulator, in the page head */
+.game-launch {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.1rem;
+    max-width: 800px;
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.game-launch:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.game-launch-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.game-launch-text {
+    display: grid;
+    gap: 0.15rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.game-launch-kicker {
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.game-launch-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.game-launch-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.game-launch-go {
+    flex-shrink: 0;
+}
 
 .builder {
     display: grid;
@@ -32,14 +88,61 @@
 
 .builder-body {
     display: grid;
-    grid-template-columns: 190px 1fr;
+    grid-template-columns: 200px 1fr;
     gap: 1rem;
     align-items: start;
 }
 
 .builder-palette {
     display: grid;
+    gap: 0.6rem;
+    align-content: start;
+}
+
+.builder-tabs {
+    display: flex;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+}
+
+.builder-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 0.35rem 0.2rem;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.builder-tab:hover {
+    color: var(--text-primary);
+}
+
+.builder-tab[aria-selected="true"] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.builder-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.builder-group {
+    display: grid;
     gap: 0.5rem;
+}
+
+.builder-group[hidden] {
+    display: none;
 }
 
 .builder-part {
@@ -147,6 +250,28 @@
 
 .gm-port.target {
     fill: #7dd3fc;
+}
+
+/* Equipment mounts (hardpoints and mounting feet) */
+.gm-port.gm-mount {
+    stroke: #fbbf24;
+}
+
+.gm-port.gm-mount.target {
+    fill: #fbbf24;
+}
+
+.builder-selection-name {
+    align-self: center;
+    max-width: 14rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(11, 18, 32, 0.85);
+    color: #e5e7eb;
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .builder-selection {
@@ -261,8 +386,8 @@
         grid-template-columns: 1fr;
     }
 
-    .builder-palette {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+    .builder-group {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0.35rem;
     }
 
@@ -293,6 +418,17 @@
 
     .builder-result {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .game-launch {
+        flex-wrap: wrap;
+    }
+
+    .game-launch-go {
+        width: 100%;
+        text-align: center;
     }
 }
 

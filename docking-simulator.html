@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docking Simulator | Woody Space Agency</title>
+    <script src="page-init.js?v=4"></script>
+    <link rel="stylesheet" href="intro.css?v=8">
+    <script src="intro.js?v=8"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="stylesheet" href="docking-simulator.css?v=1">
+    <link rel="stylesheet" href="liquid-glass.css?v=17">
+    <script src="liquid-glass.js?v=19"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="game.html">Game</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head sim-head" style="padding: 2.25rem 2rem 1.25rem;">
+        <div class="container">
+            <p class="sim-back"><a href="game.html">&larr; Station Builder</a></p>
+            <h1 style="margin-bottom: 0.4rem;">Docking Simulator</h1>
+            <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 800px;">
+                Fly a spacecraft to an orbital station in first person and dock with its active port. A simplified local relative-motion simulator for practising the approach, not a full orbital rendezvous model.
+            </p>
+        </div>
+    </section>
+
+    <section class="sim-section">
+        <div class="sim" id="sim" data-mode="intro">
+            <div class="sim-toolbar">
+                <p class="sim-toolbar-hint">Keyboard: translate <kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd><kbd>H</kbd><kbd>N</kbd> · rotate <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>Q</kbd><kbd>E</kbd></p>
+                <div class="sim-actions">
+                    <button type="button" class="btn btn-primary btn-small" id="sim-pause">Start</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="sim-restart">Restart</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="sim-assist" aria-pressed="true">Flight Assist: On</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="sim-fullscreen">Full screen</button>
+                </div>
+            </div>
+
+            <div class="sim-view" id="sim-view" tabindex="0" role="application" aria-label="Docking camera view. Use the keyboard controls listed in the instructions.">
+                <canvas class="sim-canvas" id="sim-canvas"></canvas>
+                <svg class="sim-hud" id="sim-hud" aria-hidden="true" focusable="false"></svg>
+                <div class="sim-status" aria-hidden="true">
+                    <div class="sim-phase" id="sim-phase" data-level="info">APPROACH</div>
+                    <div class="sim-advice" id="sim-advice" data-level="info"></div>
+                </div>
+                <div class="sim-readout sim-readout-left" aria-hidden="true">
+                    <span class="sim-readout-label">RANGE</span>
+                    <span class="sim-readout-value" id="hud-range">0.0</span>
+                    <span class="sim-readout-unit">m</span>
+                </div>
+                <div class="sim-readout sim-readout-right" aria-hidden="true" data-level="ok">
+                    <span class="sim-readout-label">CLOSING</span>
+                    <span class="sim-readout-value" id="hud-closing">0.00</span>
+                    <span class="sim-readout-unit">m/s</span>
+                    <span class="sim-readout-limit" id="hud-limit"></span>
+                </div>
+                <div class="sim-chips" aria-hidden="true">
+                    <span class="sim-chip" id="hud-assist" data-level="ok">FLT ASSIST ON</span>
+                    <span class="sim-chip" id="hud-fine" hidden>FINE CONTROL</span>
+                </div>
+
+                <div class="sim-overlay" id="sim-loading">
+                    <div class="sim-card sim-card-small"><p class="sim-card-text">Loading the 3D view…</p></div>
+                </div>
+
+                <div class="sim-overlay" id="sim-intro" hidden>
+                    <div class="sim-card" role="dialog" aria-labelledby="sim-intro-title">
+                        <h2 class="sim-card-title" id="sim-intro-title">Dock with the station</h2>
+                        <p class="sim-card-lead">Your spacecraft starts about 180 m from the station, slightly off the approach axis and drifting. Fly to the active docking port (green lights, marked <strong>PORT</strong> on the HUD) and dock gently.</p>
+                        <div class="sim-intro-grid">
+                            <div>
+                                <h3>Procedure</h3>
+                                <ol class="sim-steps">
+                                    <li>Find the port reticle; read range and closing speed.</li>
+                                    <li>Cancel unwanted drift.</li>
+                                    <li>Line up: put the centre marker on the axis crosshairs and level the roll.</li>
+                                    <li>Translate until the port reticle sits on the crosshairs.</li>
+                                    <li>Close slowly, staying inside the corridor gates.</li>
+                                    <li>Keep the prograde marker on the port and slow down as you get near.</li>
+                                    <li>Touch at 0.2 m/s or less, within 0.25 m and 5°, rotating under 0.5°/s.</li>
+                                </ol>
+                            </div>
+                            <div>
+                                <h3>Controls</h3>
+                                <dl class="sim-controls">
+                                    <div><dt>Translate</dt><dd><kbd>I</kbd> up · <kbd>K</kbd> down · <kbd>J</kbd> left · <kbd>L</kbd> right · <kbd>H</kbd> forward · <kbd>N</kbd> back</dd></div>
+                                    <div><dt>Rotate</dt><dd><kbd>W</kbd> pitch up · <kbd>S</kbd> pitch down · <kbd>A</kbd> yaw left · <kbd>D</kbd> yaw right · <kbd>Q</kbd> roll left · <kbd>E</kbd> roll right</dd></div>
+                                    <div><dt>Also</dt><dd>Hold <kbd>Shift</kbd> for fine thrust · <kbd>F</kbd> Flight Assist · <kbd>P</kbd> or <kbd>Esc</kbd> pause</dd></div>
+                                </dl>
+                                <h3>HUD symbols</h3>
+                                <ul class="sim-symbols">
+                                    <li><svg viewBox="-20 -12 40 24" aria-hidden="true"><path d="M-17 0H-8L-4 4L0 0L4 4L8 0H17"/></svg>Centre marker: where your docking port points</li>
+                                    <li><svg viewBox="-12 -12 24 24" aria-hidden="true"><path d="M-9 -4V-9H-4M4 -9H9V-4M9 4V9H4M-4 9H-9V4"/></svg>Port reticle: the active docking port</li>
+                                    <li><svg viewBox="-20 -12 40 24" aria-hidden="true"><path d="M-16 0H-8M8 0H16M0 -6V-10" /><circle r="5"/></svg>Prograde: where you are actually moving</li>
+                                    <li><svg viewBox="-14 -12 28 24" aria-hidden="true"><path d="M-13 0H-5M5 0H13M0 -11V-4M0 4V11" stroke-dasharray="3 2"/></svg>Axis crosshairs: the ideal docking axis</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="sim-card-note">Flight Assist is on: it gently damps rotation and sideways drift, but you still steer, line up and control the closing speed. This is a simplified local relative-motion docking simulator, not a full orbital rendezvous simulation or a validated spacecraft model.</p>
+                        <div class="sim-card-actions">
+                            <button type="button" class="sim-btn sim-btn-primary" id="sim-start">Start</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sim-overlay" id="sim-paused" hidden>
+                    <div class="sim-card sim-card-small" role="dialog" aria-labelledby="sim-paused-title">
+                        <h2 class="sim-card-title" id="sim-paused-title">Paused</h2>
+                        <p class="sim-card-text"></p>
+                        <div class="sim-card-actions">
+                            <button type="button" class="sim-btn sim-btn-primary" data-action="resume">Resume</button>
+                            <button type="button" class="sim-btn" data-action="restart">Restart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sim-overlay" id="sim-result" hidden>
+                    <div class="sim-card sim-card-small" role="dialog" aria-labelledby="sim-result-title">
+                        <h2 class="sim-card-title" id="sim-result-title"></h2>
+                        <p class="sim-card-text"></p>
+                        <dl class="sim-stats"></dl>
+                        <div class="sim-card-actions">
+                            <button type="button" class="sim-btn sim-btn-primary" data-action="restart">Fly again</button>
+                            <a class="sim-btn" href="game.html">Station Builder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sim-overlay" id="sim-error" hidden>
+                    <div class="sim-card sim-card-small" role="alert">
+                        <h2 class="sim-card-title"></h2>
+                        <p class="sim-card-text"></p>
+                        <div class="sim-card-actions"><a class="sim-btn" href="game.html">Back to the Station Builder</a></div>
+                    </div>
+                </div>
+                <noscript>
+                    <div class="sim-overlay"><div class="sim-card sim-card-small"><p class="sim-card-text">The Docking Simulator needs JavaScript to run.</p></div></div>
+                </noscript>
+            </div>
+
+            <div class="sim-dash" id="sim-dash" aria-label="Instrument panel">
+                <div class="sim-group">
+                    <h3>Position <span>m</span></h3>
+                    <div class="sim-row"><span>Lateral X</span><span data-t="x">+0.00</span></div>
+                    <div class="sim-row"><span>Vertical Y</span><span data-t="y">+0.00</span></div>
+                    <div class="sim-row"><span>Axial Z</span><span data-t="z">0.0</span></div>
+                    <div class="sim-row"><span>Range</span><span data-t="range">0.0</span></div>
+                </div>
+                <div class="sim-group">
+                    <h3>Rel. velocity <span>m/s</span></h3>
+                    <div class="sim-row"><span>Vx</span><span data-t="vx">+0.000</span></div>
+                    <div class="sim-row"><span>Vy</span><span data-t="vy">+0.000</span></div>
+                    <div class="sim-row"><span>Vz</span><span data-t="vz">+0.000</span></div>
+                    <div class="sim-row"><span>Closing</span><span data-t="closing">+0.00</span></div>
+                </div>
+                <div class="sim-group">
+                    <h3>Attitude error <span>°</span></h3>
+                    <div class="sim-row"><span>Pitch</span><span data-t="pitch">+0.0</span></div>
+                    <div class="sim-row"><span>Yaw</span><span data-t="yaw">+0.0</span></div>
+                    <div class="sim-row"><span>Roll</span><span data-t="roll">+0.0</span></div>
+                </div>
+                <div class="sim-group">
+                    <h3>Rates <span>°/s</span></h3>
+                    <div class="sim-row"><span>Pitch</span><span data-t="rp">+0.00</span></div>
+                    <div class="sim-row"><span>Yaw</span><span data-t="ry">+0.00</span></div>
+                    <div class="sim-row"><span>Roll</span><span data-t="rr">+0.00</span></div>
+                </div>
+                <div class="sim-group sim-rcs">
+                    <h3>RCS <span>assist <b data-t="assist">ON</b> · thrust <b data-t="fine">FULL</b></span></h3>
+                    <div class="sim-keys">
+                        <div class="sim-pad" aria-label="Translation">
+                            <span class="sim-pad-label">Translate</span>
+                            <button type="button" class="sim-key" data-key="i" tabindex="-1" aria-label="Translate up (I)" style="grid-area: up"><b>I</b><small>up</small></button>
+                            <button type="button" class="sim-key" data-key="j" tabindex="-1" aria-label="Translate left (J)" style="grid-area: left"><b>J</b><small>left</small></button>
+                            <button type="button" class="sim-key" data-key="k" tabindex="-1" aria-label="Translate down (K)" style="grid-area: down"><b>K</b><small>down</small></button>
+                            <button type="button" class="sim-key" data-key="l" tabindex="-1" aria-label="Translate right (L)" style="grid-area: right"><b>L</b><small>right</small></button>
+                            <button type="button" class="sim-key" data-key="h" tabindex="-1" aria-label="Translate forward (H)" style="grid-area: fwd"><b>H</b><small>fwd</small></button>
+                            <button type="button" class="sim-key" data-key="n" tabindex="-1" aria-label="Translate back (N)" style="grid-area: back"><b>N</b><small>back</small></button>
+                        </div>
+                        <div class="sim-pad" aria-label="Rotation">
+                            <span class="sim-pad-label">Rotate</span>
+                            <button type="button" class="sim-key" data-key="w" tabindex="-1" aria-label="Pitch up (W)" style="grid-area: up"><b>W</b><small>pitch ↑</small></button>
+                            <button type="button" class="sim-key" data-key="a" tabindex="-1" aria-label="Yaw left (A)" style="grid-area: left"><b>A</b><small>yaw ←</small></button>
+                            <button type="button" class="sim-key" data-key="s" tabindex="-1" aria-label="Pitch down (S)" style="grid-area: down"><b>S</b><small>pitch ↓</small></button>
+                            <button type="button" class="sim-key" data-key="d" tabindex="-1" aria-label="Yaw right (D)" style="grid-area: right"><b>D</b><small>yaw →</small></button>
+                            <button type="button" class="sim-key" data-key="q" tabindex="-1" aria-label="Roll left (Q)" style="grid-area: fwd"><b>Q</b><small>roll ↺</small></button>
+                            <button type="button" class="sim-key" data-key="e" tabindex="-1" aria-label="Roll right (E)" style="grid-area: back"><b>E</b><small>roll ↻</small></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="sim-group">
+                    <h3>Flight</h3>
+                    <div class="sim-row"><span>Time</span><span data-t="time">0:00</span></div>
+                    <div class="sim-row"><span>RCS Δv</span><span data-t="dv">0.00</span></div>
+                    <div class="sim-row"><span>Failed contacts</span><span data-t="failed">0</span></div>
+                </div>
+            </div>
+            <p class="visually-hidden" id="sim-live" role="status" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=5"></script>
+    <script src="navigation.js?v=6"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+    <script type="module" src="docking/main.js?v=1"></script>
+    <script>
+        // If the simulator's module never starts (a very old browser, a failed download), say so
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var loading = document.getElementById('sim-loading'), error = document.getElementById('sim-error');
+                if (!loading || loading.hidden || !error.hidden) return;
+                loading.hidden = true;
+                error.hidden = false;
+                error.querySelector('.sim-card-title').textContent = 'The simulator could not start';
+                error.querySelector('.sim-card-text').textContent = 'Its scripts did not load or are not supported by this browser. Reload the page, or try an up-to-date browser.';
+            }, 15000);
+        });
+    </script>
+</body>
+</html>

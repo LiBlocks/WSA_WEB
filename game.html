@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KGOSS Station Builder | Woody Space Agency</title>
-    <script src="page-init.js?v=3"></script>
+    <title>Station Builder | Woody Space Agency</title>
+    <script src="page-init.js?v=4"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=13">
-    <link rel="stylesheet" href="game.css?v=2">
-    <link rel="stylesheet" href="liquid-glass.css?v=16">
-    <script src="liquid-glass.js?v=18"></script>
+    <link rel="stylesheet" href="game.css?v=3">
+    <link rel="stylesheet" href="liquid-glass.css?v=17">
+    <script src="liquid-glass.js?v=19"></script>
     <link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
@@ -43,10 +43,22 @@
 
     <section class="page-head" style="padding: 3rem 2rem 2rem;">
         <div class="container">
-            <h1 style="margin-bottom: 0.5rem;">KGOSS Station Builder</h1>
+            <h1 style="margin-bottom: 0.5rem;">Station Builder</h1>
             <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 800px;">
-                Assemble your own version of WSA's orbital station. Drag modules into orbit, join their docking ports, then press Done to save a picture of your build.
+                Assemble your own orbital station. Drag modules into orbit, join their docking ports, mount solar arrays and other equipment on their hardpoints, then press Done to save a picture of your build.
             </p>
+            <a class="program-card game-launch" href="docking-simulator.html">
+                <svg class="game-launch-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                    <circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="6"/>
+                    <path d="M24 3v8M24 37v8M3 24h8M37 24h8M12 12l4 4M36 12l-4 4M12 36l4-4M36 36l-4-4"/>
+                </svg>
+                <span class="game-launch-text">
+                    <span class="game-launch-kicker">Also try</span>
+                    <span class="game-launch-title">Docking Simulator</span>
+                    <span class="game-launch-desc">Fly a spacecraft to the station in first person and dock it gently with the active port.</span>
+                </span>
+                <span class="btn btn-primary btn-small game-launch-go">Launch simulator</span>
+            </a>
         </div>
     </section>
 
@@ -65,6 +77,7 @@
                     <div class="builder-stage" id="builder-stage">
                         <svg class="builder-canvas" id="builder-canvas" viewBox="0 0 1000 700" role="application" aria-label="Station assembly area"></svg>
                         <div class="builder-selection" id="builder-selection" hidden>
+                            <span class="builder-selection-name" id="builder-selection-name"></span>
                             <button type="button" class="builder-tool" id="builder-rotate">Rotate</button>
                             <button type="button" class="builder-tool" id="builder-remove">Remove</button>
                         </div>
@@ -76,7 +89,7 @@
                 </div>
                 <p class="builder-status" id="builder-status" role="status" aria-live="polite"></p>
                 <div class="builder-result" id="builder-result" hidden>
-                    <img class="builder-preview" id="builder-preview" alt="Your finished KGOSS station">
+                    <img class="builder-preview" id="builder-preview" alt="Your finished station">
                     <div class="builder-result-side">
                         <p class="builder-result-title">Station image ready</p>
                         <p class="builder-result-note" id="builder-result-size"></p>
@@ -99,10 +112,10 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=4"></script>
-    <script src="navigation.js?v=5"></script>
+    <script src="wsa-data.js?v=5"></script>
+    <script src="navigation.js?v=6"></script>
     <script src="features.js?v=4"></script>
     <script src="decorations.js?v=3"></script>
-    <script src="game.js?v=2"></script>
+    <script src="game.js?v=3"></script>
 </body>
 </html>
