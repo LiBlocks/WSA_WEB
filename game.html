@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KGOSS Station Builder | Woody Space Agency</title>
+    <script src="page-init.js?v=3"></script>
+    <link rel="stylesheet" href="intro.css?v=7">
+    <script src="intro.js?v=8"></script>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="stylesheet" href="game.css?v=2">
+    <link rel="stylesheet" href="liquid-glass.css?v=11">
+    <script src="liquid-glass.js?v=11"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="game.html">Game</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head" style="padding: 3rem 2rem 2rem;">
+        <div class="container">
+            <h1 style="margin-bottom: 0.5rem;">KGOSS Station Builder</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 800px;">
+                Assemble your own version of WSA's orbital station. Drag modules into orbit, join their docking ports, then press Done to save a picture of your build.
+            </p>
+        </div>
+    </section>
+
+    <section class="builder-section">
+        <div class="container">
+            <div class="builder" id="builder">
+                <div class="builder-toolbar">
+                    <p class="builder-hint" id="builder-hint">Drag a module into orbit to start.</p>
+                    <div class="builder-actions">
+                        <button type="button" class="btn btn-secondary btn-small" id="builder-new">New build</button>
+                        <button type="button" class="btn btn-primary btn-small" id="builder-done">Done</button>
+                    </div>
+                </div>
+                <div class="builder-body">
+                    <div class="builder-palette" id="builder-palette" aria-label="Station modules"></div>
+                    <div class="builder-stage" id="builder-stage">
+                        <svg class="builder-canvas" id="builder-canvas" viewBox="0 0 1000 700" role="application" aria-label="Station assembly area"></svg>
+                        <div class="builder-selection" id="builder-selection" hidden>
+                            <button type="button" class="builder-tool" id="builder-rotate">Rotate</button>
+                            <button type="button" class="builder-tool" id="builder-remove">Remove</button>
+                        </div>
+                        <div class="builder-trash" id="builder-trash" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+                            <span>Drop to remove</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="builder-status" id="builder-status" role="status" aria-live="polite"></p>
+                <div class="builder-result" id="builder-result" hidden>
+                    <img class="builder-preview" id="builder-preview" alt="Your finished KGOSS station">
+                    <div class="builder-result-side">
+                        <p class="builder-result-title">Station image ready</p>
+                        <p class="builder-result-note" id="builder-result-size"></p>
+                        <div class="builder-result-actions">
+                            <a class="btn btn-primary btn-small" id="builder-download" download="WSA-KGOSS-Station-Build.png">Download PNG</a>
+                            <button type="button" class="btn btn-secondary btn-small" id="builder-share">Share</button>
+                        </div>
+                        <p class="builder-result-note" id="builder-share-status" role="status" aria-live="polite"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=4"></script>
+    <script src="navigation.js?v=5"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+    <script src="game.js?v=2"></script>
+</body>
+</html>

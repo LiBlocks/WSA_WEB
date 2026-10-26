@@ -1,0 +1,308 @@
+/* KGOSS Station Builder (game.html, game.js). The assembly area is always deep space, in both themes,
+   matching the exported image; the controls around it follow the site theme. */
+
+.builder {
+    display: grid;
+    gap: 1rem;
+}
+
+.builder-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.builder-hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.builder-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.builder .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.builder-body {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.builder-palette {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.builder-part {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.builder-part:hover {
+    border-color: var(--accent);
+}
+
+.builder-part:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.builder-part svg {
+    flex-shrink: 0;
+    width: 52px;
+    height: 34px;
+}
+
+.builder-part-name {
+    line-height: 1.25;
+}
+
+.builder-part-short {
+    display: none;
+}
+
+.builder-stage {
+    position: relative;
+    aspect-ratio: 10 / 7;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0b1220, #111a2e);
+}
+
+.builder-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.gm-module {
+    cursor: grab;
+}
+
+.gm-module:focus {
+    outline: none;
+}
+
+.gm-module.dragging {
+    cursor: grabbing;
+}
+
+.gm-select {
+    fill: none;
+    stroke: #60a5fa;
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+    pointer-events: none;
+}
+
+.gm-module.invalid .gm-art {
+    opacity: 0.55;
+}
+
+.gm-module.invalid .gm-select,
+.gm-module.invalid .gm-outline {
+    stroke: #f87171;
+}
+
+.gm-outline {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 2;
+    pointer-events: none;
+}
+
+.gm-port {
+    fill: #0b1220;
+    stroke: #7dd3fc;
+    stroke-width: 2;
+    pointer-events: none;
+}
+
+.gm-port.target {
+    fill: #7dd3fc;
+}
+
+.builder-selection {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.builder-selection[hidden],
+.builder-result[hidden] {
+    display: none;
+}
+
+.builder-tool {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    background: rgba(11, 18, 32, 0.85);
+    color: #e5e7eb;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.builder-tool:hover,
+.builder-tool:focus-visible {
+    border-color: #7dd3fc;
+}
+
+.builder-trash {
+    position: absolute;
+    left: 0.6rem;
+    bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.builder-trash svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.builder-trash.armed {
+    border-style: solid;
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.18);
+    color: #fecaca;
+}
+
+.builder-status {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.builder-status.error {
+    color: var(--danger);
+}
+
+.builder-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+}
+
+.builder-preview {
+    display: block;
+    justify-self: center;
+    max-width: 100%;
+    max-height: 420px;
+    border-radius: 6px;
+}
+
+.builder-result-title {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+}
+
+.builder-result-note {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.builder-result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.9rem 0 0.6rem;
+}
+
+@media (max-width: 760px) {
+    .builder-body {
+        grid-template-columns: 1fr;
+    }
+
+    .builder-palette {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.35rem;
+    }
+
+    .builder-part {
+        flex-direction: column;
+        gap: 0.2rem;
+        padding: 0.4rem 0.2rem;
+        font-size: 0.72rem;
+        text-align: center;
+    }
+
+    .builder-part svg {
+        width: 44px;
+        height: 28px;
+    }
+
+    .builder-part-name {
+        display: none;
+    }
+
+    .builder-part-short {
+        display: block;
+    }
+
+    .builder-trash span {
+        display: none;
+    }
+
+    .builder-result {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .builder-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .builder-actions {
+        justify-content: flex-end;
+    }
+}

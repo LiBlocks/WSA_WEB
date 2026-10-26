@@ -1,0 +1,112 @@
+/* WSA intro: the page opens behind a monochrome curtain, the insignia glides in, the agency name is
+   traced in outline and filled, then the curtain pulls down to reveal the page. Played by intro.js; without that script nothing here
+   applies. The whole sequence is CSS animations, timed from the moment the curtain is added (all
+   delays below are measured from then). */
+
+:root {
+    --wsa-intro-bg: #fff;
+    --wsa-intro-fg: #0a0a0a;
+}
+
+:root[data-theme="dark"] {
+    --wsa-intro-bg: #000;
+    --wsa-intro-fg: #f5f5f5;
+}
+
+/* Covers the page from the first paint, before <body> exists; the curtain takes over once it does */
+:root.wsa-intro-pending::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    background: var(--wsa-intro-bg);
+}
+
+.wsa-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    overflow: hidden;
+    background: var(--wsa-intro-bg);
+    color: var(--wsa-intro-fg);
+    animation: wsa-intro-leave 0.8s cubic-bezier(0.76, 0, 0.24, 1) 2.7s forwards;
+}
+
+/* Rises from below the viewport and settles at the centre, decelerating */
+.wsa-intro-logo {
+    display: block;
+    width: clamp(96px, 22vmin, 148px);
+    height: auto;
+    aspect-ratio: 1;
+    transform: translateY(calc(50vh + 100%));
+    animation: wsa-intro-logo 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+
+.wsa-intro-title {
+    /* SVG text in the site font, sized like the old <p> title; it never moves */
+    display: block;
+    flex-shrink: 0;
+    width: 100%;
+    height: 1.4em;
+    overflow: visible;
+    font-size: clamp(1.4rem, 4.2vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+/* Every letter runs the same sequence on its own: its outline is drawn by sliding a dash along its
+   contours at a steady pace, the fill comes in quickly, then the outline fades. Each letter starts
+   a moment after the one before (--i is its position among the letters) without waiting for it to
+   finish, so the word ripples in from left to right. The resting style is plain filled text, so the
+   title stays readable if these animations never run. */
+.wsa-intro-title tspan {
+    --wsa-trace: 7.5em;                 /* longer than any letter's outline */
+    --wsa-start: calc(0.95s + var(--i) * 0.03s);
+    fill: currentColor;
+    fill-opacity: 1;
+    stroke: currentColor;
+    stroke-opacity: 0;
+    stroke-width: 1px;
+    stroke-linejoin: round;
+    stroke-dasharray: var(--wsa-trace) var(--wsa-trace);
+    animation:
+        wsa-intro-trace 0.5s linear var(--wsa-start) both,
+        wsa-intro-fill 0.15s ease-out calc(var(--wsa-start) + 0.5s) both,
+        wsa-intro-edge 0.12s ease-out calc(var(--wsa-start) + 0.65s) both;
+}
+
+@keyframes wsa-intro-leave {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+}
+
+@keyframes wsa-intro-logo {
+    to { transform: translateY(0); }
+}
+
+@keyframes wsa-intro-trace {
+    from {
+        stroke-dashoffset: var(--wsa-trace);
+        stroke-opacity: 1;
+    }
+    to {
+        stroke-dashoffset: 0;
+        stroke-opacity: 1;
+    }
+}
+
+@keyframes wsa-intro-fill {
+    from { fill-opacity: 0; }
+    to { fill-opacity: 1; }
+}
+
+@keyframes wsa-intro-edge {
+    from { stroke-opacity: 1; }
+    to { stroke-opacity: 0; }
+}

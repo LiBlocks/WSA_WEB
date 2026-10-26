@@ -258,6 +258,7 @@
         if (document.querySelector('.lg-cosmos')) return;
         const cosmos = document.createElement('div');
         cosmos.className = 'lg-cosmos';
+        cosmos.id = 'lg-cosmos';
         cosmos.setAttribute('aria-hidden', 'true');
         cosmos.innerHTML = skySVG() + planetASVG() + planetBSVG() + blackHoleSVG();
         if (fadeIn) {
@@ -267,16 +268,48 @@
             });
         }
         document.body.prepend(cosmos);
+        startSkyClock(cosmos);
     }
 
     function removeCosmos() {
+        stopSkyClock();
         const cosmos = document.querySelector('.lg-cosmos');
         if (cosmos) cosmos.remove();
+    }
+
+    // The loops advance in ticks rather than every frame: they move slowly enough that 12 steps a
+    // second look the same, and every glass pane over the sky only has to be redrawn when it changes
+    const SKY_FPS = 12;
+    let skyClock = 0;
+
+    function startSkyClock(cosmos) {
+        stopSkyClock();
+        const loops = cosmos.getAnimations({ subtree: true })
+            .filter(a => a.effect && a.effect.getTiming().iterations === Infinity);
+        if (!loops.length) return;
+        const t0 = document.timeline.currentTime;
+        const base = loops.map(a => {
+            a.pause();
+            return a.currentTime;
+        });
+        skyClock = setInterval(() => {
+            const elapsed = document.timeline.currentTime - t0;
+            loops.forEach((a, i) => {
+                if (a.playState !== 'idle') a.currentTime = base[i] + elapsed;
+            });
+        }, 1000 / SKY_FPS);
+    }
+
+    function stopSkyClock() {
+        clearInterval(skyClock);
+        skyClock = 0;
     }
 
     /* ---------- Pointer tilt: the surface faces the pointer and its highlights follow ---------- */
 
     const CARDS = '.program-card, .overview-card, .vehicle-card, .album-card, .wallet-card, .status-card';
+    // Panes that tilt under the pointer: the cards plus the stat tiles and the wide panels
+    const TILT_PANES = CARDS + ', .stat-card, .achievement, .module-card:not(.expandable-section .module-card)';
     const CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .lg-toggle';
     const TILT_VARS = ['--lg-nx', '--lg-ny', '--lg-glow', '--lg-angle'];
     // Resting light comes from above, slightly to the left
@@ -312,6 +345,7 @@
         el.classList.remove('lg-settle');
         el.classList.add('lg-tilt');
         el.style.setProperty('--lg-glow', '1');
+        slabEngage(el, s);
     }
 
     function track(el, e) {
@@ -323,6 +357,7 @@
         el.style.setProperty('--lg-nx', nx.toFixed(3));
         el.style.setProperty('--lg-ny', ny.toFixed(3));
         el.style.setProperty('--lg-angle', `${s.angle.toFixed(1)}deg`);
+        slabAim(el, nx, ny);
     }
 
     function release(el) {
@@ -333,6 +368,7 @@
         el.style.setProperty('--lg-glow', '0');
         el.style.setProperty('--lg-angle', `${s.angle.toFixed(1)}deg`);
         el.classList.replace('lg-tilt', 'lg-settle');
+        slabAim(el, null);
         s.timer = setTimeout(() => clear(el), SETTLE_MS);
     }
 
@@ -347,6 +383,7 @@
         el.style.transition = 'none';
         el.classList.remove('lg-tilt', 'lg-settle');
         TILT_VARS.forEach(name => el.style.removeProperty(name));
+        el.style.removeProperty('--lg-copy-pos');
         getComputedStyle(el).transform;
         el.style.removeProperty('transition');
     }
@@ -358,11 +395,18 @@
         });
     }
 
+    // A scroll settles everything at once: in Firefox the sky copy inside a tilted pane is placed for
+    // the scroll position it tilted at
+    function releaseOnScroll() {
+        releaseAll();
+        if (copyLens) document.querySelectorAll('.lg-lens-copy.lg-settle').forEach(clear);
+    }
+
     function update() {
         tilt.frame = 0;
         const e = tilt.event;
         const target = e.target instanceof Element ? e.target : null;
-        [CARDS, CONTROLS].forEach((selector, slot) => {
+        [TILT_PANES, CONTROLS].forEach((selector, slot) => {
             let el = target && target.closest(selector);
             // Cards still fading in (decorations.js) keep their own transform until they arrive
             if (el && el.matches('.reveal:not(.revealed)')) el = null;
@@ -390,7 +434,7 @@
         tilt.on = true;
         document.addEventListener('pointermove', onPointerMove, { passive: true });
         document.addEventListener('pointerout', onPointerOut, { passive: true });
-        window.addEventListener('scroll', releaseAll, { passive: true });
+        window.addEventListener('scroll', releaseOnScroll, { passive: true });
         window.addEventListener('blur', releaseAll);
     }
 
@@ -399,7 +443,7 @@
         tilt.on = false;
         document.removeEventListener('pointermove', onPointerMove);
         document.removeEventListener('pointerout', onPointerOut);
-        window.removeEventListener('scroll', releaseAll);
+        window.removeEventListener('scroll', releaseOnScroll);
         window.removeEventListener('blur', releaseAll);
         cancelAnimationFrame(tilt.frame);
         tilt.frame = 0;
@@ -407,32 +451,76 @@
         document.querySelectorAll('.lg-tilt, .lg-settle').forEach(clear);
     }
 
-    /* ---------- Refraction: the rim of each control bends what lies behind it ---------- */
+    /* ---------- Refraction: each clear pane is a slab of glass that bends what lies behind it ---------- */
 
-    // Only Chromium applies SVG filters inside backdrop-filter; other browsers keep plain clear glass.
-    // Controls inside bars, dialogs or other glass are skipped: they only see that pane's own tint.
-    const REFRACT = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .menu-fab';
-    const REFRACT_SKIP = 'header, .nav-drawer, dialog, footer, ' + CARDS +
-        ', .stat-card, .expandable-section, .achievement, .tl-toggle, .search-field, .module-card';
-    const canRefract = !!(navigator.userAgentData && navigator.userAgentData.brands &&
+    // Chromium applies the lens filter to the backdrop itself (--lg-refract in backdrop-filter). Firefox
+    // can't, but can paint a live copy of the sky (-moz-element) inside the pane and bend that instead
+    // (--lg-refract-copy and .lg-lens-copy; see liquid-glass.css). Other browsers keep plain clear glass.
+    // Panes inside bars, dialogs or other panes are skipped: they only see that surface's own tint.
+    const LENS_CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .menu-fab';
+    const LENS_PANES = CARDS + ', .stat-card, .expandable-section, .achievement, .tl-toggle, .search-field, ' +
+        '.module-card:not(.expandable-section .module-card)';
+    const LENS_SKIP = 'header, .nav-drawer, dialog, footer';
+    const backdropLens = !!(navigator.userAgentData && navigator.userAgentData.brands &&
         navigator.userAgentData.brands.some(b => b.brand === 'Chromium')) &&
         window.CSS && CSS.supports('backdrop-filter', 'blur(1px)');
+    const copyLens = !backdropLens && !!(window.CSS && CSS.supports('background-image', '-moz-element(#a)'));
+    const LENS_VAR = copyLens ? '--lg-refract-copy' : '--lg-refract';
     const reduceTransparency = window.matchMedia('(prefers-reduced-transparency: reduce)');
+    // Phones, tablets and small windows (the stylesheet's lite mode) refract the controls only
+    const lite = window.matchMedia('(pointer: coarse), (max-width: 768px)');
     const SVG_NS = 'http://www.w3.org/2000/svg';
-    const BEZEL_MAX = 18;   // px of rim that bends, at most
-    const THICKNESS = 3;    // rim height over its width: thicker glass bends further in from the edge
-    const BEND = 0.75;      // strongest inward shift, as a share of the bezel
+    const RESIZE_SETTLE_MS = 150;
 
-    const refract = { on: false, defs: null, filters: new Map(), seen: new WeakSet(), resize: null, mutate: null, frame: 0 };
+    // The rim bends the view inward, and splits it slightly by colour: blue bends further than red,
+    // so lines crossing the rim pick up a faint rainbow fringe
+    const DISPERSION = 0.4;
+    // Controls: a capsule rim that bends evenly all round
+    const BEZEL_CONTROL = 18;   // px of rim that bends, at most
+    const BEND = 0.75;          // strongest inward shift, as a share of the bezel
+    // Panes: a rounded rim on every side, bending harder on the sides set by the slab vector (x, y in
+    // -1..1; positive x favours the right side, positive y the bottom). At rest that is the bottom-right
+    // corner, away from the light; under the pointer it is the side that tilts up toward the viewer,
+    // and the whole view shifts a little, as it does through a tilted plate of glass.
+    const BEZEL_PANE = 32;      // px wide, at most
+    const PANE_THICKNESS = 8;   // a rounded edge: the bend eases in over the whole rim instead of dropping off
+    const EDGE_SHIFT = 18;      // px, strongest inward shift on the favoured side
+    const EDGE_FLOOR = 0.5;     // the other sides still bend this much
+    const TILT_SHIFT = 3;       // px, the view through a fully tilted pane
+    const PANE_SCALE = 2 * (EDGE_SHIFT + TILT_SHIFT);
+    const SLAB_REST = { x: 0.9, y: 0.9, dx: 0, dy: 0 };
+    // Light caught in the rim, split into a spectrum by how hard the rim bends there: the strongest
+    // bend (the favoured edge) shows blue and violet, gentler bends cyan, green and a faint amber as
+    // the rim flattens, so the other sides (half the bend) stay warm and dim. Entries run from no
+    // bend to full.
+    const PRISM = {
+        r: '1 1 1 1 0.55 0.2 0.35 0.6',
+        g: '0.55 0.55 0.75 0.95 1 0.8 0.5 0.4',
+        b: '0.2 0.2 0.25 0.3 0.6 1 1 1',
+        a: '0 0.02 0.08 0.2 0.36 0.52 0.66 0.75',
+    };
+    // How bright that light is, from the theme's --lg-prism (it shows less over a light sky)
+    const prismStrength = () => parseFloat(getComputedStyle(root).getPropertyValue('--lg-prism')) || 0.3;
+
+    const refract = {
+        on: false, defs: null, frame: 0, timer: 0, resize: null, mutate: null, theme: null,
+        filters: new Map(),     // key -> { id, users }
+        lens: new Map(),        // element -> key
+        pending: new Map(),     // element -> [width, height] waiting for the resize to settle
+        live: new Map(),        // element -> { filter, cur, goal } while its slab moves
+        liveCount: 0,
+        anim: 0,
+    };
 
     // How far each rim pixel looks inward, from the edge (index 0) to the flat top: the rim is a
-    // convex squircle, and its slope bends a straight-down view toward the centre (n = 1.5)
-    function bendProfile(bezel) {
+    // convex squircle, and its slope bends a straight-down view toward the centre (n = 1.5).
+    // Taller rims (thickness) keep bending further in from the edge.
+    function bendProfile(bezel, thickness) {
         const out = new Float32Array(bezel * 4 + 1);
         let max = 0;
         for (let i = 0; i < out.length; i++) {
             const t = Math.max(i / (out.length - 1), 0.02);
-            const slope = THICKNESS * Math.pow(1 - t, 3) * Math.pow(1 - Math.pow(1 - t, 4), -0.75);
+            const slope = thickness * Math.pow(1 - t, 3) * Math.pow(1 - Math.pow(1 - t, 4), -0.75);
             const a = Math.atan(slope);
             out[i] = Math.tan(a - Math.asin(Math.sin(a) / 1.5));
             max = Math.max(max, out[i]);
@@ -440,89 +528,291 @@
         return out.map(v => v / max);
     }
 
-    // Displacement map for a rounded box: red/green = how far to look along x/y, 128 = straight through
-    function mapURL(w, h, r, bezel) {
+    // Displacement map for a rounded box: red/green = how far to look along x/y, 128 = straight through,
+    // `amp` = the strongest shift as a share of the full range. Only the rim band is computed.
+    // The bend follows contours with a corner radius of at least `round`, so it curves smoothly
+    // through the corners instead of meeting at a seam; the box itself keeps radius `r`.
+    function mapURL(w, h, r, bezel, thickness, amp, round = r) {
         const canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d');
         const img = ctx.createImageData(w, h);
         const data = img.data;
-        const profile = bendProfile(bezel);
+        new Uint32Array(data.buffer).fill(0xff808080);
+        const profile = bendProfile(bezel, thickness);
         const last = profile.length - 1;
+        const rr = Math.min(Math.max(r, round), w / 2, h / 2);
+        const band = Math.ceil(Math.max(rr, bezel));
+        const inside = (px, py) => {
+            const qx = Math.abs(px) - (w / 2 - r), qy = Math.abs(py) - (h / 2 - r);
+            return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) < r;
+        };
+        const pixel = (x, y) => {
+            // Signed distance to the rounded contour and the outward normal there
+            const px = x + 0.5 - w / 2, py = y + 0.5 - h / 2;
+            const qx = Math.abs(px) - (w / 2 - rr), qy = Math.abs(py) - (h / 2 - rr);
+            const ox = Math.max(qx, 0), oy = Math.max(qy, 0);
+            const out = Math.hypot(ox, oy);
+            let depth = rr - out - Math.min(Math.max(qx, qy), 0);
+            if (depth >= bezel) return;
+            if (depth <= 0) {
+                // The corner between a tighter box corner and the rounder contour bends like the edge
+                if (rr === r || !inside(px, py)) return;
+                depth = 0.01;
+            }
+            let nx = 0, ny = 0;
+            if (out > 0) { nx = ox / out; ny = oy / out; }
+            else if (qx > qy) nx = 1;
+            else ny = 1;
+            const m = profile[Math.min(last, Math.round(depth / bezel * last))] * amp * 127;
+            const k = (y * w + x) * 4;
+            data[k] = Math.round(128 - Math.sign(px) * nx * m);
+            data[k + 1] = Math.round(128 - Math.sign(py) * ny * m);
+        };
         for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                // Signed distance to the rounded edge and the outward normal there
-                const px = x + 0.5 - w / 2, py = y + 0.5 - h / 2;
-                const qx = Math.abs(px) - (w / 2 - r), qy = Math.abs(py) - (h / 2 - r);
-                const ox = Math.max(qx, 0), oy = Math.max(qy, 0);
-                const out = Math.hypot(ox, oy);
-                const depth = r - out - Math.min(Math.max(qx, qy), 0);
-                let nx = 0, ny = 0, m = 0;
-                if (depth > 0 && depth < bezel) {
-                    if (out > 0) { nx = ox / out; ny = oy / out; }
-                    else if (qx > qy) nx = 1;
-                    else ny = 1;
-                    m = profile[Math.min(last, Math.round(depth / bezel * last))];
-                }
-                const k = (y * w + x) * 4;
-                data[k] = Math.round(128 - Math.sign(px) * nx * m * 127);
-                data[k + 1] = Math.round(128 - Math.sign(py) * ny * m * 127);
-                data[k + 2] = 128;
-                data[k + 3] = 255;
+            if (y < band || y >= h - band) {
+                for (let x = 0; x < w; x++) pixel(x, y);
+            } else {
+                for (let x = 0; x < Math.min(bezel, w); x++) pixel(x, y);
+                for (let x = Math.max(w - bezel, 0); x < w; x++) pixel(x, y);
             }
         }
         ctx.putImageData(img, 0, 0);
         return canvas.toDataURL();
     }
 
-    function filterFor(w, h, r) {
-        const key = `${w}-${h}-${r}`;
-        let id = refract.filters.get(key);
-        if (id) return id;
-        id = `lg-rf-${key}`;
-        // A flat top stays clear in the middle of even the smallest capsule
-        const bezel = Math.max(2, Math.round(Math.min(r * 0.8, BEZEL_MAX)));
-        const filter = document.createElementNS(SVG_NS, 'filter');
-        filter.id = id;
-        [['x', 0], ['y', 0], ['width', w], ['height', h], ['filterUnits', 'userSpaceOnUse'],
-            ['primitiveUnits', 'userSpaceOnUse'], ['color-interpolation-filters', 'sRGB']]
-            .forEach(([name, value]) => filter.setAttribute(name, value));
+    const fmt = v => v.toFixed(4);
+    // Transfer tables that weight the pane map per side and add the tilt shift: values below 128 are
+    // the right (red) and bottom (green) edges, values above the left and top. The last two give the
+    // same per-side bend for the rim light, without the shift, as 0 (none) to 1 (full).
+    function slabTables(v) {
+        const k = EDGE_SHIFT / PANE_SCALE;
+        const weight = t => EDGE_FLOOR + (1 - EDGE_FLOOR) * Math.max(t, 0);
+        const cx = 0.5 + v.dx / PANE_SCALE, cy = 0.5 + v.dy / PANE_SCALE;
+        return [
+            `${fmt(cx - k * weight(v.x))} ${fmt(cx)} ${fmt(cx + k * weight(-v.x))}`,
+            `${fmt(cy - k * weight(v.y))} ${fmt(cy)} ${fmt(cy + k * weight(-v.y))}`,
+            `${fmt(weight(v.x))} 0 ${fmt(weight(-v.x))}`,
+            `${fmt(weight(v.y))} 0 ${fmt(weight(-v.y))}`,
+        ];
+    }
+
+    // The rim light: how hard each pixel bends (x + y of the per-side bend), coloured by PRISM and
+    // added over the refracted view as light
+    function prism(bx, by) {
+        return `<feComponentTransfer in="map-raw" result="bend"><feFuncR type="table" tableValues="${bx}"/>` +
+            `<feFuncG type="table" tableValues="${by}"/></feComponentTransfer>` +
+            '<feColorMatrix type="matrix" values="1 1 0 0 0  1 1 0 0 0  1 1 0 0 0  1 1 0 0 0"/>' +
+            `<feComponentTransfer result="prism"><feFuncR type="table" tableValues="${PRISM.r}"/>` +
+            `<feFuncG type="table" tableValues="${PRISM.g}"/><feFuncB type="table" tableValues="${PRISM.b}"/>` +
+            `<feFuncA type="table" tableValues="${PRISM.a}"/></feComponentTransfer>` +
+            `<feComposite class="lg-prism-mix" in="view" in2="prism" operator="arithmetic" k2="1" k3="${prismStrength()}"/>`;
+    }
+
+    // Two passes of the same bend: a weaker one gives red, a stronger one blue, and green is their
+    // average (a third pass would cost more than the faint difference is worth)
+    function dispersed(map, scale, result = '') {
+        const pass = (factor, values, result) =>
+            `<feDisplacementMap in="SourceGraphic" in2="${map}" scale="${(scale * factor).toFixed(2)}" xChannelSelector="R" yChannelSelector="G"/>` +
+            `<feColorMatrix type="matrix" values="${values}" result="${result}"/>`;
+        return pass(1 - DISPERSION, '1 0 0 0 0  0 0.5 0 0 0  0 0 0 0 0  0 0 0 1 0', 'warm') +
+            pass(1 + DISPERSION, '0 0 0 0 0  0 0.5 0 0 0  0 0 1 0 0  0 0 0 1 0', 'cool') +
+            `<feComposite in="warm" in2="cool" operator="arithmetic" k2="1" k3="1"${result && ` result="${result}"`}/>`;
+    }
+
+    function filterFor(w, h, kind) {
+        let r, key, body;
         // The neutral flood stands in until the map image has decoded, so nothing jumps on load
-        filter.innerHTML =
-            '<feFlood flood-color="rgb(128,128,128)" result="flat"/>' +
-            `<feImage href="${mapURL(w, h, r, bezel)}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="img"/>` +
-            '<feComposite in="img" in2="flat" operator="over" result="map"/>' +
-            `<feDisplacementMap in="SourceGraphic" in2="map" scale="${(bezel * BEND * 2).toFixed(1)}" xChannelSelector="R" yChannelSelector="G"/>`;
-        refract.defs.appendChild(filter);
-        refract.filters.set(key, id);
-        return id;
+        const image = url =>
+            `<feImage href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="map-img"/>` +
+            '<feComposite in="map-img" in2="flat" operator="over" result="map-raw"/>';
+        if (kind.control) {
+            // Controls are capsules or circles, so the rim radius is half the short side
+            r = Math.round(Math.min(w, h) / 2);
+            const bezel = Math.max(2, Math.round(Math.min(r * 0.8, BEZEL_CONTROL)));
+            key = `c-${w}-${h}`;
+            if (!refract.filters.has(key)) body = image(mapURL(w, h, r, bezel, 3, 1)) + dispersed('map-raw', bezel * BEND * 2);
+        } else {
+            const bezel = Math.max(4, Math.round(Math.min(BEZEL_PANE, Math.min(w, h) / 4)));
+            key = `p-${w}-${h}-${kind.radius}`;
+            if (!refract.filters.has(key)) {
+                const [tr, tg, bx, by] = slabTables(SLAB_REST);
+                body = image(mapURL(w, h, kind.radius, bezel, PANE_THICKNESS, 1, bezel)) +
+                    `<feComponentTransfer in="map-raw" result="map"><feFuncR type="table" tableValues="${tr}"/>` +
+                    `<feFuncG type="table" tableValues="${tg}"/></feComponentTransfer>` +
+                    dispersed('map', PANE_SCALE, 'view') + prism(bx, by);
+            }
+        }
+        if (body) {
+            const filter = document.createElementNS(SVG_NS, 'filter');
+            filter.id = `lg-rf-${key}`;
+            [['x', 0], ['y', 0], ['width', w], ['height', h], ['filterUnits', 'userSpaceOnUse'],
+                ['primitiveUnits', 'userSpaceOnUse'], ['color-interpolation-filters', 'sRGB']]
+                .forEach(([name, value]) => filter.setAttribute(name, value));
+            filter.innerHTML = '<feFlood flood-color="rgb(128,128,128)" result="flat"/>' + body;
+            refract.defs.appendChild(filter);
+            refract.filters.set(key, { id: filter.id, users: 0 });
+        }
+        return key;
+    }
+
+    // Filters no pane uses any more (after a resize) are dropped
+    function releaseLens(el) {
+        const key = refract.lens.get(el);
+        if (!key) return;
+        refract.lens.delete(el);
+        const entry = refract.filters.get(key);
+        if (entry && --entry.users <= 0) {
+            const filter = document.getElementById(entry.id);
+            if (filter) filter.remove();
+            refract.filters.delete(key);
+        }
+    }
+
+    function clearLens(el) {
+        dropLive(el);
+        el.style.removeProperty(LENS_VAR);
+        el.classList.remove('lg-lens-copy');
     }
 
     function sizeLens(el, width, height) {
+        // Firefox's sky copy fills the padding box, inside the pane's border
+        if (copyLens) {
+            width = el.clientWidth;
+            height = el.clientHeight;
+        }
         const w = Math.round(width), h = Math.round(height);
-        if (w < 8 || h < 8) {
-            el.style.removeProperty('--lg-refract');
+        if (w < 8 || h < 8 || !el.isConnected) {
+            releaseLens(el);
+            clearLens(el);
             return;
         }
-        // Every lens is a capsule or a circle in Liquid Glass (see liquid-glass.css), so the rim radius
-        // is half the short side. The computed radius can't be used: the site's own `transition: all`
-        // on buttons is still animating it from the regular corners when the mode is switched on.
-        const r = Math.round(Math.min(w, h) / 2);
-        el.style.setProperty('--lg-refract', `url(#${filterFor(w, h, r)})`);
+        // The computed radius of a control can't be used: the site's own `transition: all` on buttons is
+        // still animating it from the regular corners when the mode is switched on
+        const kind = el.matches(LENS_CONTROLS) ? { control: true } :
+            { radius: Math.max(0, Math.round((parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0) - (copyLens ? el.clientLeft : 0))) };
+        const key = filterFor(w, h, kind);
+        if (refract.lens.get(el) !== key) {
+            dropLive(el);
+            releaseLens(el);
+            refract.filters.get(key).users++;
+            refract.lens.set(el, key);
+            el.style.setProperty(LENS_VAR, `url(#${refract.filters.get(key).id})`);
+            if (copyLens) el.classList.add('lg-lens-copy');
+        }
+    }
+
+    /* The slab under the pointer gets its own copy of its filter, whose transfer tables follow the
+       tilt, eased frame by frame, then hands back to the shared filter once it has come to rest */
+
+    function slabEngage(el, s) {
+        if (!refract.on || !refract.lens.has(el) || el.matches(LENS_CONTROLS)) return;
+        // Firefox: under the tilt transform the sky copy is placed by hand instead of fixed to the viewport
+        if (copyLens) {
+            el.style.setProperty('--lg-copy-pos',
+                `${-(s.x - window.scrollX + el.clientLeft)}px ${-(s.y - window.scrollY + el.clientTop)}px`);
+        }
+        let live = refract.live.get(el);
+        if (!live) {
+            const shared = document.getElementById(refract.filters.get(refract.lens.get(el)).id);
+            const filter = shared.cloneNode(true);
+            filter.id = `${shared.id}-live${++refract.liveCount}`;
+            refract.defs.appendChild(filter);
+            live = { filter, funcs: filter.querySelectorAll('[result="map"] > *, [result="bend"] > *'), cur: { ...SLAB_REST }, goal: { ...SLAB_REST } };
+            refract.live.set(el, live);
+            el.style.setProperty(LENS_VAR, `url(#${filter.id})`);
+        }
+    }
+
+    // nx, ny: the pointer across the pane, -1..1; null = released
+    function slabAim(el, nx, ny) {
+        const live = refract.live.get(el);
+        if (!live) return;
+        live.resting = nx === null;
+        live.goal = live.resting ? { ...SLAB_REST } :
+            { x: -nx, y: -ny, dx: -nx * TILT_SHIFT, dy: -ny * TILT_SHIFT };
+        if (!refract.anim) refract.anim = requestAnimationFrame(stepSlabs);
+    }
+
+    // Eased by time rather than per frame, so a slow frame rate doesn't slow the glass down
+    const SLAB_EASE_MS = 90;
+
+    function stepSlabs(now) {
+        refract.anim = 0;
+        const ease = 1 - Math.exp(-Math.min(now - (refract.animAt || now - 16), 250) / SLAB_EASE_MS);
+        refract.animAt = now;
+        refract.live.forEach((live, el) => {
+            let moving = false;
+            for (const k in live.goal) {
+                const d = live.goal[k] - live.cur[k];
+                live.cur[k] = Math.abs(d) < 0.004 ? live.goal[k] : live.cur[k] + d * ease;
+                if (live.cur[k] !== live.goal[k]) moving = true;
+            }
+            slabTables(live.cur).forEach((values, i) => live.funcs[i].setAttribute('tableValues', values));
+            if (!moving && live.resting) dropLive(el);
+            else if (moving) refract.anim = refract.anim || requestAnimationFrame(stepSlabs);
+        });
+        if (!refract.anim) refract.animAt = 0;
+    }
+
+    function dropLive(el) {
+        const live = refract.live.get(el);
+        if (!live) return;
+        refract.live.delete(el);
+        live.filter.remove();
+        const key = refract.lens.get(el);
+        if (key && refract.filters.has(key)) el.style.setProperty(LENS_VAR, `url(#${refract.filters.get(key).id})`);
+    }
+
+    function lensTargets() {
+        const selector = lite.matches ? LENS_CONTROLS : LENS_CONTROLS + ', ' + LENS_PANES;
+        return [...document.querySelectorAll(selector)].filter(el =>
+            !el.closest(LENS_SKIP) && !(el.parentElement && el.parentElement.closest(LENS_PANES)));
     }
 
     function scanLenses() {
         refract.frame = 0;
-        document.querySelectorAll(REFRACT).forEach(el => {
-            if (refract.seen.has(el) || el.closest(REFRACT_SKIP)) return;
-            refract.seen.add(el);
+        // Panes that features.js re-rendered away give their filters back
+        refract.lens.forEach((key, el) => {
+            if (!el.isConnected) {
+                refract.resize.unobserve(el);
+                dropLive(el);
+                releaseLens(el);
+            }
+        });
+        lensTargets().forEach(el => {
+            if (refract.lens.has(el) || refract.pending.has(el)) return;
+            refract.pending.set(el, null);
             refract.resize.observe(el);
         });
     }
 
+    // The first measurement of a pane is applied at once; later ones wait until resizing settles
+    function onResize(entries) {
+        let later = false;
+        entries.forEach(entry => {
+            const box = entry.borderBoxSize && entry.borderBoxSize[0];
+            const size = box ? [box.inlineSize, box.blockSize] : [entry.target.offsetWidth, entry.target.offsetHeight];
+            if (refract.lens.has(entry.target)) {
+                refract.pending.set(entry.target, size);
+                later = true;
+            } else {
+                refract.pending.delete(entry.target);
+                sizeLens(entry.target, size[0], size[1]);
+            }
+        });
+        if (later) {
+            clearTimeout(refract.timer);
+            refract.timer = setTimeout(() => {
+                refract.pending.forEach((size, el) => { if (size) sizeLens(el, size[0], size[1]); });
+                refract.pending.clear();
+            }, RESIZE_SETTLE_MS);
+        }
+    }
+
     function startRefraction() {
-        if (refract.on || !canRefract || reduceTransparency.matches || !document.body) return;
+        if (refract.on || !(backdropLens || copyLens) || reduceTransparency.matches || !document.body) return;
         refract.on = true;
         const svg = document.createElementNS(SVG_NS, 'svg');
         svg.setAttribute('class', 'lg-lens-defs');
@@ -531,17 +821,27 @@
         refract.defs = document.createElementNS(SVG_NS, 'defs');
         svg.appendChild(refract.defs);
         document.body.appendChild(svg);
-        refract.resize = new ResizeObserver(entries => entries.forEach(entry => {
-            const box = entry.borderBoxSize && entry.borderBoxSize[0];
-            if (box) sizeLens(entry.target, box.inlineSize, box.blockSize);
-            else sizeLens(entry.target, entry.target.offsetWidth, entry.target.offsetHeight);
-        }));
+        refract.resize = new ResizeObserver(onResize);
         // Chips, dialogs and search results are added later by features.js
         refract.mutate = new MutationObserver(() => {
             if (!refract.frame) refract.frame = requestAnimationFrame(scanLenses);
         });
         refract.mutate.observe(document.body, { childList: true, subtree: true });
+        refract.theme = new MutationObserver(() => {
+            const k3 = String(prismStrength());
+            refract.defs.querySelectorAll('.lg-prism-mix').forEach(node => node.setAttribute('k3', k3));
+        });
+        refract.theme.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+        window.addEventListener('scroll', onLensScroll, { passive: true });
         scanLenses();
+    }
+
+    // Every scrolled frame would redraw every lens (Chromium bends the backdrop again, Firefox paints
+    // its sky copies again), so the lenses step aside while the page moves and come back once it rests
+    function onLensScroll() {
+        root.classList.add('lg-scrolling');
+        clearTimeout(refract.scrollTimer);
+        refract.scrollTimer = setTimeout(() => root.classList.remove('lg-scrolling'), 180);
     }
 
     function stopRefraction() {
@@ -549,12 +849,20 @@
         refract.on = false;
         refract.resize.disconnect();
         refract.mutate.disconnect();
+        refract.theme.disconnect();
+        window.removeEventListener('scroll', onLensScroll);
+        clearTimeout(refract.scrollTimer);
+        root.classList.remove('lg-scrolling');
         cancelAnimationFrame(refract.frame);
-        refract.frame = 0;
+        cancelAnimationFrame(refract.anim);
+        clearTimeout(refract.timer);
+        refract.frame = refract.anim = 0;
+        refract.lens.forEach((key, el) => clearLens(el));
         refract.defs.parentNode.remove();
         refract.filters.clear();
-        refract.seen = new WeakSet();
-        document.querySelectorAll(REFRACT).forEach(el => el.style.removeProperty('--lg-refract'));
+        refract.lens.clear();
+        refract.live.clear();
+        refract.pending.clear();
     }
 
     /* ---------- Setup ---------- */
@@ -597,10 +905,20 @@
     reduceMotion.addEventListener('change', () => {
         if (reduceMotion.matches) stopTilt();
         else if (isOn()) startTilt();
+        // The stylesheet stops or restarts the loops; the clock follows
+        stopSkyClock();
+        const cosmos = document.querySelector('.lg-cosmos');
+        if (cosmos && !reduceMotion.matches) requestAnimationFrame(() => startSkyClock(cosmos));
     });
 
     reduceTransparency.addEventListener('change', () => {
         if (reduceTransparency.matches) stopRefraction();
         else if (isOn()) startRefraction();
+    });
+
+    lite.addEventListener('change', () => {
+        if (!refract.on) return;
+        stopRefraction();
+        startRefraction();
     });
 })();

@@ -227,22 +227,18 @@
     --lg-tint: 255 255 255;
     --lg-bar-tint: 255 255 255;
     --lg-accent-rgb: 44 100 201;
-    --lg-fill: 0.1;
-    --lg-fill-control: 0;
-    --lg-edge-control: 0.95;
-    --lg-hairline-control: 0.13;
+    --lg-fill: 0;
+    --lg-hairline: 0.13;
     --lg-fill-bar: 0.62;
     --lg-fill-dialog: 0.84;
-    --lg-fill-nested: 0.22;
+    --lg-fill-nested: 0.08;
+    --lg-prism: 0.3;          /* light caught in the refracting rim (liquid-glass.js) */
     --lg-rim-a: 0.4;
     --lg-hi: 255 255 255;
     --lg-lo: 30 41 59;
-    --lg-spec: 0.7;
-    --lg-sheen: 0.18;
     --lg-edge-hi: 1;
     --lg-edge-lo: rgb(30 41 59 / 0.1);
     --lg-bevel: 0.9;
-    --lg-bevel-shade: 0.08;
     --lg-outline: 0.07;
     --lg-shadow: 0.16;
     --lg-sat: 140%;
@@ -278,22 +274,18 @@
     --lg-tint: 160 180 220;
     --lg-bar-tint: 16 23 42;
     --lg-accent-rgb: 104 146 222;
-    --lg-fill: 0.05;
-    --lg-fill-control: 0;
-    --lg-edge-control: 0.45;
-    --lg-hairline-control: 0;
+    --lg-fill: 0;
+    --lg-hairline: 0;
     --lg-fill-bar: 0.62;
     --lg-fill-dialog: 0.8;
-    --lg-fill-nested: 0.05;
+    --lg-fill-nested: 0.03;
+    --lg-prism: 0.45;
     --lg-rim-a: 0.14;
     --lg-hi: 255 255 255;
     --lg-lo: 2 5 14;
-    --lg-spec: 0.16;
-    --lg-sheen: 0.045;
     --lg-edge-hi: 0.55;
     --lg-edge-lo: rgb(255 255 255 / 0.05);
     --lg-bevel: 0.2;
-    --lg-bevel-shade: 0.5;
     --lg-outline: 0.35;
     --lg-shadow: 0.6;
     --lg-sat: 130%;
@@ -488,57 +480,34 @@
 
 /* ---------- Glass surfaces ---------- */
 
-/* A nearly clear pane: the sky shows through a thin tint, the rim carries the material.
-   One recipe, tuned per group through variables and wrapped in :where() so the per-element
-   adjustments below can override it. No pseudo-elements, so existing ::after click targets and
-   positioning stay untouched. The light comes from --lg-nx/--lg-ny (resting: above, slightly
-   left; set by liquid-glass.js under the pointer) and --lg-angle (pointing away from the light).
-   Background layers: a specular spot hugging the rim nearest the pointer and a faint sheen sweep
-   (both only while hovered), over the nearly clear body tint.
-   Shadows: lit inner bevel toward the light and shaded bevel away from it (thickness), a denser
-   inner rim (clear centre), a hairline, and a soft floating shadow that leans away from the light.
-   The ::before below draws the curved rim itself. */
+/* Cards, panels and controls are fully clear panes: no tint, blur, colour lift, bevel, gloss or
+   shadow, so their middle is exactly what lies behind. The edge carries the material: a 1px rim line
+   (the ::before ring below, plus a hairline in light mode, where a white rim alone vanishes) and, in
+   Chromium, refraction: --lg-refract is an SVG displacement filter liquid-glass.js sizes to each
+   pane, bending the background inward along the rim. Wrapped in :where() so the per-group
+   adjustments below can override it. No ::after, so existing click targets stay untouched.
+   --lg-a is a tint for states that need one (hover on controls, pressed chips, the fallbacks). */
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
     .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .menu-fab
 ) {
     --lg-a: var(--lg-fill);
-    --lg-r: var(--lg-rim-a);
-    --lg-rim: 22px;
     --lg-e: var(--lg-edge-hi);
-    --lg-b: var(--lg-blur);
-    --lg-drop-y: 14px;
-    --lg-drop-blur: 34px;
     --lg-nx: -0.4;
     --lg-ny: -1;
     --lg-glow: 0;
     --lg-angle: 158deg;
-    background:
-        radial-gradient(38% 46% at calc(50% + var(--lg-nx, -0.4) * 62%) calc(50% + var(--lg-ny, -1) * 62%),
-            rgb(var(--lg-hi) / calc(var(--lg-spec) * var(--lg-glow, 0))), transparent) padding-box,
-        linear-gradient(110deg,
-            transparent calc(40% + var(--lg-nx, -0.4) * 30%),
-            rgb(var(--lg-hi) / calc(var(--lg-sheen) * var(--lg-glow, 0))) calc(50% + var(--lg-nx, -0.4) * 30%),
-            transparent calc(60% + var(--lg-nx, -0.4) * 30%)) padding-box,
-        linear-gradient(rgb(var(--lg-tint) / var(--lg-a)), rgb(var(--lg-tint) / var(--lg-a))) padding-box;
+    background: rgb(var(--lg-tint) / var(--lg-a));
     border-color: transparent;
-    box-shadow:
-        inset calc(var(--lg-nx, -0.4) * -1px) calc(var(--lg-ny, -1) * -1px) 0 rgb(var(--lg-hi) / var(--lg-bevel)),
-        inset calc(var(--lg-nx, -0.4) * 1.5px) calc(var(--lg-ny, -1) * 1.5px) 2px rgb(var(--lg-lo) / var(--lg-bevel-shade)),
-        inset 0 0 var(--lg-rim) calc(var(--lg-rim) * -0.25) rgb(var(--lg-tint) / var(--lg-r)),
-        0 0 0 1px rgb(var(--lg-lo) / var(--lg-outline)),
-        calc(var(--lg-nx, -0.4) * var(--lg-glow, 0) * -6px)
-        calc(var(--lg-drop-y) - var(--lg-ny, -1) * var(--lg-glow, 0) * 3px)
-        var(--lg-drop-blur) calc(var(--lg-drop-blur) * -0.5) rgb(var(--lg-lo) / var(--lg-shadow)),
-        0 1px 2px rgb(var(--lg-lo) / calc(var(--lg-shadow) * 0.35));
-    -webkit-backdrop-filter: blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
-    backdrop-filter: blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    box-shadow: inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: var(--lg-refract, none);
 }
 
-/* The rim: a 1px ring brightest toward the light, a fainter reflection on the opposite side and
-   almost nothing along the sides, so the pane reads as curving away rather than outlined.
-   Masked to the ring so the clear centre stays clear. */
+/* The rim: a 1px ring brightest toward the light (--lg-angle points away from it; liquid-glass.js
+   turns it toward the pointer), a fainter reflection on the opposite side and almost nothing along
+   the sides, so the pane reads as curving away rather than outlined. Masked to the ring. */
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
@@ -572,31 +541,25 @@
     position: relative;
 }
 
-/* Wide panels: a broad, quiet rim and a lower float, no tilt */
+/* Panes are rounded slabs; their lens maps follow the corner (liquid-glass.js) */
+:root[data-liquid-glass] :where(
+    .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
+    .expandable-section, .achievement, .module-card:not(.expandable-section .module-card)
+) {
+    border-radius: 18px;
+}
+
+:root[data-liquid-glass] :where(.tl-toggle, .search-field) {
+    border-radius: 12px;
+}
+
+/* Wide panels: a quieter rim */
 :root[data-liquid-glass] :where(.expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card)) {
-    --lg-r: calc(var(--lg-rim-a) * 0.75);
-    --lg-rim: 30px;
     --lg-e: calc(var(--lg-edge-hi) * 0.65);
-    --lg-drop-y: 10px;
-    --lg-drop-blur: 28px;
 }
 
-/* Small controls: fully clear lenses. No tint, blur, colour lift, bevel or shadow, so the middle
-   is exactly what lies behind. The edge is a 1px rim line (the ::before ring above, plus a hairline
-   in light mode where a white rim alone vanishes) and, in Chromium, refraction: --lg-refract is an
-   SVG displacement filter liquid-glass.js sizes to each control, bending the background inward
-   along the rounded rim. Capsule and circle shapes give the rim a curve to bend through (the lens
-   maps assume them). */
-:root[data-liquid-glass] :where(.btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle) {
-    --lg-a: var(--lg-fill-control);
-    --lg-e: var(--lg-edge-control);
-    --lg-spec: 0;
-    --lg-sheen: 0;
-    box-shadow: inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline-control));
-    -webkit-backdrop-filter: none;
-    backdrop-filter: var(--lg-refract, none);
-}
-
+/* Controls are capsules and circles, which gives their rim a curve to bend through
+   (the lens maps in liquid-glass.js assume these shapes) */
 :root[data-liquid-glass] :where(.btn, .chip, .related-chip) {
     border-radius: 999px;
 }
@@ -606,7 +569,7 @@
 }
 
 :root[data-liquid-glass] :where(.btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle):hover {
-    --lg-a: calc(var(--lg-fill-control) + 0.04);
+    --lg-a: calc(var(--lg-fill) + 0.04);
 }
 
 /* Primary button: the same clear lens, marked by an accent rim and accent text */
@@ -623,18 +586,29 @@
     color: var(--accent);
 }
 
+/* While the page scrolls the lenses rest (liquid-glass.js sets .lg-scrolling): bending every pane
+   again on every scrolled frame is what makes scrolling heavy */
+:root.lg-scrolling[data-liquid-glass] :where(
+    .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
+    .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle
+) {
+    backdrop-filter: none;
+}
+
 /* The floating menu button sits over body text, so like the top bar it stays frosted */
 :root[data-liquid-glass] .menu-fab {
     --lg-tint: var(--lg-bar-tint);
     --lg-a: var(--lg-fill-bar);
-    --lg-rim: 8px;
-    --lg-b: var(--lg-blur-bar);
-    --lg-spec: 0;
-    --lg-sheen: 0;
-    --lg-drop-y: 6px;
-    --lg-drop-blur: 18px;
-    -webkit-backdrop-filter: blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
-    backdrop-filter: var(--lg-refract,) blur(var(--lg-b)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    box-shadow:
+        inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline)),
+        0 6px 18px -8px rgb(var(--lg-lo) / var(--lg-shadow));
+    -webkit-backdrop-filter: blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: var(--lg-refract,) blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+:root.lg-scrolling[data-liquid-glass] .menu-fab {
+    backdrop-filter: blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
 }
 
 .lg-lens-defs {
@@ -642,6 +616,36 @@
     width: 0;
     height: 0;
     overflow: hidden;
+}
+
+/* Firefox can't filter the backdrop, so the pane bends a live copy of the sky instead: the copy is
+   painted behind the pane's content, fixed to the viewport so it lines up with the real sky, and bent
+   by the same lens filter. Under the tilt transform a fixed background no longer lines up, so while
+   tilting the copy is placed by hand (--lg-copy-pos, set by liquid-glass.js) and turns with the pane. */
+@supports (background-image: -moz-element(#a)) {
+    :root[data-liquid-glass] .lg-lens-copy::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background: -moz-element(#lg-cosmos) fixed;
+        filter: var(--lg-refract-copy, none);
+        pointer-events: none;
+        /* Fades back in once the pane has arrived or the page has stopped scrolling */
+        transition: opacity 0.3s ease 0.3s;
+    }
+
+    :root[data-liquid-glass] .lg-lens-copy:is(.lg-tilt, .lg-settle)::after {
+        background-attachment: scroll;
+        background-position: var(--lg-copy-pos, 0 0);
+    }
+
+    :root[data-liquid-glass] .lg-lens-copy.reveal:not(.revealed)::after,
+    :root.lg-scrolling[data-liquid-glass] .lg-lens-copy::after {
+        opacity: 0;
+        transition: opacity 0.1s ease;
+    }
 }
 
 /* Accents the existing styles express with borders */
@@ -715,13 +719,10 @@
     background-color: rgb(var(--lg-ink) / 0.08);
 }
 
-/* Panes inside other glass: a light tint and a hairline rim, no blur of their own
-   (nested backdrop blur is costly and muddy) */
+/* Panes inside other panes: a whisper of tint and a hairline, nothing else */
 :root[data-liquid-glass] :is(.expandable-section .module-card, .technical-details, .wallet-address, .data-table th, .tl-panel-content, .empty-state) {
     background-color: rgb(var(--lg-tint) / var(--lg-fill-nested));
-    box-shadow:
-        inset 0 1px 0 rgb(var(--lg-hi) / calc(var(--lg-bevel) * 0.5)),
-        inset 0 0 14px -6px rgb(var(--lg-tint) / var(--lg-rim-a));
+    box-shadow: none;
 }
 
 :root[data-liquid-glass] :is(.expandable-section .module-card, .technical-details, .wallet-address, .data-table th) {
@@ -750,9 +751,15 @@
 
 /* ---------- Pointer tilt (classes set by liquid-glass.js while hovered / settling) ---------- */
 
-:root[data-liquid-glass] :is(.program-card, .overview-card, .vehicle-card, .album-card, .wallet-card, .status-card) {
+:root[data-liquid-glass] :is(.program-card, .overview-card, .vehicle-card, .album-card, .wallet-card, .status-card, .stat-card) {
     --lg-tilt-max: 2.5deg;
     --lg-persp: 900px;
+}
+
+/* Wide panels turn less, from further away, so their far ends don't swing */
+:root[data-liquid-glass] :is(.achievement, .module-card:not(.expandable-section .module-card)) {
+    --lg-tilt-max: 1.5deg;
+    --lg-persp: 2400px;
 }
 
 :root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button, .lg-toggle) {
@@ -829,12 +836,10 @@
     }
 }
 
-/* No backdrop-filter: near-opaque tints keep text readable */
+/* No backdrop-filter: the bars and dialogs, which rely on blur, get near-opaque tints */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     :root[data-liquid-glass][data-theme] {
         --lg-tint: var(--lg-bar-tint);
-        --lg-fill: 0.82;
-        --lg-fill-control: 0.8;
         --lg-fill-bar: 0.94;
         --lg-fill-dialog: 0.96;
         --lg-fill-nested: 0.5;
@@ -845,7 +850,6 @@
     :root[data-liquid-glass][data-theme] {
         --lg-tint: var(--lg-bar-tint);
         --lg-fill: 0.94;
-        --lg-fill-control: 0.92;
         --lg-fill-bar: 0.97;
         --lg-fill-dialog: 0.98;
         --lg-fill-nested: 0.7;
