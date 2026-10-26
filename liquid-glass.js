@@ -147,10 +147,14 @@
         [1180, 40, 1.4], [1320, 150, 0.8], [1470, 80, 1.1], [1550, 300, 0.9], [1400, 420, 1.2],
         [1520, 560, 0.8], [1290, 640, 1.0], [1450, 760, 1.3], [1560, 900, 0.9], [1180, 880, 0.8],
         [980, 960, 1.1], [760, 900, 0.8], [560, 980, 1.0], [380, 860, 1.2], [120, 940, 0.9],
-        [60, 700, 1.1], [250, 560, 0.8], [40, 480, 1.0], [640, 520, 0.8], [880, 640, 1.0], [720, 760, 0.7]
+        [60, 700, 1.1], [250, 560, 0.8], [40, 480, 1.0], [640, 520, 0.8], [880, 640, 1.0], [720, 760, 0.7],
+        [960, 770, 0.7], [1320, 300, 0.7], [180, 750, 0.7], [600, 830, 1.2], [770, 560, 0.8],
+        [510, 500, 0.7], [1430, 940, 0.7], [550, 660, 1.2], [950, 410, 0.8], [1170, 390, 1.1],
+        [410, 650, 1.0], [1300, 770, 1.0], [1030, 660, 0.7], [260, 920, 0.9], [690, 270, 1.2],
+        [890, 290, 1.0], [490, 370, 0.8], [1180, 540, 0.9], [1030, 520, 1.1], [740, 430, 1.2]
     ];
     // Stars that brighten now and then; the first four keep doing so in lite mode
-    const TWINKLE = [10, 0, 17, 7, 23, 12, 3, 29];
+    const TWINKLE = [10, 0, 17, 7, 23, 12, 3, 29, 45, 14, 34, 40, 2, 49, 42, 25, 50, 38, 20, 41, 46, 44];
 
     function skySVG() {
         const stars = STARS.map(([x, y, r], i) => {
@@ -184,24 +188,24 @@
         return out;
     }
 
-    function planetASVG() {
+    function planetASVG(id = 'a') {
         const R = 104;
         const P = 120;
         return `
 <svg class="lg-diagram lg-planet-a" viewBox="-300 -150 600 300" style="--lg-dur: ${P}s" aria-hidden="true" focusable="false">
     <defs>
-        <radialGradient id="lg-a-shade" cx="0.32" cy="0.28" r="0.85">
+        <radialGradient id="lg-${id}-shade" cx="0.32" cy="0.28" r="0.85">
             <stop offset="0" class="lg-stop-lit"/>
             <stop offset="0.6" class="lg-stop-mid"/>
             <stop offset="1" class="lg-stop-dark"/>
         </radialGradient>
-        <clipPath id="lg-a-clip"><circle r="${R}"/></clipPath>
+        <clipPath id="lg-${id}-clip"><circle r="${R}"/></clipPath>
     </defs>
     <g transform="rotate(-12)"><path class="lg-line lg-orbit lg-dashed" d="M -270 0 A 270 58 0 0 1 270 0"/></g>
     <circle class="lg-body" r="${R}"/>
-    <circle r="${R}" fill="url(#lg-a-shade)"/>
+    <circle r="${R}" fill="url(#lg-${id}-shade)"/>
     <g transform="rotate(-20)">
-        <g clip-path="url(#lg-a-clip)">
+        <g clip-path="url(#lg-${id}-clip)">
             <path class="lg-line lg-grid" d="M -104 0 H 104 M -90 -52 H 90 M -90 52 H 90 M -52 -90 H 52 M -52 90 H 52"/>
             ${meridians(6, R, P)}
         </g>
@@ -215,16 +219,16 @@
 </svg>`;
     }
 
-    function planetBSVG() {
+    function planetBSVG(id = 'b') {
         const R = 22;
         const P = 80;
         return `
 <svg class="lg-diagram lg-planet-b" viewBox="-80 -40 160 80" style="--lg-dur: ${P}s" aria-hidden="true" focusable="false">
-    <defs><clipPath id="lg-b-clip"><circle r="${R}"/></clipPath></defs>
+    <defs><clipPath id="lg-${id}-clip"><circle r="${R}"/></clipPath></defs>
     <g transform="rotate(-14)">
         <path class="lg-line lg-orbit" d="M -54 0 A 54 11 0 0 1 54 0 M -43 0 A 43 8.5 0 0 1 43 0"/>
         <circle class="lg-body" r="${R}"/>
-        <g clip-path="url(#lg-b-clip)">
+        <g clip-path="url(#lg-${id}-clip)">
             <path class="lg-line lg-grid" d="M -22 0 H 22 M -19 -11 H 19 M -19 11 H 19"/>
             ${meridians(3, R, P)}
         </g>
@@ -242,16 +246,210 @@
         ).join('') + '<circle class="lg-line lg-faint" r="62"/>';
     }
 
-    function blackHoleSVG() {
+    function blackHoleSVG(id = 'bh') {
         return `
 <svg class="lg-diagram lg-blackhole" viewBox="-170 -60 340 120" aria-hidden="true" focusable="false">
-    <defs><clipPath id="lg-bh-near"><rect x="-200" y="0" width="400" height="200"/></clipPath></defs>
+    <defs><clipPath id="lg-${id}-near"><rect x="-200" y="0" width="400" height="200"/></clipPath></defs>
     <g transform="rotate(-8) scale(1 0.24)">${diskRings()}</g>
     <path class="lg-line lg-lens" d="M -43 0 A 43 36 0 0 1 43 0"/>
     <circle class="lg-horizon" r="24"/>
     <circle class="lg-line lg-photon" r="30"/>
-    <g transform="rotate(-8) scale(1 0.24)"><g clip-path="url(#lg-bh-near)">${diskRings()}</g></g>
+    <g transform="rotate(-8) scale(1 0.24)"><g clip-path="url(#lg-${id}-near)">${diskRings()}</g></g>
 </svg>`;
+    }
+
+    // A booster's flight: up from the pad, over the top and back down onto the landing target.
+    // A short bright tracer runs along the path; the target ticks pulse.
+    function trajectorySVG() {
+        return `
+<svg class="lg-diagram lg-trajectory" viewBox="-300 -200 600 400" style="--lg-dur: 9s" aria-hidden="true" focusable="false">
+    <path class="lg-line lg-faint lg-dashed" d="M -300 158 A 1250 1250 0 0 1 300 158"/>
+    <path class="lg-limb" d="M -300 187 A 1250 1250 0 0 1 300 187"/>
+    <path class="lg-line lg-orbit lg-dashed" d="M -200 166 C -186 -70, 30 -168, 92 -60 S 152 112 152 158"/>
+    <path class="lg-tracer" pathLength="1000" d="M -200 166 C -186 -70, 30 -168, 92 -60 S 152 112 152 158"/>
+    <path class="lg-line" d="M -212 166 H -188 M -200 166 V 152"/>
+    <circle class="lg-line" cx="152" cy="161" r="9"/>
+    <path class="lg-line" d="M 140 161 H 164 M 152 149 V 173"/>
+    <circle class="lg-pulse" cx="152" cy="161" r="9"/>
+    <path class="lg-line lg-faint" d="M 104 -40 l 14 -6 M 120 2 l 15 -2 M 134 46 l 15 0 M 144 92 l 15 2"/>
+</svg>`;
+    }
+
+    // KGOSS in outline: a truss with modules, a centrifuge ring, solar arrays and a docked capsule,
+    // swaying gently over a planet's limb
+    function stationSVG() {
+        const panel = (x, y) => `<g transform="translate(${x} ${y})"><rect class="lg-line" x="-11" y="-26" width="22" height="52"/>` +
+            '<path class="lg-line lg-faint" d="M 0 -26 V 26 M -11 -13 H 11 M -11 0 H 11 M -11 13 H 11"/></g>';
+        return `
+<svg class="lg-diagram lg-station" viewBox="-260 -170 520 340" style="--lg-dur: 26s" aria-hidden="true" focusable="false">
+    <path class="lg-line lg-faint lg-dashed" d="M -260 96 A 900 900 0 0 1 260 96"/>
+    <path class="lg-limb" d="M -260 132 A 900 900 0 0 1 260 132"/>
+    <ellipse class="lg-line lg-orbit lg-dashed" cx="0" cy="-12" rx="240" ry="46"/>
+    <path class="lg-tracer" pathLength="1000" d="M -240 -12 A 240 46 0 0 0 240 -12"/>
+    <g class="lg-sway">
+        <path class="lg-line" d="M -104 -20 H 104"/>
+        ${panel(-84, -52)}${panel(-84, 12)}${panel(84, -52)}${panel(84, 12)}
+        <path class="lg-line" d="M -84 -26 V -14 M 84 -26 V -14"/>
+        <circle class="lg-body" cx="-36" cy="-20" r="24"/><circle class="lg-limb" cx="-36" cy="-20" r="24"/>
+        <path class="lg-line lg-faint" d="M -36 -44 V 4 M -60 -20 H -12"/>
+        <rect class="lg-body" x="-6" y="-29" width="44" height="18" rx="5"/><rect class="lg-line" x="-6" y="-29" width="44" height="18" rx="5"/>
+        <rect class="lg-body" x="40" y="-27" width="26" height="14" rx="4"/><rect class="lg-line" x="40" y="-27" width="26" height="14" rx="4"/>
+        <path class="lg-body" d="M 104 -27 L 122 -31 L 122 -9 L 104 -13 Z"/><path class="lg-line" d="M 104 -27 L 122 -31 L 122 -9 L 104 -13 Z"/>
+    </g>
+</svg>`;
+    }
+
+    // A Hohmann transfer: low orbit to the Mun's orbit along half an ellipse, with burn marks at
+    // both ends; the Mun travels round its orbit
+    function transferSVG(id = 'tr') {
+        return `
+<svg class="lg-diagram lg-transfer" viewBox="-230 -210 460 420" style="--lg-dur: 10s" aria-hidden="true" focusable="false">
+    <defs><clipPath id="lg-${id}-clip"><circle r="34"/></clipPath></defs>
+    <circle class="lg-line lg-faint lg-dashed" r="178"/>
+    <circle class="lg-line lg-orbit" r="66"/>
+    <path class="lg-line lg-orbit lg-dashed" d="M 66 0 A 122 108.4 0 0 0 -178 0"/>
+    <path class="lg-tracer" pathLength="1000" d="M 66 0 A 122 108.4 0 0 0 -178 0"/>
+    <path class="lg-line" d="M 60 -8 L 72 0 L 60 8 M -172 -8 L -184 0 L -172 8"/>
+    <circle class="lg-body" r="34"/>
+    <g clip-path="url(#lg-${id}-clip)"><path class="lg-line lg-grid" d="M -34 0 H 34 M -30 -17 H 30 M -30 17 H 30"/>${meridians(3, 34, 70)}</g>
+    <circle class="lg-limb" r="34"/>
+    <g class="lg-revolve" style="--lg-dur: 120s"><circle class="lg-moon" cx="178" cy="0" r="11"/></g>
+</svg>`;
+    }
+
+    // The Mun, cratered and turning slowly, with a lander's descent arc onto its limb
+    function munSVG(id = 'mun') {
+        const craters = [[-40, -30, 16], [22, -52, 10], [46, 18, 20], [-18, 38, 12], [-62, 22, 8], [10, 4, 6], [64, -34, 7], [-34, 70, 9]];
+        return `
+<svg class="lg-diagram lg-mun" viewBox="-230 -180 460 360" style="--lg-dur: 11s" aria-hidden="true" focusable="false">
+    <defs>
+        <radialGradient id="lg-${id}-shade" cx="0.3" cy="0.3" r="0.9">
+            <stop offset="0" class="lg-stop-lit"/><stop offset="0.6" class="lg-stop-mid"/><stop offset="1" class="lg-stop-dark"/>
+        </radialGradient>
+        <clipPath id="lg-${id}-clip"><circle r="104"/></clipPath>
+    </defs>
+    <ellipse class="lg-line lg-faint lg-dashed" rx="170" ry="40" transform="rotate(-16)"/>
+    <circle class="lg-body" r="104"/>
+    <circle r="104" fill="url(#lg-${id}-shade)"/>
+    <g clip-path="url(#lg-${id}-clip)"><g class="lg-revolve" style="--lg-dur: 240s">
+        ${craters.map(([x, y, r]) => `<circle class="lg-line lg-grid" cx="${x}" cy="${y}" r="${r}"/>`).join('')}
+    </g></g>
+    <circle class="lg-limb" r="104"/>
+    <path class="lg-line lg-orbit lg-dashed" d="M 214 -168 C 160 -150, 110 -128, 86 -60"/>
+    <path class="lg-tracer" pathLength="1000" d="M 214 -168 C 160 -150, 110 -128, 86 -60"/>
+    <path class="lg-line" d="M 78 -64 l -6 -6 M 94 -56 l 6 -6"/>
+</svg>`;
+    }
+
+    // A star chart: a slowly turning celestial grid with two constellations that draw themselves in
+    function chartSVG() {
+        const ticks = Array.from({ length: 36 }, (_, i) => {
+            const a = i * Math.PI / 18, r1 = 214, r2 = i % 3 ? 220 : 228;
+            return `M ${(r1 * Math.cos(a)).toFixed(1)} ${(r1 * Math.sin(a)).toFixed(1)} L ${(r2 * Math.cos(a)).toFixed(1)} ${(r2 * Math.sin(a)).toFixed(1)}`;
+        }).join(' ');
+        const figure = (pts, cls, dur, offset) => `<path class="lg-line lg-constellation ${cls}" pathLength="100" ` +
+            `style="--lg-dur: ${dur}s; animation-delay: ${delay(dur, offset)}" d="M ${pts.map(p => p.join(' ')).join(' L ')}"/>` +
+            pts.map(([x, y]) => `<circle class="lg-chart-star" cx="${x}" cy="${y}" r="2.6"/>`).join('');
+        return `
+<svg class="lg-diagram lg-chart" viewBox="-240 -240 480 480" aria-hidden="true" focusable="false">
+    <g class="lg-revolve" style="--lg-dur: 400s">
+        <circle class="lg-line lg-faint" r="80"/><circle class="lg-line lg-faint lg-dashed" r="150"/><circle class="lg-line lg-faint" r="214"/>
+        <path class="lg-line lg-faint" d="M -214 0 H 214 M 0 -214 V 214 M -151 -151 L 151 151 M -151 151 L 151 -151"/>
+        <path class="lg-line" d="${ticks}"/>
+    </g>
+    ${figure([[-120, -60], [-70, -96], [-20, -70], [30, -104], [86, -80], [120, -30]], 'is-a', 14, 0)}
+    ${figure([[-110, 70], [-60, 40], [-14, 66], [-30, 120], [40, 110], [90, 60]], 'is-b', 14, 7)}
+</svg>`;
+    }
+
+    // A launcher in blueprint outline, with stage lines, a height rule and a scan line passing down it
+    function blueprintSVG() {
+        return `
+<svg class="lg-diagram lg-blueprint" viewBox="-130 -270 260 540" style="--lg-dur: 7s" aria-hidden="true" focusable="false">
+    <path class="lg-line" d="M 0 -250 C 22 -224, 26 -196, 26 -160 L 26 -110 L 30 -96 L 30 150 L 30 196 L -30 196 L -30 150 L -30 -96 L -26 -110 L -26 -160 C -26 -196, -22 -224, 0 -250 Z"/>
+    <path class="lg-line lg-faint lg-dashed" d="M -70 -160 H 70 M -70 -96 H 70 M -70 150 H 70"/>
+    <path class="lg-line" d="M -30 150 L -54 196 L -30 196 M 30 150 L 54 196 L 30 196"/>
+    <path class="lg-line" d="M -18 196 L -24 222 L -4 222 L -10 196 M 18 196 L 24 222 L 4 222 L 10 196"/>
+    <path class="lg-line lg-faint" d="M -30 -40 H 30 M -30 40 H 30 M -26 -135 H 26"/>
+    <path class="lg-line" d="M 96 -250 V 222 M 90 -250 H 102 M 90 222 H 102 M 90 -160 H 102 M 90 -96 H 102 M 90 150 H 102"/>
+    <g class="lg-scan"><path class="lg-line lg-orbit" d="M -80 -250 H 80"/></g>
+</svg>`;
+    }
+
+    // Scenes: which diagrams fill the sky. Each page has its own, and some sections switch to
+    // another as they reach the middle of the window (desktop only; phones keep the first scene).
+    const SCENES = {
+        orbit: () => `<div class="lg-scene" data-scene="orbit">${planetASVG()}${planetBSVG()}${blackHoleSVG()}</div>`,
+        trajectory: () => `<div class="lg-scene" data-scene="trajectory">${trajectorySVG()}${planetBSVG('b2')}</div>`,
+        station: () => `<div class="lg-scene" data-scene="station">${stationSVG()}${planetBSVG('b3')}</div>`,
+        transfer: () => `<div class="lg-scene" data-scene="transfer">${transferSVG()}${blackHoleSVG('bh2')}</div>`,
+        lunar: () => `<div class="lg-scene" data-scene="lunar">${munSVG()}${planetBSVG('b4')}</div>`,
+        chart: () => `<div class="lg-scene" data-scene="chart">${chartSVG()}${blackHoleSVG('bh3')}</div>`,
+        blueprint: () => `<div class="lg-scene" data-scene="blueprint">${blueprintSVG()}${trajectorySVG()}</div>`,
+    };
+    // page → [scene for the top of the page, [section selector, scene] …]
+    const PAGE_SCENES = {
+        'index.html': ['orbit', [['.overview', 'trajectory'], ['.featured-programs', 'station'], ['.quick-achievements', 'transfer'], ['.cta-section', 'lunar']]],
+        'about.html': ['orbit', []],
+        'goals-achievements.html': ['transfer', [['#timeline', 'trajectory']]],
+        'vehicles-programs.html': ['blueprint', [['#aegis', 'trajectory'], ['#lyra', 'blueprint'], ['#aircraft', 'orbit']]],
+        'missions-archive.html': ['lunar', [['#silver-bridge', 'transfer']]],
+        'gallery.html': ['chart', []],
+        'autoland.html': ['trajectory', [['#glide', 'lunar']]],
+        'kgoss.html': ['station', []],
+        'game.html': ['station', []],
+        'support.html': ['orbit', []],
+    };
+    const SCENE_SWAP_MS = 1300;   // matches the .lg-scene transitions in liquid-glass.css
+    const scene = { cosmos: null, current: null, plan: null, frame: 0 };
+
+    function pagePlan() {
+        const page = location.pathname.split('/').pop() || 'index.html';
+        const plan = PAGE_SCENES[page] || ['orbit', []];
+        // Phones, tablets and small windows keep one calm scene
+        return lite.matches ? ['orbit', []] : plan;
+    }
+
+    // The scene for the section crossing the upper middle of the window
+    function sceneForScroll() {
+        let name = scene.plan[0];
+        const line = innerHeight * 0.45;
+        for (const [selector, value] of scene.plan[1]) {
+            const el = document.querySelector(selector);
+            if (el && el.getBoundingClientRect().top < line) name = value;
+        }
+        return name;
+    }
+
+    function showScene(name) {
+        if (!scene.cosmos || name === scene.current) return;
+        const next = scene.cosmos.querySelector(`.lg-scene[data-scene="${name}"]`);
+        const prev = scene.current && scene.cosmos.querySelector(`.lg-scene[data-scene="${scene.current}"]`);
+        scene.current = name;
+        clearTimeout(next.hideTimer);
+        next.hidden = false;
+        void next.offsetWidth;                 // start the fade from the hidden pose
+        next.classList.add('is-on');
+        if (prev) {
+            prev.classList.remove('is-on');
+            clearTimeout(prev.hideTimer);
+            // Once faded, the old scene leaves the page so its loops stop costing anything
+            prev.hideTimer = setTimeout(() => {
+                if (!prev.classList.contains('is-on')) {
+                    prev.hidden = true;
+                    startSkyClock(scene.cosmos);
+                }
+            }, SCENE_SWAP_MS);
+        }
+        startSkyClock(scene.cosmos);
+    }
+
+    function onSceneScroll() {
+        if (scene.frame) return;
+        scene.frame = requestAnimationFrame(() => {
+            scene.frame = 0;
+            showScene(sceneForScroll());
+        });
     }
 
     function buildCosmos(fadeIn) {
@@ -260,7 +458,10 @@
         cosmos.className = 'lg-cosmos';
         cosmos.id = 'lg-cosmos';
         cosmos.setAttribute('aria-hidden', 'true');
-        cosmos.innerHTML = skySVG() + planetASVG() + planetBSVG() + blackHoleSVG();
+        scene.plan = pagePlan();
+        const names = [...new Set([scene.plan[0], ...scene.plan[1].map(([, value]) => value)])];
+        cosmos.innerHTML = skySVG() + names.map(n => SCENES[n]()).join('');
+        cosmos.querySelectorAll('.lg-scene').forEach(el => { el.hidden = true; });
         if (fadeIn) {
             cosmos.classList.add('is-entering');
             cosmos.addEventListener('animationend', e => {
@@ -268,11 +469,19 @@
             });
         }
         document.body.prepend(cosmos);
-        startSkyClock(cosmos);
+        scene.cosmos = cosmos;
+        scene.current = null;
+        showScene(sceneForScroll());
+        if (scene.plan[1].length) window.addEventListener('scroll', onSceneScroll, { passive: true });
     }
 
     function removeCosmos() {
         stopSkyClock();
+        window.removeEventListener('scroll', onSceneScroll);
+        cancelAnimationFrame(scene.frame);
+        scene.frame = 0;
+        scene.cosmos = null;
+        scene.current = null;
         const cosmos = document.querySelector('.lg-cosmos');
         if (cosmos) cosmos.remove();
     }
@@ -472,35 +681,41 @@
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const RESIZE_SETTLE_MS = 150;
 
-    // The rim bends the view inward, and splits it slightly by colour: blue bends further than red,
-    // so lines crossing the rim pick up a faint rainbow fringe
-    const DISPERSION = 0.4;
+    // Chromatic aberration: the rim bends short wavelengths further than long ones, so what lies
+    // behind it is seen twice, slightly apart: a red image bent a little less and a cyan-blue one a
+    // little more. A star or line under the rim gets a tiny red fringe on one side and a cyan one on
+    // the other. Where nothing bends (the flat middle) the two coincide and there is no colour at all.
+    const DISPERSION = 0.15;    // red bends (1 - this), cyan (1 + this), as a share of the bend
     // Controls: a capsule rim that bends evenly all round
     const BEZEL_CONTROL = 18;   // px of rim that bends, at most
     const BEND = 0.75;          // strongest inward shift, as a share of the bezel
     // Panes: a rounded rim on every side, bending harder on the sides set by the slab vector (x, y in
     // -1..1; positive x favours the right side, positive y the bottom). At rest that is the bottom-right
     // corner, away from the light; under the pointer it is the side that tilts up toward the viewer,
-    // and the whole view shifts a little, as it does through a tilted plate of glass.
-    const BEZEL_PANE = 32;      // px wide, at most
-    const PANE_THICKNESS = 8;   // a rounded edge: the bend eases in over the whole rim instead of dropping off
+    // and the whole view shifts a little, as it does through a tilted plate of glass. That shift is
+    // the same for every colour (a flat plate barely disperses), so the middle stays clean.
+    const BEZEL_PANE = 40;      // px wide, at most
+    const PANE_THICKNESS = 14;  // a rounded edge: the bend holds near the rim, then rolls off over its whole width
     const EDGE_SHIFT = 18;      // px, strongest inward shift on the favoured side
     const EDGE_FLOOR = 0.5;     // the other sides still bend this much
     const TILT_SHIFT = 3;       // px, the view through a fully tilted pane
-    const PANE_SCALE = 2 * (EDGE_SHIFT + TILT_SHIFT);
+    const PANE_SCALE = 2 * EDGE_SHIFT;
     const SLAB_REST = { x: 0.9, y: 0.9, dx: 0, dy: 0 };
-    // Light caught in the rim, split into a spectrum by how hard the rim bends there: the strongest
-    // bend (the favoured edge) shows blue and violet, gentler bends cyan, green and a faint amber as
-    // the rim flattens, so the other sides (half the bend) stay warm and dim. Entries run from no
-    // bend to full.
-    const PRISM = {
-        r: '1 1 1 1 0.55 0.2 0.35 0.6',
-        g: '0.55 0.55 0.75 0.95 1 0.8 0.5 0.4',
-        b: '0.2 0.2 0.25 0.3 0.6 1 1 1',
-        a: '0 0.02 0.08 0.2 0.36 0.52 0.66 0.75',
-    };
-    // How bright that light is, from the theme's --lg-prism (it shows less over a light sky)
-    const prismStrength = () => parseFloat(getComputedStyle(root).getPropertyValue('--lg-prism')) || 0.3;
+    // Glass softens what lies behind it a touch: a slight blur under the bend (px). At the rim the
+    // lens looks further inward than the blur reaches, so the pane edges get no dark fringe.
+    const SOFTEN = 1.2;
+    // The rim's own light: the curved edge catches a faint hairline of light just inside it, and it
+    // splits like everything else seen through the rim: its red image sits a touch further in and its
+    // cyan image a touch further out, with white where they overlap. So the split shows even over an
+    // empty sky. It runs RIM_LIGHT.at px in from the pane's own rounded edge (blue in the map is the
+    // distance to that edge, so it hugs the corners too) and fades in on the sides the slab favours,
+    // between RIM_LIGHT.fade side weights, so it follows the tilt and tapers off round the corners.
+    // Chromium draws it as an image on the pane's ::after, faded per side by a mask (.lg-rim in
+    // liquid-glass.css): inside its backdrop filter it would cost most of the frame rate.
+    const RIM_LIGHT = { at: 2, split: 0.55, width: 0.6, fade: [0.6, 0.95] };    // px, except fade
+    const RIM_RANGE = 8;        // px of edge distance the map's blue channel covers
+    const RIM_STEPS = 64;
+    const rimStrength = () => parseFloat(getComputedStyle(root).getPropertyValue('--lg-rim-light')) || 0.35;
 
     const refract = {
         on: false, defs: null, frame: 0, timer: 0, resize: null, mutate: null, theme: null,
@@ -529,24 +744,28 @@
     }
 
     // Displacement map for a rounded box: red/green = how far to look along x/y, 128 = straight through,
-    // `amp` = the strongest shift as a share of the full range. Only the rim band is computed.
+    // `amp` = the strongest shift as a share of the full range; blue = how close the box's own edge
+    // is, 255 at the edge down to 0 at RIM_RANGE px in. Only the rim band is computed.
     // The bend follows contours with a corner radius of at least `round`, so it curves smoothly
     // through the corners instead of meeting at a seam; the box itself keeps radius `r`.
-    function mapURL(w, h, r, bezel, thickness, amp, round = r) {
+    // With `rim`, it paints the rim light instead (see rimColour), on a clear image.
+    function mapURL(w, h, r, bezel, thickness, amp, round = r, rim = false) {
         const canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d');
         const img = ctx.createImageData(w, h);
         const data = img.data;
-        new Uint32Array(data.buffer).fill(0xff808080);
+        if (!rim) new Uint32Array(data.buffer).fill(0xff008080);
         const profile = bendProfile(bezel, thickness);
         const last = profile.length - 1;
         const rr = Math.min(Math.max(r, round), w / 2, h / 2);
         const band = Math.ceil(Math.max(rr, bezel));
+        // Inside the box, with a pixel and a half to spare: the box's own anti-aliased edge must bend
+        // inward too, or it would show the softened edge of what lies behind as a jagged dark line
         const inside = (px, py) => {
             const qx = Math.abs(px) - (w / 2 - r), qy = Math.abs(py) - (h / 2 - r);
-            return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) < r;
+            return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) < r + 1.5;
         };
         const pixel = (x, y) => {
             // Signed distance to the rounded contour and the outward normal there
@@ -558,17 +777,29 @@
             if (depth >= bezel) return;
             if (depth <= 0) {
                 // The corner between a tighter box corner and the rounder contour bends like the edge
-                if (rr === r || !inside(px, py)) return;
+                if (!inside(px, py)) return;
                 depth = 0.01;
             }
             let nx = 0, ny = 0;
             if (out > 0) { nx = ox / out; ny = oy / out; }
             else if (qx > qy) nx = 1;
             else ny = 1;
-            const m = profile[Math.min(last, Math.round(depth / bezel * last))] * amp * 127;
+            const bend = profile[Math.min(last, Math.round(depth / bezel * last))];
             const k = (y * w + x) * 4;
+            // Distance in from the box's own edge (radius r)
+            const ex = Math.abs(px) - (w / 2 - r), ey = Math.abs(py) - (h / 2 - r);
+            const edge = r - Math.hypot(Math.max(ex, 0), Math.max(ey, 0)) - Math.min(Math.max(ex, ey), 0);
+            if (rim) {
+                const [red, cyan, alpha] = rimColour(edge);
+                data[k] = Math.round(red * 255);
+                data[k + 1] = data[k + 2] = Math.round(cyan * 255);
+                data[k + 3] = Math.round(alpha * 255);
+                return;
+            }
+            const m = bend * amp * 127;
             data[k] = Math.round(128 - Math.sign(px) * nx * m);
             data[k + 1] = Math.round(128 - Math.sign(py) * ny * m);
+            data[k + 2] = Math.round(Math.min(Math.max(1 - edge / RIM_RANGE, 0), 1) * 255);
         };
         for (let y = 0; y < h; y++) {
             if (y < band || y >= h - band) {
@@ -583,41 +814,87 @@
     }
 
     const fmt = v => v.toFixed(4);
-    // Transfer tables that weight the pane map per side and add the tilt shift: values below 128 are
-    // the right (red) and bottom (green) edges, values above the left and top. The last two give the
-    // same per-side bend for the rim light, without the shift, as 0 (none) to 1 (full).
+    // Transfer tables that weight the pane map per side: values below 128 are the right (red) and
+    // bottom (green) edges, values above the left and top. The last two give the squared per-side
+    // bend, 0 (none) to 1 (full), for the rim light: summed, they are the square of how hard it bends.
+    const SQUARE_STEPS = 16;
     function slabTables(v) {
         const k = EDGE_SHIFT / PANE_SCALE;
         const weight = t => EDGE_FLOOR + (1 - EDGE_FLOOR) * Math.max(t, 0);
-        const cx = 0.5 + v.dx / PANE_SCALE, cy = 0.5 + v.dy / PANE_SCALE;
+        const squared = t => {
+            const lo = weight(t), hi = weight(-t), out = [];
+            for (let i = 0; i <= SQUARE_STEPS; i++) {
+                const d = 2 * i / SQUARE_STEPS - 1;     // -1 (right/bottom, full) .. 1 (left/top, full)
+                out.push(fmt((d < 0 ? lo : hi) ** 2 * d * d));
+            }
+            return out.join(' ');
+        };
         return [
-            `${fmt(cx - k * weight(v.x))} ${fmt(cx)} ${fmt(cx + k * weight(-v.x))}`,
-            `${fmt(cy - k * weight(v.y))} ${fmt(cy)} ${fmt(cy + k * weight(-v.y))}`,
-            `${fmt(weight(v.x))} 0 ${fmt(weight(-v.x))}`,
-            `${fmt(weight(v.y))} 0 ${fmt(weight(-v.y))}`,
+            `${fmt(0.5 - k * weight(v.x))} 0.5 ${fmt(0.5 + k * weight(-v.x))}`,
+            `${fmt(0.5 - k * weight(v.y))} 0.5 ${fmt(0.5 + k * weight(-v.y))}`,
+            squared(v.x),
+            squared(v.y),
         ];
     }
 
-    // The rim light: how hard each pixel bends (x + y of the per-side bend), coloured by PRISM and
-    // added over the refracted view as light
-    function prism(bx, by) {
-        return `<feComponentTransfer in="map-raw" result="bend"><feFuncR type="table" tableValues="${bx}"/>` +
-            `<feFuncG type="table" tableValues="${by}"/></feComponentTransfer>` +
-            '<feColorMatrix type="matrix" values="1 1 0 0 0  1 1 0 0 0  1 1 0 0 0  1 1 0 0 0"/>' +
-            `<feComponentTransfer result="prism"><feFuncR type="table" tableValues="${PRISM.r}"/>` +
-            `<feFuncG type="table" tableValues="${PRISM.g}"/><feFuncB type="table" tableValues="${PRISM.b}"/>` +
-            `<feFuncA type="table" tableValues="${PRISM.a}"/></feComponentTransfer>` +
-            `<feComposite class="lg-prism-mix" in="view" in2="prism" operator="arithmetic" k2="1" k3="${prismStrength()}"/>`;
+    // The rim light at a given distance in from the edge (px): red and cyan (0..1, relative to the
+    // brighter) and opacity. Red sits further in, cyan further out.
+    function rimColour(d) {
+        const red = Math.exp(-(((d - RIM_LIGHT.at - RIM_LIGHT.split) / RIM_LIGHT.width) ** 2));
+        const cyan = Math.exp(-(((d - RIM_LIGHT.at + RIM_LIGHT.split) / RIM_LIGHT.width) ** 2));
+        const peak = Math.max(red, cyan, 1e-6);
+        return [red / peak, cyan / peak, peak];
     }
 
-    // Two passes of the same bend: a weaker one gives red, a stronger one blue, and green is their
-    // average (a third pass would cost more than the faint difference is worth)
-    function dispersed(map, scale, result = '') {
+    // How much of the rim light a side shows, from its weight
+    function rimShow(weight) {
+        const t = Math.min(Math.max((weight - RIM_LIGHT.fade[0]) / (RIM_LIGHT.fade[1] - RIM_LIGHT.fade[0]), 0), 1);
+        return t * t * (3 - 2 * t);
+    }
+
+    // Firefox draws the rim light inside its lens filter: its colour and opacity as tables over the
+    // edge distance (blue), and how much of it each side shows as a table over the squared weighted
+    // bend there (the rim bends almost fully that close to the edge)
+    function rimTables() {
+        const strength = rimStrength(), r = [], c = [], a = [], show = [];
+        for (let i = 0; i <= RIM_STEPS; i++) {
+            const m = i / RIM_STEPS;
+            const [red, cyan, alpha] = rimColour((1 - m) * RIM_RANGE);
+            r.push(fmt(red));
+            c.push(fmt(cyan));
+            a.push(fmt(alpha * strength));
+            show.push(fmt(rimShow(Math.sqrt(m))));     // the side weight
+        }
+        return { r: r.join(' '), c: c.join(' '), a: a.join(' '), show: show.join(' ') };
+    }
+
+    function rimLight(bx, by) {
+        const t = rimTables();
+        return `<feComponentTransfer in="map-raw" result="bend"><feFuncR type="table" tableValues="${bx}"/>` +
+            `<feFuncG type="table" tableValues="${by}"/></feComponentTransfer>` +
+            '<feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 1 0 0 0"/>' +
+            `<feComponentTransfer result="rim-show"><feFuncA type="table" tableValues="${t.show}"/></feComponentTransfer>` +
+            '<feColorMatrix in="map-raw" type="matrix" values="0 0 1 0 0  0 0 1 0 0  0 0 1 0 0  0 0 1 0 0"/>' +
+            `<feComponentTransfer class="lg-rim-light"><feFuncR type="table" tableValues="${t.r}"/>` +
+            `<feFuncG type="table" tableValues="${t.c}"/><feFuncB type="table" tableValues="${t.c}"/>` +
+            `<feFuncA type="table" tableValues="${t.a}"/></feComponentTransfer>` +
+            '<feComposite in2="rim-show" operator="in" result="rim"/>' +
+            '<feComposite in="rim" in2="view" operator="over"/>';
+    }
+
+    // The slight blur, taken before the bend
+    const soften = `<feGaussianBlur in="SourceGraphic" stdDeviation="${SOFTEN}" result="soft"/>`;
+    // Panes: the same, then the tilt's whole-view shift
+    const softenTilted = `<feGaussianBlur in="SourceGraphic" stdDeviation="${SOFTEN}"/>` +
+        '<feOffset dx="0" dy="0" result="soft"/>';
+
+    // Two passes of the same bend: a weaker one gives the red channel, a stronger one green and blue
+    function dispersed(map, scale, result = '', source = 'soft') {
         const pass = (factor, values, result) =>
-            `<feDisplacementMap in="SourceGraphic" in2="${map}" scale="${(scale * factor).toFixed(2)}" xChannelSelector="R" yChannelSelector="G"/>` +
+            `<feDisplacementMap in="${source}" in2="${map}" scale="${(scale * factor).toFixed(2)}" xChannelSelector="R" yChannelSelector="G"/>` +
             `<feColorMatrix type="matrix" values="${values}" result="${result}"/>`;
-        return pass(1 - DISPERSION, '1 0 0 0 0  0 0.5 0 0 0  0 0 0 0 0  0 0 0 1 0', 'warm') +
-            pass(1 + DISPERSION, '0 0 0 0 0  0 0.5 0 0 0  0 0 1 0 0  0 0 0 1 0', 'cool') +
+        return pass(1 - DISPERSION, '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0', 'warm') +
+            pass(1 + DISPERSION, '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0', 'cool') +
             `<feComposite in="warm" in2="cool" operator="arithmetic" k2="1" k3="1"${result && ` result="${result}"`}/>`;
     }
 
@@ -632,16 +909,16 @@
             r = Math.round(Math.min(w, h) / 2);
             const bezel = Math.max(2, Math.round(Math.min(r * 0.8, BEZEL_CONTROL)));
             key = `c-${w}-${h}`;
-            if (!refract.filters.has(key)) body = image(mapURL(w, h, r, bezel, 3, 1)) + dispersed('map-raw', bezel * BEND * 2);
+            if (!refract.filters.has(key)) body = image(mapURL(w, h, r, bezel, 3, 1)) + soften + dispersed('map-raw', bezel * BEND * 2);
         } else {
             const bezel = Math.max(4, Math.round(Math.min(BEZEL_PANE, Math.min(w, h) / 4)));
             key = `p-${w}-${h}-${kind.radius}`;
             if (!refract.filters.has(key)) {
                 const [tr, tg, bx, by] = slabTables(SLAB_REST);
-                body = image(mapURL(w, h, kind.radius, bezel, PANE_THICKNESS, 1, bezel)) +
+                body = image(mapURL(w, h, kind.radius, bezel, PANE_THICKNESS, 1, bezel)) + softenTilted +
                     `<feComponentTransfer in="map-raw" result="map"><feFuncR type="table" tableValues="${tr}"/>` +
                     `<feFuncG type="table" tableValues="${tg}"/></feComponentTransfer>` +
-                    dispersed('map', PANE_SCALE, 'view') + prism(bx, by);
+                    (copyLens ? dispersed('map', PANE_SCALE, 'view') + rimLight(bx, by) : dispersed('map', PANE_SCALE));
             }
         }
         if (body) {
@@ -650,7 +927,7 @@
             [['x', 0], ['y', 0], ['width', w], ['height', h], ['filterUnits', 'userSpaceOnUse'],
                 ['primitiveUnits', 'userSpaceOnUse'], ['color-interpolation-filters', 'sRGB']]
                 .forEach(([name, value]) => filter.setAttribute(name, value));
-            filter.innerHTML = '<feFlood flood-color="rgb(128,128,128)" result="flat"/>' + body;
+            filter.innerHTML = '<feFlood flood-color="rgb(128,128,0)" result="flat"/>' + body;
             refract.defs.appendChild(filter);
             refract.filters.set(key, { id: filter.id, users: 0 });
         }
@@ -670,10 +947,27 @@
         }
     }
 
+    // Chromium's rim light: drawn once per pane size, inside the border like the pane's own corners
+    const rimImages = new Map();
+    function rimImage(el, w, h, radius) {
+        const cw = el.clientWidth, ch = el.clientHeight, border = el.clientLeft;
+        const bezel = Math.max(4, Math.round(Math.min(BEZEL_PANE, Math.min(w, h) / 4)));
+        const key = `${cw}-${ch}-${radius}`;
+        if (!rimImages.has(key)) {
+            if (rimImages.size > 200) rimImages.clear();
+            rimImages.set(key, mapURL(cw, ch, Math.max(0, radius - border), bezel, PANE_THICKNESS, 1, Math.max(0, bezel - border), true));
+        }
+        el.style.setProperty('--lg-rim-img', `url(${rimImages.get(key)})`);
+        el.classList.add('lg-rim');
+    }
+
     function clearLens(el) {
         dropLive(el);
         el.style.removeProperty(LENS_VAR);
         el.classList.remove('lg-lens-copy');
+        el.style.removeProperty('--lg-copy-clip');
+        el.style.removeProperty('--lg-rim-img');
+        el.classList.remove('lg-rim');
     }
 
     function sizeLens(el, width, height) {
@@ -701,6 +995,9 @@
             el.style.setProperty(LENS_VAR, `url(#${refract.filters.get(key).id})`);
             if (copyLens) el.classList.add('lg-lens-copy');
         }
+        if (backdropLens && !kind.control) rimImage(el, w, h, kind.radius);
+        // Firefox doesn't clip a filtered copy to the pane's corners, so the copy is clipped by hand
+        if (copyLens) el.style.setProperty('--lg-copy-clip', `inset(0 round ${kind.control ? Math.round(Math.min(w, h) / 2) : kind.radius}px)`);
     }
 
     /* The slab under the pointer gets its own copy of its filter, whose transfer tables follow the
@@ -719,7 +1016,8 @@
             const filter = shared.cloneNode(true);
             filter.id = `${shared.id}-live${++refract.liveCount}`;
             refract.defs.appendChild(filter);
-            live = { filter, funcs: filter.querySelectorAll('[result="map"] > *, [result="bend"] > *'), cur: { ...SLAB_REST }, goal: { ...SLAB_REST } };
+            live = { filter, funcs: filter.querySelectorAll('[result="map"] > *, [result="bend"] > *'), shift: filter.querySelector('feOffset'),
+                cur: { ...SLAB_REST }, goal: { ...SLAB_REST } };
             refract.live.set(el, live);
             el.style.setProperty(LENS_VAR, `url(#${filter.id})`);
         }
@@ -749,16 +1047,30 @@
                 live.cur[k] = Math.abs(d) < 0.004 ? live.goal[k] : live.cur[k] + d * ease;
                 if (live.cur[k] !== live.goal[k]) moving = true;
             }
-            slabTables(live.cur).forEach((values, i) => live.funcs[i].setAttribute('tableValues', values));
+            slabTables(live.cur).forEach((values, i) => live.funcs[i] && live.funcs[i].setAttribute('tableValues', values));
+            rimAim(el, live.cur);
+            live.shift.setAttribute('dx', fmt(-live.cur.dx));
+            live.shift.setAttribute('dy', fmt(-live.cur.dy));
             if (!moving && live.resting) dropLive(el);
             else if (moving) refract.anim = refract.anim || requestAnimationFrame(stepSlabs);
         });
         if (!refract.anim) refract.animAt = 0;
     }
 
+    // Chromium's rim light follows the slab through its mask: which side along each axis, how much
+    function rimAim(el, v) {
+        if (!el.classList.contains('lg-rim')) return;
+        const weight = t => EDGE_FLOOR + (1 - EDGE_FLOOR) * Math.max(t, 0);
+        el.style.setProperty('--lg-rim-dx', v.x < 0 ? 'to left' : 'to right');
+        el.style.setProperty('--lg-rim-dy', v.y < 0 ? 'to top' : 'to bottom');
+        el.style.setProperty('--lg-rim-ax', fmt(rimShow(weight(Math.abs(v.x)))));
+        el.style.setProperty('--lg-rim-ay', fmt(rimShow(weight(Math.abs(v.y)))));
+    }
+
     function dropLive(el) {
         const live = refract.live.get(el);
         if (!live) return;
+        ['--lg-rim-dx', '--lg-rim-dy', '--lg-rim-ax', '--lg-rim-ay'].forEach(k => el.style.removeProperty(k));
         refract.live.delete(el);
         live.filter.remove();
         const key = refract.lens.get(el);
@@ -828,8 +1140,8 @@
         });
         refract.mutate.observe(document.body, { childList: true, subtree: true });
         refract.theme = new MutationObserver(() => {
-            const k3 = String(prismStrength());
-            refract.defs.querySelectorAll('.lg-prism-mix').forEach(node => node.setAttribute('k3', k3));
+            const a = rimTables().a;
+            refract.defs.querySelectorAll('.lg-rim-light feFuncA').forEach(node => node.setAttribute('tableValues', a));
         });
         refract.theme.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
         window.addEventListener('scroll', onLensScroll, { passive: true });
@@ -917,6 +1229,11 @@
     });
 
     lite.addEventListener('change', () => {
+        // Phones keep one calm scene; desktop windows get the per-section scenes
+        if (isOn()) {
+            removeCosmos();
+            buildCosmos(false);
+        }
         if (!refract.on) return;
         stopRefraction();
         startRefraction();

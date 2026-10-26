@@ -232,7 +232,8 @@
     --lg-fill-bar: 0.62;
     --lg-fill-dialog: 0.84;
     --lg-fill-nested: 0.08;
-    --lg-prism: 0.3;          /* light caught in the refracting rim (liquid-glass.js) */
+    --lg-soften: 1.2px;       /* glass softens what lies behind it a touch */
+    --lg-rim-light: 0.3;      /* the faint split line of light along the rim (liquid-glass.js) */
     --lg-rim-a: 0.4;
     --lg-hi: 255 255 255;
     --lg-lo: 30 41 59;
@@ -279,8 +280,9 @@
     --lg-fill-bar: 0.62;
     --lg-fill-dialog: 0.8;
     --lg-fill-nested: 0.03;
-    --lg-prism: 0.45;
+    --lg-soften: 1.2px;
     --lg-rim-a: 0.14;
+    --lg-rim-light: 0.28;
     --lg-hi: 255 255 255;
     --lg-lo: 2 5 14;
     --lg-edge-hi: 0.55;
@@ -356,6 +358,161 @@
     bottom: 6vh;
     left: max(-110px, calc((100vw - 1200px) / 2 - 300px));
     width: clamp(240px, 22vw, 360px);
+}
+
+/* Scenes: the sky stays fixed while the diagrams over it change with the page and, on desktop, with
+   the section in view (liquid-glass.js). The outgoing scene fades and sinks a little while the next
+   one rises in; once faded it leaves the page ([hidden]) so its loops cost nothing. */
+.lg-scene {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+    transition: opacity 1.1s ease, transform 1.3s cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+
+.lg-scene.is-on {
+    opacity: 1;
+    transform: none;
+}
+
+.lg-scene[hidden] {
+    display: none;
+}
+
+/* Where each scene's diagrams sit: in the side margins when the window has them, partly behind the
+   content column (and so seen through the glass) when it doesn't */
+.lg-trajectory {
+    left: max(-140px, calc((100vw - 1200px) / 2 - 360px));
+    bottom: 3vh;
+    width: clamp(420px, 40vw, 640px);
+}
+
+.lg-scene[data-scene="trajectory"] .lg-planet-b {
+    top: 16vh;
+    left: auto;
+    right: max(-30px, calc((100vw - 1200px) / 2 - 150px));
+}
+
+.lg-station {
+    top: 8vh;
+    right: max(-160px, calc((100vw - 1200px) / 2 - 380px));
+    width: clamp(420px, 40vw, 660px);
+}
+
+.lg-scene[data-scene="station"] .lg-planet-b {
+    top: auto;
+    bottom: 14vh;
+}
+
+.lg-transfer {
+    top: 12vh;
+    right: max(-160px, calc((100vw - 1200px) / 2 - 360px));
+    width: clamp(380px, 36vw, 580px);
+}
+
+.lg-mun {
+    top: 6vh;
+    right: max(-150px, calc((100vw - 1200px) / 2 - 340px));
+    width: clamp(380px, 36vw, 580px);
+}
+
+.lg-chart {
+    top: 14vh;
+    right: max(-200px, calc((100vw - 1200px) / 2 - 380px));
+    width: clamp(420px, 40vw, 640px);
+}
+
+.lg-blueprint {
+    top: 7vh;
+    right: max(-30px, calc((100vw - 1200px) / 2 - 200px));
+    height: 86vh;
+    width: auto;
+}
+
+.lg-scene[data-scene="blueprint"] .lg-trajectory {
+    width: clamp(320px, 28vw, 460px);
+}
+
+/* A short bright segment running along a path (each path has pathLength="1000") */
+.lg-tracer {
+    fill: none;
+    stroke: rgb(var(--lg-ink-accent) / 0.9);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 18 1000;
+    animation: lg-trace var(--lg-dur) linear infinite;
+}
+
+@keyframes lg-trace {
+    from { stroke-dashoffset: 18; }
+    to { stroke-dashoffset: -1000; }
+}
+
+/* The landing target's ring spreading out */
+.lg-pulse {
+    fill: none;
+    stroke: rgb(var(--lg-ink-accent) / 0.6);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: lg-pulse 3s ease-out infinite;
+}
+
+@keyframes lg-pulse {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(2.6); opacity: 0; }
+}
+
+/* The station drifting gently in its orbit */
+.lg-sway {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: lg-sway var(--lg-dur) ease-in-out infinite;
+}
+
+@keyframes lg-sway {
+    0%, 100% { transform: rotate(-3deg) translateY(2px); }
+    50% { transform: rotate(3deg) translateY(-3px); }
+}
+
+/* Turning about the diagram's centre (each of these viewBoxes is centred on 0 0) */
+.lg-revolve {
+    transform-box: view-box;
+    transform-origin: 0 0;
+    animation: lg-spin var(--lg-dur) linear infinite;
+}
+
+/* Star chart figures drawing themselves in, holding, then fading for the next pass */
+.lg-constellation {
+    stroke: rgb(var(--lg-ink-accent) / 0.55);
+    stroke-width: 1.2;
+    vector-effect: none;
+    stroke-dasharray: 100 100;
+    animation: lg-draw var(--lg-dur) ease-in-out infinite;
+}
+
+@keyframes lg-draw {
+    0% { stroke-dashoffset: 100; opacity: 1; }
+    35% { stroke-dashoffset: 0; opacity: 1; }
+    80% { stroke-dashoffset: 0; opacity: 1; }
+    95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+.lg-chart-star {
+    fill: rgb(var(--lg-star) / 0.85);
+}
+
+/* A scan line passing down the blueprint */
+.lg-scan {
+    animation: lg-scan var(--lg-dur) ease-in-out infinite;
+}
+
+@keyframes lg-scan {
+    0% { transform: translateY(0); opacity: 0; }
+    12%, 88% { opacity: 1; }
+    100% { transform: translateY(472px); opacity: 0; }
 }
 
 .lg-line {
@@ -480,12 +637,14 @@
 
 /* ---------- Glass surfaces ---------- */
 
-/* Cards, panels and controls are fully clear panes: no tint, blur, colour lift, bevel, gloss or
-   shadow, so their middle is exactly what lies behind. The edge carries the material: a 1px rim line
+/* Cards, panels and controls are clear panes: no tint, colour lift, bevel, gloss or shadow, and only
+   a slight blur (--lg-soften), so their middle is what lies behind, a touch softened. The edge carries the material: a 1px rim line
    (the ::before ring below, plus a hairline in light mode, where a white rim alone vanishes) and, in
    Chromium, refraction: --lg-refract is an SVG displacement filter liquid-glass.js sizes to each
-   pane, bending the background inward along the rim. Wrapped in :where() so the per-group
-   adjustments below can override it. No ::after, so existing click targets stay untouched.
+   pane, softening the background slightly and bending it inward along the rim. Panes without a
+   lens of their own (phones, and Firefox, whose lens is the ::after copy below) get the blur alone. Wrapped in :where() so the per-group
+   adjustments below can override it. Only lensed panes get an ::after (the rim light), and it
+   ignores the pointer, so existing click targets stay untouched.
    --lg-a is a tint for states that need one (hover on controls, pressed chips, the fallbacks). */
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
@@ -501,8 +660,8 @@
     background: rgb(var(--lg-tint) / var(--lg-a));
     border-color: transparent;
     box-shadow: inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline));
-    -webkit-backdrop-filter: none;
-    backdrop-filter: var(--lg-refract, none);
+    -webkit-backdrop-filter: blur(var(--lg-soften));
+    backdrop-filter: var(--lg-refract, blur(var(--lg-soften)));
 }
 
 /* The rim: a 1px ring brightest toward the light (--lg-angle points away from it; liquid-glass.js
@@ -593,7 +752,7 @@
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
     .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle
 ) {
-    backdrop-filter: none;
+    backdrop-filter: blur(var(--lg-soften));
 }
 
 /* The floating menu button sits over body text, so like the top bar it stays frosted */
@@ -618,6 +777,26 @@
     overflow: hidden;
 }
 
+/* Chromium's rim light (liquid-glass.js draws it to --lg-rim-img): a faint hairline a few pixels in
+   from the edge, split into red (inside) and cyan (outside) like everything seen through the rim.
+   Each axis shows it on the side the slab favours (--lg-rim-dx/dy) as much as --lg-rim-ax/ay says,
+   fading in toward that side so it tapers off round the corners. At rest: the bottom and right. */
+:root[data-liquid-glass] .lg-rim::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--lg-rim-img) 0 0 / 100% 100% no-repeat;
+    opacity: var(--lg-rim-light);
+    -webkit-mask:
+        linear-gradient(var(--lg-rim-dx, to right), transparent calc(100% - 64px), rgb(0 0 0 / var(--lg-rim-ax, 1)) calc(100% - 16px)),
+        linear-gradient(var(--lg-rim-dy, to bottom), transparent calc(100% - 64px), rgb(0 0 0 / var(--lg-rim-ay, 1)) calc(100% - 16px));
+    mask:
+        linear-gradient(var(--lg-rim-dx, to right), transparent calc(100% - 64px), rgb(0 0 0 / var(--lg-rim-ax, 1)) calc(100% - 16px)),
+        linear-gradient(var(--lg-rim-dy, to bottom), transparent calc(100% - 64px), rgb(0 0 0 / var(--lg-rim-ay, 1)) calc(100% - 16px));
+    pointer-events: none;
+}
+
 /* Firefox can't filter the backdrop, so the pane bends a live copy of the sky instead: the copy is
    painted behind the pane's content, fixed to the viewport so it lines up with the real sky, and bent
    by the same lens filter. Under the tilt transform a fixed background no longer lines up, so while
@@ -631,9 +810,18 @@
         border-radius: inherit;
         background: -moz-element(#lg-cosmos) fixed;
         filter: var(--lg-refract-copy, none);
+        clip-path: var(--lg-copy-clip, none);
         pointer-events: none;
         /* Fades back in once the pane has arrived or the page has stopped scrolling */
         transition: opacity 0.3s ease 0.3s;
+    }
+
+    :root[data-liquid-glass] .lg-lens-copy {
+        backdrop-filter: none;
+    }
+
+    :root.lg-scrolling[data-liquid-glass] .lg-lens-copy {
+        backdrop-filter: blur(var(--lg-soften));
     }
 
     :root[data-liquid-glass] .lg-lens-copy:is(.lg-tilt, .lg-settle)::after {
