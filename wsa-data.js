@@ -679,6 +679,7 @@ window.WSA = {
         { title: 'Aegis Program',                href: 'vehicles-programs.html#aegis',       type: 'Program',  keywords: 'booster recovery Mark II Mark V' },
         { title: 'Lyra Program',                 href: 'vehicles-programs.html#lyra',        type: 'Program',  keywords: 'booster Selene Sol Astra P-1E' },
         { title: 'Aircraft & Spaceplane Program', href: 'vehicles-programs.html#aircraft',   type: 'Program',  keywords: 'SSTO Swift-1X spaceplane' },
+        { title: 'Mission Map',                  href: 'mission-map.html',                   type: 'Map',      keywords: 'map 3D solar system Kerbol planets moons OPM outer planets replay timeline route Duna Jool Mun Minmus Odysseus' },
         { title: 'Missions & Project Archive',   href: 'missions-archive.html',              type: 'Page',     keywords: 'missions archive records' },
         { title: 'Goals & Achievements',         href: 'goals-achievements.html',            type: 'Page',     keywords: 'objectives status' },
         { title: 'About WSA',                    href: 'about.html',                         type: 'Page',     keywords: 'philosophy agency' },
