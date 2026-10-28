@@ -212,8 +212,8 @@ export function createInput(root, view, { onAction, enabled }) {
         pitch -= inv * shape(stick.y);
         roll += shape(stick.x);
         if (settings.control === 'mouse' && mouse.inside) {
-            // The pointer shows where the nose should go: above the centre raises it
-            pitch -= inv * shape(mouse.sy);
+            // The pointer works like the stick: above the centre lowers the nose
+            pitch += inv * shape(mouse.sy);
             roll += shape(mouse.sx);
         }
         if (tilt.on && tilt.p0 !== null) {

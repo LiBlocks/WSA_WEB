@@ -47,10 +47,9 @@ export const PLANE = {
 const WEIGHT = PLANE.mass * G;
 const QREF = 0.5 * RHO * 70 * 70;   // dynamic pressure at a typical approach speed
 
-// Touchdown limits. Gameplay limits, not real-world certification values.
+// Touchdown limits. Gameplay limits, not real-world certification values. How hard the gear can be hit
+// depends on the scenario (gearLimit below); the nose wheel takes half of that.
 export const LIMITS = {
-    hardSink: 4,            // m/s: sinking faster than this at touchdown collapses the gear
-    noseFirstSink: 2,       // m/s: the nose wheel first at more than this collapses it
     sideways: 10,           // deg between the nose and the direction of travel at touchdown
     tyreSpeed: 95,          // m/s ground speed at touchdown
     rollBank: 20,           // deg: more bank than this and a wingtip reaches the ground
@@ -61,11 +60,13 @@ export const LIMITS = {
 
 // start: x across and z back from the threshold (m), alt (m), speed (m/s), heading (deg, + right of
 // the runway direction), path (deg, flight path angle), gear down or up. wind: [x, y, z] m/s.
-// assist: how strongly Flight Assist limits the aircraft in this scenario.
+// assist: how strongly Flight Assist limits the aircraft in this scenario. gearLimit: the sink rate (m/s)
+// at touchdown above which the landing gear collapses.
 export const SCENARIOS = {
     training: {
         label: 'Training',
-        blurb: 'Lined up, slower and closer in, gear already down, a gentle aircraft.',
+        blurb: 'Lined up, slower and closer in, gear already down, a gentle aircraft. The gear takes up to 8 m/s.',
+        gearLimit: 8,
         start: { x: 40, z: 4200, alt: 330, speed: 74, heading: 2, path: -3.5, gear: true },
         wind: [0, 0, 0],
         assist: { bank: 30, pitchRate: 7, rollRate: 30 },
@@ -73,7 +74,8 @@ export const SCENARIOS = {
     },
     standard: {
         label: 'Standard',
-        blurb: 'Off to the left of the centreline and a little fast. Lower the gear yourself.',
+        blurb: 'Off to the left of the centreline and a little fast. Lower the gear yourself. The gear takes up to 6 m/s.',
+        gearLimit: 6,
         start: { x: -240, z: 6000, alt: 470, speed: 92, heading: 6, path: -3.5, gear: false },
         wind: [0, 0, 0],
         assist: { bank: 45, pitchRate: 9, rollRate: 42 },
@@ -81,7 +83,8 @@ export const SCENARIOS = {
     },
     advanced: {
         label: 'Advanced',
-        blurb: 'Further out, high, fast and well off the centreline, with a 5 m/s crosswind from the right.',
+        blurb: 'Further out, high, fast and well off the centreline, with a 5 m/s crosswind from the right. The gear takes up to 4 m/s.',
+        gearLimit: 4,
         start: { x: 520, z: 8000, alt: 720, speed: 115, heading: -14, path: -3, gear: false },
         wind: [-5, 0, 0],
         assist: { bank: 60, pitchRate: 11, rollRate: 50 },
@@ -462,10 +465,11 @@ function groundContact(s, a, env) {
         if (tdS > RUNWAY.length) return finish(s, false, { code: 'long', title: 'MISSED THE RUNWAY', text: 'The aircraft touched down beyond the far end of the runway.' });
         return finish(s, false, { code: 'offside', title: 'MISSED THE RUNWAY', text: `The wheels touched the grass ${Math.round(Math.abs(tdX) - RUNWAY.width / 2 + 2.4)} m ${tdX < 0 ? 'left' : 'right'} of the runway edge.` });
     }
-    if (sink > LIMITS.hardSink) {
-        return finish(s, false, { code: 'hard', title: 'HARD LANDING', text: `The aircraft hit the runway sinking at ${sink.toFixed(1)} m/s, more than the gear can take (${LIMITS.hardSink} m/s). Flare earlier: raise the nose gently in the last 10–15 m.` });
+    const gearLimit = SCENARIOS[s.scenario].gearLimit;
+    if (sink > gearLimit) {
+        return finish(s, false, { code: 'hard', title: 'HARD LANDING', text: `The aircraft hit the runway sinking at ${sink.toFixed(1)} m/s, more than the gear can take (${gearLimit} m/s in this scenario). Flare earlier: raise the nose gently in the last 10–15 m.` });
     }
-    if (noseFirst && sink > LIMITS.noseFirstSink) {
+    if (noseFirst && sink > gearLimit / 2) {
         return finish(s, false, { code: 'nosegear', title: 'NOSE GEAR COLLAPSE', text: `The nose wheel touched first, sinking at ${sink.toFixed(1)} m/s. Land on the main wheels with the nose slightly up.` });
     }
     if (Math.abs(drift) > LIMITS.sideways) {

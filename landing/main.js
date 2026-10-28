@@ -280,7 +280,7 @@ function setControl(mode) {
     } else {
         settings.control = mode === 'mouse' ? 'mouse' : 'keyboard';
         note(settings.control === 'mouse'
-            ? 'Mouse steering: move the pointer away from the centre of the view to turn; the wheel sets the throttle. The keys still work.'
+            ? 'Mouse steering: the pointer works like a control stick. Above the centre lowers the nose, below raises it, left and right roll; the wheel sets the throttle. The keys still work.'
             : '');
     }
     saveSettings();
@@ -511,7 +511,7 @@ function showFailure(r) {
     dl.replaceChildren();
     const td = r.touchdown;
     if (td) {
-        row(dl, 'Vertical speed at touchdown', `${td.vs >= 0 ? '+' : '−'}${Math.abs(td.vs).toFixed(2)} m/s`, Math.abs(td.vs) > LIMITS.hardSink ? 'bad' : '');
+        row(dl, 'Vertical speed at touchdown', `${td.vs >= 0 ? '+' : '−'}${Math.abs(td.vs).toFixed(2)} m/s`, Math.abs(td.vs) > SCENARIOS[r.scenario].gearLimit ? 'bad' : '');
         row(dl, 'Touchdown speed', `${td.gs.toFixed(1)} m/s`, td.gs > LIMITS.tyreSpeed ? 'bad' : '');
         row(dl, 'Centerline at touchdown', `${Math.abs(td.x).toFixed(1)} m`, Math.abs(td.x) > RUNWAY.width / 2 ? 'bad' : '');
         row(dl, 'Heading off the runway', `${Math.abs(td.heading).toFixed(1)}° (moving ${Math.abs(td.drift).toFixed(1)}° sideways)`, Math.abs(td.drift) > LIMITS.sideways ? 'bad' : '');

@@ -163,9 +163,9 @@
                         <p class="ld-card-lead">Your spaceplane is on approach to runway 09 at the WSA spaceport. Line up with the centreline, follow the glide path down, flare, touch down gently on the main wheels and brake to a stop on the runway.</p>
                         <fieldset class="ld-scenarios">
                             <legend>Scenario</legend>
-                            <label><input type="radio" name="ld-scenario" value="training"><span><b>Training</b><small>Lined up, slower and closer, gear already down.</small></span></label>
-                            <label><input type="radio" name="ld-scenario" value="standard" checked><span><b>Standard</b><small>Off the centreline and a little fast. Lower the gear yourself.</small></span></label>
-                            <label><input type="radio" name="ld-scenario" value="advanced"><span><b>Advanced</b><small>Far out, high, fast and well off the centreline, with a crosswind.</small></span></label>
+                            <label><input type="radio" name="ld-scenario" value="training"><span><b>Training</b><small>Lined up, slower and closer, gear already down. The gear takes up to 8 m/s.</small></span></label>
+                            <label><input type="radio" name="ld-scenario" value="standard" checked><span><b>Standard</b><small>Off the centreline and a little fast. Lower the gear yourself. The gear takes up to 6 m/s.</small></span></label>
+                            <label><input type="radio" name="ld-scenario" value="advanced"><span><b>Advanced</b><small>Far out, high, fast and well off the centreline, with a crosswind. The gear takes up to 4 m/s.</small></span></label>
                         </fieldset>
                         <div class="ld-setup-grid">
                             <div>
@@ -186,7 +186,7 @@
                                     <div class="ld-desktop-only"><dt>Roll · rudder</dt><dd><kbd>A</kbd> <kbd>D</kbd> roll left and right · <kbd>Q</kbd> <kbd>E</kbd> rudder. On the runway they steer.</dd></div>
                                     <div class="ld-desktop-only"><dt>Throttle</dt><dd><kbd>R</kbd> up · <kbd>F</kbd> down · <kbd>X</kbd> idle · <kbd>Z</kbd> full</dd></div>
                                     <div class="ld-desktop-only"><dt>Also</dt><dd><kbd>G</kbd> gear · hold <kbd>B</kbd> to brake · <kbd>T</kbd> Flight Assist · <kbd>V</kbd> camera · <kbd>M</kbd> mouse steering · <kbd>Space</kbd> or <kbd>Esc</kbd> pause. Arrow keys work like W A S D.</dd></div>
-                                    <div class="ld-desktop-only"><dt>Mouse</dt><dd>Choose Mouse above the view, then move the pointer from the centre toward where the nose should go; the wheel sets the throttle.</dd></div>
+                                    <div class="ld-desktop-only"><dt>Mouse</dt><dd>Choose Mouse above the view. The pointer works like a control stick: above the centre lowers the nose, below raises it, left and right roll. The wheel sets the throttle.</dd></div>
                                     <div class="ld-touch-only"><dt>Touch</dt><dd>Stick: up lowers the nose, left and right roll. THR slider: throttle. GEAR, hold BRAKE, ◀ ▶ rudder, CAM: camera.</dd></div>
                                     <div class="ld-touch-only"><dt>Tilt</dt><dd>Choose Tilt above the view to fly by tilting the device: tip it away to lower the nose, left or right to roll. Calibrate sets how you hold it as level.</dd></div>
                                 </dl>
@@ -330,7 +330,7 @@
     <script src="navigation.js?v=9"></script>
     <script src="features.js?v=4"></script>
     <script src="decorations.js?v=3"></script>
-    <script type="module" src="landing/main.js?v=1"></script>
+    <script type="module" src="landing/main.js?v=2"></script>
     <script>
         // If the game's module never starts (a very old browser, a failed download), say so
         window.addEventListener('load', function () {
