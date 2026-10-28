@@ -1178,6 +1178,168 @@ button.btn {
     margin-top: 0.5rem;
 }
 
+/* Missions page: the banner offering the Mission Map */
+.map-banner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+    padding: 1.25rem 1.5rem;
+    background-color: rgba(59, 130, 246, 0.08);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+}
+
+.map-banner-icon {
+    flex-shrink: 0;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.6;
+}
+
+.map-banner-icon circle {
+    fill: var(--accent);
+    stroke: none;
+}
+
+.map-banner-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.map-banner-text p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.map-banner-text .map-banner-question {
+    margin-bottom: 0.2rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.map-banner .btn {
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .map-banner {
+        flex-wrap: wrap;
+        padding: 1.1rem 1.15rem;
+    }
+
+    .map-banner-icon {
+        display: none;
+    }
+
+    .map-banner .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Contact page */
+.contact-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 680px;
+    padding: 2rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.contact-notice {
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    background-color: rgba(245, 158, 11, 0.12);
+    border-left: 3px solid var(--warning);
+    border-radius: 4px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-field label {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-field input,
+.form-field textarea {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    font: inherit;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-field textarea {
+    min-height: 9rem;
+    resize: vertical;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-field [aria-invalid="true"] {
+    border-color: var(--danger);
+}
+
+.field-error {
+    color: var(--danger);
+    font-size: 0.875rem;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+}
+
+.form-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.form-status {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.form-status[data-kind="success"] {
+    color: var(--success);
+}
+
+.form-status[data-kind="error"] {
+    color: var(--danger);
+}
+
+@media (max-width: 640px) {
+    .contact-card {
+        padding: 1.25rem;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+
 .footer-links {
     margin-top: 0.75rem;
 }

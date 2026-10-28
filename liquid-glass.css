@@ -1069,3 +1069,22 @@
         display: none;
     }
 }
+
+/* Missions page banner and the contact form: frosted panes like the dialogs, without the pointer
+   tilt (typing into a pane that leans away would be awkward) */
+:root[data-liquid-glass] :is(.map-banner, .contact-card) {
+    background-color: rgb(var(--lg-tint) / var(--lg-fill-nested));
+    border-color: rgb(var(--lg-hi) / calc(var(--lg-rim-a) + 0.1));
+    border-radius: 18px;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+:root[data-liquid-glass] .map-banner {
+    border-color: rgb(var(--lg-accent-rgb) / 0.55);
+}
+
+:root[data-liquid-glass] .form-field :is(input, textarea) {
+    background-color: rgb(var(--lg-tint) / calc(var(--lg-fill-nested) + 0.04));
+    border-radius: 10px;
+}

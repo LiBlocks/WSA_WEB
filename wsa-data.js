@@ -683,6 +683,7 @@ window.WSA = {
         { title: 'Missions & Project Archive',   href: 'missions-archive.html',              type: 'Page',     keywords: 'missions archive records' },
         { title: 'Goals & Achievements',         href: 'goals-achievements.html',            type: 'Page',     keywords: 'objectives status' },
         { title: 'About WSA',                    href: 'about.html',                         type: 'Page',     keywords: 'philosophy agency' },
-        { title: 'Support WSA',                  href: 'support.html',                       type: 'Page',     keywords: 'donate donation bitcoin ethereum' }
+        { title: 'Support WSA',                  href: 'support.html',                       type: 'Page',     keywords: 'donate donation bitcoin ethereum' },
+        { title: 'Contact WSA',                  href: 'contact.html',                       type: 'Page',     keywords: 'contact message email form get in touch feedback question' }
     ]
 };
