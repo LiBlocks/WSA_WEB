@@ -1,8 +1,8 @@
-/* Games menu (games.html): one card per game, side by side, neither one the default. The card art is
-   always deep space, like the games themselves. */
+/* Games menu (games.html): one card per game, side by side, none of them the default. The card art is
+   always the game's own scene, dark like the games themselves. */
 
 .games-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr));
 }
 
 .game-card {

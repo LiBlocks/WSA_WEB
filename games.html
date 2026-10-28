@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Games | Woody Space Agency</title>
-    <script src="page-init.js?v=7"></script>
+    <script src="page-init.js?v=8"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=14">
-    <link rel="stylesheet" href="games.css?v=1">
+    <link rel="stylesheet" href="games.css?v=2">
     <link rel="stylesheet" href="liquid-glass.css?v=18">
     <script src="liquid-glass.js?v=19"></script>
     <link rel="icon" type="image/png" href="images/favicon.png">
@@ -45,7 +45,7 @@
         <div class="container">
             <h1 style="margin-bottom: 0.5rem;">Games</h1>
             <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 800px;">
-                Two ways to spend some time in orbit: design a space station, or fly a spacecraft in to dock with one.
+                Three small games: design a space station, fly a spacecraft in to dock with one, or bring a spaceplane home to the runway.
             </p>
         </div>
     </section>
@@ -103,6 +103,38 @@
                     <span class="game-card-meta">Best with a keyboard · touch controls on phones</span>
                     <span class="btn btn-primary btn-small game-card-play">Play Docking Simulator</span>
                 </a>
+                <a class="program-card game-card" href="ssto-landing.html">
+                    <span class="game-card-art" aria-hidden="true">
+                        <svg viewBox="0 0 320 150" focusable="false">
+                            <defs>
+                                <linearGradient id="gc-dusk" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#18284a"/><stop offset="1" stop-color="#d99a68"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="320" height="88" fill="url(#gc-dusk)"/>
+                            <rect y="88" width="320" height="62" fill="#3d5a35"/>
+                            <path d="M0 88 L70 80 L120 86 L180 77 L240 85 L320 79 V88 Z" fill="#4a5e48"/>
+                            <path d="M132 150 L150 88 L170 88 L188 150 Z" fill="#4b4f55"/>
+                            <path d="M159 92 v4 M159 101 v6 M158.6 113 v9 M158.2 130 v13" stroke="#f2f2ee" stroke-width="1.6"/>
+                            <g fill="#fff3c4"><circle cx="147" cy="104" r="1.2"/><circle cx="143.5" cy="117" r="1.4"/><circle cx="139" cy="133" r="1.6"/><circle cx="172" cy="104" r="1.2"/><circle cx="175.5" cy="117" r="1.4"/><circle cx="180" cy="133" r="1.6"/></g>
+                            <g fill="#e8ebee"><rect x="226" y="62" width="22" height="26"/><path d="M262 88 a18 18 0 0 1 36 0 Z"/><rect x="204" y="70" width="4" height="18"/><rect x="200" y="64" width="12" height="6" fill="#1d3b55"/></g>
+                            <rect x="226" y="66" width="22" height="3" fill="#2f6fd6"/>
+                            <g transform="translate(118 44) rotate(-6)">
+                                <path d="M0 0 C10 -3 22 -4 34 -3 L58 -2 L60 2 L34 4 C22 5 10 4 0 0 Z" fill="#e9edf2"/>
+                                <path d="M24 0 L50 -1 L56 9 L40 9 Z" fill="#cfd6de"/>
+                                <path d="M46 -2 L52 -14 L57 -14 L58 -2 Z" fill="#e9edf2"/>
+                                <path d="M6 -1.5 C9 -3 13 -3.4 16 -3 L15 -0.5 Z" fill="#0f2235"/>
+                                <rect x="58" y="-1.5" width="4" height="3" fill="#9ec5ff"/>
+                                <path d="M30 3 v5 M50 3 v4" stroke="#8e98a5" stroke-width="1"/>
+                            </g>
+                            <g fill="none" stroke="#4dff91" stroke-width="1.4" opacity="0.8"><rect x="139" y="58" width="42" height="22"/><rect x="146" y="68" width="28" height="15" opacity="0.7"/></g>
+                        </svg>
+                    </span>
+                    <h3>SSTO Landing</h3>
+                    <p>Fly a small spaceplane down to the spaceport runway: line up, descend, flare and touch down gently. Get a grade, earn awards, and save or share your landing card.</p>
+                    <span class="game-card-meta">Keyboard or mouse · tilt or touch controls on phones</span>
+                    <span class="btn btn-primary btn-small game-card-play">Play SSTO Landing</span>
+                </a>
             </div>
         </div>
     </section>
@@ -115,8 +147,8 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=8"></script>
-    <script src="navigation.js?v=8"></script>
+    <script src="wsa-data.js?v=9"></script>
+    <script src="navigation.js?v=9"></script>
     <script src="features.js?v=4"></script>
     <script src="decorations.js?v=3"></script>
 </body>

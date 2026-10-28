@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSTO Landing | Woody Space Agency</title>
+    <script src="page-init.js?v=8"></script>
+    <link rel="stylesheet" href="intro.css?v=8">
+    <script src="intro.js?v=8"></script>
+    <link rel="stylesheet" href="styles.css?v=14">
+    <link rel="stylesheet" href="ssto-landing.css?v=1">
+    <link rel="stylesheet" href="liquid-glass.css?v=18">
+    <script src="liquid-glass.js?v=19"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="games.html">Games</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head ld-head" style="padding: 2.25rem 2rem 1.25rem;">
+        <div class="container">
+            <p class="ld-back"><a href="games.html">&larr; Games</a></p>
+            <h1 style="margin-bottom: 0.4rem;">SSTO Landing</h1>
+            <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 820px;">
+                Bring a small WSA spaceplane home to the spaceport runway: line up, descend, flare, touch down gently and stop. A simplified flight model for an approachable landing game, not a full flight simulator.
+            </p>
+        </div>
+    </section>
+
+    <section class="ld-section">
+        <div class="ld" id="ld" data-mode="setup">
+            <div class="ld-toolbar">
+                <p class="ld-hint"><kbd>W</kbd><kbd>S</kbd> pitch · <kbd>A</kbd><kbd>D</kbd> roll · <kbd>Q</kbd><kbd>E</kbd> rudder · <kbd>R</kbd><kbd>F</kbd> throttle · <kbd>G</kbd> gear · <kbd>B</kbd> brake</p>
+                <div class="ld-actions">
+                    <div class="ld-seg ld-desktop-only" role="radiogroup" aria-label="Controls">
+                        <button type="button" role="radio" data-control-option="keyboard" aria-checked="true">Keyboard</button>
+                        <button type="button" role="radio" data-control-option="mouse" aria-checked="false">Mouse</button>
+                    </div>
+                    <div class="ld-seg ld-touch-only" role="radiogroup" aria-label="Touch controls">
+                        <button type="button" role="radio" data-control-option="stick" aria-checked="true">Stick</button>
+                        <button type="button" role="radio" data-control-option="tilt" aria-checked="false">Tilt</button>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-small" id="ld-pause">Start</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ld-restart">Restart</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ld-assist" aria-pressed="true">Flight Assist: On</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ld-camera">Camera: Chase</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ld-fullscreen">Full screen</button>
+                </div>
+            </div>
+            <p class="ld-note" id="ld-note" role="status" hidden></p>
+
+            <div class="ld-view" id="ld-view" tabindex="0" role="application" aria-label="Landing view. Use the controls listed in the instructions.">
+                <canvas class="ld-canvas" id="ld-canvas"></canvas>
+                <svg class="ld-svg" aria-hidden="true" focusable="false"></svg>
+
+                <div class="ld-status" aria-hidden="true">
+                    <div class="ld-phase" data-level="info">APPROACH</div>
+                    <div class="ld-advice" data-level="info"></div>
+                </div>
+                <div class="ld-tape ld-tape-left" aria-hidden="true">
+                    <span class="ld-tape-label">AIRSPEED</span>
+                    <span class="ld-tape-value" data-h="speed">0</span>
+                    <span class="ld-tape-unit">m/s · <span data-h="gs">GS 0</span></span>
+                </div>
+                <div class="ld-tape ld-tape-right" aria-hidden="true">
+                    <span class="ld-tape-label">ALTITUDE</span>
+                    <span class="ld-tape-value" data-h="alt">0</span>
+                    <span class="ld-tape-unit">m · <span class="ld-vs" data-h="vs">0</span> m/s</span>
+                </div>
+                <div class="ld-guide" aria-hidden="true">
+                    <div><span>RUNWAY</span><b data-h="dist">0 km</b></div>
+                    <div><span>CENTER</span><b data-h="center">0 m</b></div>
+                    <div><span>HEADING</span><b data-h="hdg">0°</b></div>
+                    <div><span>GLIDE</span><b data-h="path">—</b></div>
+                </div>
+                <div class="ld-adi" aria-hidden="true">
+                    <svg viewBox="-44 -44 88 88">
+                        <defs><clipPath id="ld-adi-clip"><circle r="40"/></clipPath></defs>
+                        <g clip-path="url(#ld-adi-clip)">
+                            <g class="ld-adi-horizon">
+                                <rect x="-120" y="-240" width="240" height="240" class="sky"/>
+                                <rect x="-120" y="0" width="240" height="240" class="earth"/>
+                                <path d="M-120 0H120" class="line"/>
+                                <path d="M-10 -16H10M-6 -8H6M-6 8H6M-10 16H10" class="ladder"/>
+                            </g>
+                        </g>
+                        <circle r="40" class="rim"/>
+                        <path d="M-26 0H-9L-5 5L0 0L5 5L9 0H26" class="wings"/>
+                        <circle r="1.8" class="dot"/>
+                    </svg>
+                    <span class="ld-adi-bank">0°</span>
+                </div>
+                <div class="ld-chips" aria-hidden="true">
+                    <span class="ld-chip" data-chip="assist" data-level="ok">ASSIST ON</span>
+                    <span class="ld-chip" data-chip="gear" data-level="warn">GEAR UP</span>
+                    <span class="ld-chip" data-chip="brake" data-level="warn" hidden>BRAKE</span>
+                    <span class="ld-chip" data-chip="stall" data-level="alert" hidden>STALL</span>
+                </div>
+                <div class="ld-thr" aria-hidden="true">
+                    <span class="ld-thr-bar"><span class="ld-thr-fill"></span></span>
+                    <span class="ld-thr-text" data-h="thr">THR 0%</span>
+                </div>
+
+                <!-- Touch controls (phones and tablets): a stick (or tilt), throttle, gear, brake and rudder -->
+                <div class="ld-touch">
+                    <div class="ld-touch-left">
+                        <button type="button" class="ld-tbtn ld-calibrate" id="ld-calibrate" tabindex="-1" hidden>Calibrate</button>
+                        <div class="ld-stick" role="img" aria-label="Flight stick: up lowers the nose, down raises it, left and right roll">
+                            <span class="ld-stick-knob"></span>
+                            <span class="ld-stick-label ld-stick-top">NOSE ▼</span>
+                            <span class="ld-stick-label ld-stick-bottom">NOSE ▲</span>
+                        </div>
+                    </div>
+                    <div class="ld-touch-right">
+                        <div class="ld-touch-col">
+                            <button type="button" class="ld-tbtn" id="ld-gear-btn" tabindex="-1" aria-pressed="false"><b>GEAR</b><small>up</small></button>
+                            <button type="button" class="ld-tbtn" data-hold="brake" tabindex="-1"><b>BRAKE</b><small>hold</small></button>
+                            <div class="ld-rudder">
+                                <button type="button" class="ld-tbtn" data-hold="yawleft" tabindex="-1" aria-label="Rudder left"><b>◀</b><small>rud</small></button>
+                                <button type="button" class="ld-tbtn" data-hold="yawright" tabindex="-1" aria-label="Rudder right"><b>▶</b><small>rud</small></button>
+                            </div>
+                            <button type="button" class="ld-tbtn" id="ld-cam-btn" tabindex="-1"><b>CAM</b><small>view</small></button>
+                        </div>
+                        <div class="ld-thr-slider" role="img" aria-label="Throttle: slide up for more">
+                            <span class="ld-thr-slider-fill"></span>
+                            <span class="ld-thr-slider-label">THR</span>
+                            <span class="ld-thr-slider-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ld-overlay" id="ld-loading">
+                    <div class="ld-card ld-card-small"><p class="ld-card-text">Loading the spaceport…</p></div>
+                </div>
+
+                <div class="ld-overlay" id="ld-setup" hidden>
+                    <div class="ld-card" role="dialog" aria-labelledby="ld-setup-title">
+                        <h2 class="ld-card-title" id="ld-setup-title">Land the spaceplane</h2>
+                        <p class="ld-card-lead">Your spaceplane is on approach to runway 09 at the WSA spaceport. Line up with the centreline, follow the glide path down, flare, touch down gently on the main wheels and brake to a stop on the runway.</p>
+                        <fieldset class="ld-scenarios">
+                            <legend>Scenario</legend>
+                            <label><input type="radio" name="ld-scenario" value="training"><span><b>Training</b><small>Lined up, slower and closer, gear already down.</small></span></label>
+                            <label><input type="radio" name="ld-scenario" value="standard" checked><span><b>Standard</b><small>Off the centreline and a little fast. Lower the gear yourself.</small></span></label>
+                            <label><input type="radio" name="ld-scenario" value="advanced"><span><b>Advanced</b><small>Far out, high, fast and well off the centreline, with a crosswind.</small></span></label>
+                        </fieldset>
+                        <div class="ld-setup-grid">
+                            <div>
+                                <h3>How to land</h3>
+                                <ol class="ld-steps">
+                                    <li>Turn toward the runway and put the centreline under the nose.</li>
+                                    <li>Lower the landing gear.</li>
+                                    <li>Descend along the glide path: the PAPI lights left of the runway show two white and two red when you're on it.</li>
+                                    <li>Keep about 65–75 m/s with the throttle.</li>
+                                    <li>Over the runway, throttle to idle and raise the nose gently to flare.</li>
+                                    <li>Touch down on the main wheels, wings level, then brake to a stop.</li>
+                                </ol>
+                            </div>
+                            <div>
+                                <h3>Controls</h3>
+                                <dl class="ld-controls">
+                                    <div class="ld-desktop-only"><dt>Pitch</dt><dd><kbd>W</kbd> nose down · <kbd>S</kbd> nose up (like a control stick; swap below)</dd></div>
+                                    <div class="ld-desktop-only"><dt>Roll · rudder</dt><dd><kbd>A</kbd> <kbd>D</kbd> roll left and right · <kbd>Q</kbd> <kbd>E</kbd> rudder. On the runway they steer.</dd></div>
+                                    <div class="ld-desktop-only"><dt>Throttle</dt><dd><kbd>R</kbd> up · <kbd>F</kbd> down · <kbd>X</kbd> idle · <kbd>Z</kbd> full</dd></div>
+                                    <div class="ld-desktop-only"><dt>Also</dt><dd><kbd>G</kbd> gear · hold <kbd>B</kbd> to brake · <kbd>T</kbd> Flight Assist · <kbd>V</kbd> camera · <kbd>M</kbd> mouse steering · <kbd>Space</kbd> or <kbd>Esc</kbd> pause. Arrow keys work like W A S D.</dd></div>
+                                    <div class="ld-desktop-only"><dt>Mouse</dt><dd>Choose Mouse above the view, then move the pointer from the centre toward where the nose should go; the wheel sets the throttle.</dd></div>
+                                    <div class="ld-touch-only"><dt>Touch</dt><dd>Stick: up lowers the nose, left and right roll. THR slider: throttle. GEAR, hold BRAKE, ◀ ▶ rudder, CAM: camera.</dd></div>
+                                    <div class="ld-touch-only"><dt>Tilt</dt><dd>Choose Tilt above the view to fly by tilting the device: tip it away to lower the nose, left or right to roll. Calibrate sets how you hold it as level.</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="ld-options">
+                            <label><input type="checkbox" id="ld-assist-check" checked> Flight Assist <small>holds the attitude when you let go, limits bank and pitch, prevents stalls and shows approach gates. You still fly the landing.</small></label>
+                            <label><input type="checkbox" id="ld-invert"> Invert pitch <small>swaps nose up and nose down on every control</small></label>
+                        </div>
+                        <div class="ld-card-actions">
+                            <button type="button" class="ld-btn ld-btn-primary" id="ld-start">Start</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ld-overlay" id="ld-paused" hidden>
+                    <div class="ld-card ld-card-small" role="dialog" aria-labelledby="ld-paused-title">
+                        <h2 class="ld-card-title" id="ld-paused-title">Paused</h2>
+                        <p class="ld-card-text"></p>
+                        <div class="ld-card-actions">
+                            <button type="button" class="ld-btn ld-btn-primary" data-action="resume">Resume</button>
+                            <button type="button" class="ld-btn" data-action="restart">Restart</button>
+                            <button type="button" class="ld-btn" data-action="setup">Change scenario or controls</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ld-overlay ld-overlay-result" id="ld-result" hidden>
+                    <div class="ld-card ld-card-result" role="dialog" aria-labelledby="ld-result-title">
+                        <p class="ld-kicker" id="ld-result-title">LANDING SUCCESSFUL</p>
+                        <div class="ld-result-top">
+                            <div class="ld-grade-wrap">
+                                <div class="ld-grade">A</div>
+                                <div class="ld-grade-word"></div>
+                            </div>
+                            <div class="ld-award">
+                                <p class="ld-award-kicker">Award</p>
+                                <h2 class="ld-award-name"></h2>
+                                <p class="ld-award-text"></p>
+                                <p class="ld-award-also"></p>
+                                <p class="ld-landing-type"></p>
+                            </div>
+                        </div>
+                        <div class="ld-result-grid">
+                            <div>
+                                <h3>Why this grade</h3>
+                                <ul class="ld-why"></ul>
+                                <p class="ld-why-note"></p>
+                                <h3>Landing statistics</h3>
+                                <dl class="ld-stats"></dl>
+                            </div>
+                            <div>
+                                <h3>Your landing card</h3>
+                                <figure class="ld-card-preview"><img id="ld-card-img" alt="Landing card with the grade, award, statistics and the flown track over the runway" width="1200" height="675"></figure>
+                                <div class="ld-card-actions">
+                                    <a class="ld-btn ld-btn-primary" id="ld-save" download="WSA-SSTO-Landing.png">Save image</a>
+                                    <button type="button" class="ld-btn" id="ld-share">Share</button>
+                                    <button type="button" class="ld-btn" id="ld-copy">Copy result</button>
+                                </div>
+                                <p class="ld-share-status" id="ld-share-status" role="status"></p>
+                            </div>
+                        </div>
+                        <div class="ld-card-actions ld-card-actions-end">
+                            <button type="button" class="ld-btn ld-btn-primary" data-action="restart">Fly again</button>
+                            <button type="button" class="ld-btn" data-action="setup">Change scenario or controls</button>
+                            <a class="ld-btn" href="games.html">All games</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ld-overlay" id="ld-failed" hidden>
+                    <div class="ld-card ld-card-small" role="dialog" aria-labelledby="ld-failed-title">
+                        <p class="ld-kicker ld-kicker-fail" id="ld-failed-title">LANDING FAILED</p>
+                        <h2 class="ld-fail-title"></h2>
+                        <p class="ld-card-text"></p>
+                        <dl class="ld-stats"></dl>
+                        <div class="ld-card-actions">
+                            <button type="button" class="ld-btn ld-btn-primary" data-action="restart">Try again</button>
+                            <button type="button" class="ld-btn" data-action="setup">Change controls</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ld-overlay" id="ld-error" hidden>
+                    <div class="ld-card ld-card-small" role="alert">
+                        <h2 class="ld-card-title"></h2>
+                        <p class="ld-card-text"></p>
+                        <div class="ld-card-actions"><a class="ld-btn" href="games.html">Back to Games</a></div>
+                    </div>
+                </div>
+                <noscript>
+                    <div class="ld-overlay"><div class="ld-card ld-card-small"><p class="ld-card-text">SSTO Landing needs JavaScript to run.</p></div></div>
+                </noscript>
+            </div>
+
+            <div class="ld-dash" id="ld-dash" aria-label="Instrument panel">
+                <div class="ld-group">
+                    <h3>Flight</h3>
+                    <div class="ld-row"><span>Airspeed</span><span data-t="ias">0</span></div>
+                    <div class="ld-row"><span>Ground speed</span><span data-t="gs">0</span></div>
+                    <div class="ld-row"><span>Vertical speed</span><span data-t="vs">0</span></div>
+                    <div class="ld-row"><span>Angle of attack</span><span data-t="aoa">0</span></div>
+                    <div class="ld-row"><span>Throttle</span><span data-t="thr">0</span></div>
+                </div>
+                <div class="ld-group">
+                    <h3>Approach</h3>
+                    <div class="ld-row"><span>Height</span><span data-t="alt">0</span></div>
+                    <div class="ld-row"><span>To threshold</span><span data-t="dist">0</span></div>
+                    <div class="ld-row"><span>Centerline</span><span data-t="center">0</span></div>
+                    <div class="ld-row"><span>Glide path</span><span data-t="path">—</span></div>
+                    <div class="ld-row"><span>Runway left</span><span data-t="remaining">0</span></div>
+                </div>
+                <div class="ld-group">
+                    <h3>Attitude</h3>
+                    <div class="ld-row"><span>Pitch</span><span data-t="pitch">0</span></div>
+                    <div class="ld-row"><span>Bank</span><span data-t="bank">0</span></div>
+                    <div class="ld-row"><span>Heading off runway</span><span data-t="hdg">0</span></div>
+                    <div class="ld-row"><span>Sideslip</span><span data-t="slip">0</span></div>
+                </div>
+                <div class="ld-group">
+                    <h3>This visit</h3>
+                    <div class="ld-row"><span>Attempt</span><span data-t="attempt">1</span></div>
+                    <div class="ld-row"><span>Landings</span><span data-t="landings">0 of 0</span></div>
+                    <div class="ld-row"><span>Landing rate</span><span data-t="rate">—</span></div>
+                    <div class="ld-row"><span>Scenario</span><span data-t="scenario">Standard</span></div>
+                </div>
+            </div>
+            <p class="visually-hidden" id="ld-live" role="status" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=9"></script>
+    <script src="navigation.js?v=9"></script>
+    <script src="features.js?v=4"></script>
+    <script src="decorations.js?v=3"></script>
+    <script type="module" src="landing/main.js?v=1"></script>
+    <script>
+        // If the game's module never starts (a very old browser, a failed download), say so
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var loading = document.getElementById('ld-loading'), error = document.getElementById('ld-error');
+                if (!loading || loading.hidden || !error.hidden) return;
+                loading.hidden = true;
+                error.hidden = false;
+                error.querySelector('.ld-card-title').textContent = 'The game could not start';
+                error.querySelector('.ld-card-text').textContent = 'Its scripts did not load or are not supported by this browser. Reload the page, or try an up-to-date browser.';
+            }, 15000);
+        });
+    </script>
+</body>
+</html>

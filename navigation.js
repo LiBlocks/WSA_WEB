@@ -126,7 +126,7 @@ function onScroll() {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Pages without their own nav entry light up the section they belong to
-    const SECTION = { 'game.html': 'games.html', 'docking-simulator.html': 'games.html', 'mission-map.html': 'missions-archive.html' };
+    const SECTION = { 'game.html': 'games.html', 'docking-simulator.html': 'games.html', 'ssto-landing.html': 'games.html', 'mission-map.html': 'missions-archive.html' };
     const page = window.location.pathname.split('/').pop() || 'index.html';
     const currentPage = SECTION[page] || page;
 
