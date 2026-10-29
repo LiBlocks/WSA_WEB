@@ -675,6 +675,7 @@ window.WSA = {
         { title: 'Station Builder',              href: 'game.html',                          type: 'Game',     keywords: 'game minigame build station modules docking KGOSS solar truss' },
         { title: 'Docking Simulator',            href: 'docking-simulator.html',             type: 'Game',     keywords: 'game simulator docking dock spacecraft rendezvous approach RCS first person' },
         { title: 'SSTO Landing',                 href: 'ssto-landing.html',                  type: 'Game',     keywords: 'game landing land spaceplane SSTO runway aircraft flight approach touchdown spaceport' },
+        { title: 'Orbital Rendezvous Challenge', href: 'orbital-rendezvous.html',            type: 'Game',     keywords: 'game orbit orbital rendezvous transfer Hohmann intercept KGOSS docking delta-v prograde retrograde velocity' },
         { title: 'FAMMOK Program',               href: 'missions-archive.html#fammok',       type: 'Program',  keywords: 'Mun Minmus Duna lander' },
         { title: 'Project Silver Bridge',        href: 'missions-archive.html#silver-bridge', type: 'Mission', keywords: 'Mun ISRU drilling docking relay' },
         { title: 'Aegis Program',                href: 'vehicles-programs.html#aegis',       type: 'Program',  keywords: 'booster recovery Mark II Mark V' },
