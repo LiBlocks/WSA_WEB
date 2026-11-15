@@ -19,11 +19,18 @@ export const G0 = 9.80665;   // m/s², standard gravity: KSP's conversion from s
 const STOCK_LOG = 'KSP 1.12.5 install, Kopernicus body log Logs/Kopernicus/Squad (radius and surface gravity GeeASL); μ = GeeASL × 9.80665 m/s² × radius², rounded to 8 significant figures';
 const OPM_LOG = 'KSP 1.12.5 install with Outer Planets Mod 2.2.11, Kopernicus body log Logs/Kopernicus (radius and gravParameter)';
 
+// Each system is complete in itself. The calculators only ever offer the bodies of one system at a time,
+// so stock, Outer Planets Mod and KSRSS values can never be mixed in one calculation.
 export const ENVIRONMENTS = {
-    'ksp-stock-opm': {
-        label: 'KSP 1.12.5 · Kerbol system with Outer Planets Mod',
+    'ksp-stock': {
+        label: 'Stock Kerbol system (KSP 1.12.5)',
+        short: 'Stock',
+        note: 'The stock Kerbol system. Values read from WSA\'s KSP 1.12.5 installation; the Outer Planets Mod installed there leaves the stock bodies\' sizes and gravity unchanged.',
+    },
+    'ksp-opm': {
+        label: 'Outer Planets Mod 2.2.11 (stock system + OPM)',
         short: 'Stock + OPM',
-        note: 'The planet pack in WSA\'s current KSP installation: the stock Kerbol system plus the Outer Planets Mod 2.2.11 (Sarnus, Urlum, Neidon, Plock and their moons; Eeloo becomes a moon of Sarnus). Read from the installation\'s Kopernicus logs.',
+        note: 'WSA\'s current installation: the stock Kerbol system plus the Outer Planets Mod (Sarnus, Urlum, Neidon, Plock and their moons; Eeloo becomes a moon of Sarnus). Read from the installation\'s Kopernicus logs.',
     },
     'ksrss': {
         label: 'KSRSS Reborn',
@@ -33,10 +40,11 @@ export const ENVIRONMENTS = {
     },
 };
 
-const S = (id, name, parent, radius, mu, atmosphere) => ({ id, name, env: 'ksp-stock-opm', parent, radius, mu, atmosphere, source: STOCK_LOG });
-const O = (id, name, parent, radius, mu, atmosphere) => ({ id, name, env: 'ksp-stock-opm', parent, radius, mu, atmosphere, source: OPM_LOG, opm: true });
+const S = (id, name, parent, radius, mu, atmosphere) => ({ id, name, parent, radius, mu, atmosphere, source: STOCK_LOG });
+const O = (id, name, parent, radius, mu, atmosphere) => ({ id, name, parent, radius, mu, atmosphere, source: OPM_LOG, opm: true });
 
-export const BODIES = [
+// The stock system
+const STOCK = [
     S('kerbol', 'Kerbol (the Sun)', null, 261600000, 1.1723328e18, 600000),
     S('moho', 'Moho', 'kerbol', 250000, 1.6860938e11, 0),
     S('eve', 'Eve', 'kerbol', 700000, 8.1717302e12, 90000),
@@ -53,11 +61,15 @@ export const BODIES = [
     S('tylo', 'Tylo', 'jool', 600000, 2.82528e12, 0),
     S('bop', 'Bop', 'jool', 65000, 2.4868349e9, 0),
     S('pol', 'Pol', 'jool', 44000, 7.2170208e8, 0),
+    S('eeloo', 'Eeloo', 'kerbol', 210000, 7.4410815e10, 0),
+];
+
+// Outer Planets Mod additions. The mod leaves the stock bodies as they are, except that Eeloo becomes a
+// moon of Sarnus (its size and gravity stay the stock values).
+const OPM = [
     O('sarnus', 'Sarnus', 'kerbol', 5300000, 82089701953000, 580000),
     O('hale', 'Hale', 'sarnus', 6000, 811990.62, 0),
     O('ovok', 'Ovok', 'sarnus', 26000, 13258590.8, 0),
-    // Eeloo's size and gravity are the stock values; the Outer Planets Mod only moves it into orbit round Sarnus
-    { ...S('eeloo', 'Eeloo', 'sarnus', 210000, 7.4410815e10, 0), note: 'A planet in the stock game; the Outer Planets Mod makes it a moon of Sarnus.' },
     O('slate', 'Slate', 'sarnus', 540000, 1978856444880, 0),
     O('tekto', 'Tekto', 'sarnus', 280000, 192440992408, 95000),
     O('urlum', 'Urlum', 'kerbol', 2177000, 11944573769627.4, 325000),
@@ -72,7 +84,16 @@ export const BODIES = [
     O('karen', 'Karen', 'plock', 85050, 4681804201.24725, 0),
 ];
 
-export const body = (id, env = 'ksp-stock-opm') => BODIES.find(b => b.id === id && b.env === env);
+export const BODIES = [
+    ...STOCK.map(b => ({ ...b, env: 'ksp-stock' })),
+    ...STOCK.map(b => ({ ...b, env: 'ksp-opm',
+        ...(b.id === 'eeloo' ? { parent: 'sarnus', note: 'A planet in the stock game; the Outer Planets Mod makes it a moon of Sarnus.' } : {}) })),
+    ...OPM.map(b => ({ ...b, env: 'ksp-opm' })),
+];
+
+export const DEFAULT_ENV = 'ksp-opm';
+export const body = (id, env = DEFAULT_ENV) => BODIES.find(b => b.id === id && b.env === env);
+export const bodiesOf = env => BODIES.filter(b => b.env === env);
 
 /** Surface gravity at the reference radius, m/s² */
 export const surfaceGravity = b => b.mu / (b.radius * b.radius);

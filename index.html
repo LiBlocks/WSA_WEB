@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Woody Space Agency</title>
-    <script src="page-init.js?v=10"></script>
+    <script src="page-init.js?v=11"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
-    <link rel="stylesheet" href="styles.css?v=14">
+    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="news.css?v=1">
     <link rel="stylesheet" href="liquid-glass.css?v=18">
     <script src="liquid-glass.js?v=19"></script>
     <link rel="icon" type="image/png" href="images/favicon.png">
@@ -18,6 +19,7 @@
             <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="goals-achievements.html">Goals & Achievements</a></li>
                 <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
@@ -45,6 +47,7 @@
         <div class="container">
             <img class="hero-logo" src="images/wsa-logo.png" alt="Woody Space Agency insignia" width="132" height="132">
             <h1>Woody Space Agency</h1>
+            <p class="hero-motto" style="margin: -0.25rem 0 1rem; color: var(--accent); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;">Wonders Seek Above · Aiming for the Stars</p>
             <p class="hero-subtitle">Developing reusable spacecraft, autonomous flight systems, and space infrastructure.</p>
 
             <div class="featured-stats">
@@ -68,6 +71,18 @@
         </div>
     </section>
 
+    <section class="latest-news" aria-labelledby="latest-news-title">
+        <div class="container">
+            <div class="news-section-head">
+                <h2 id="latest-news-title">Latest News</h2>
+                <a href="news.html" class="btn btn-secondary btn-small">Read more news</a>
+            </div>
+            <div class="news-cards" id="latest-news-root">
+                <noscript><p class="muted">The latest news needs JavaScript. <a href="news.html">Read all WSA news</a>.</p></noscript>
+            </div>
+        </div>
+    </section>
+
     <section class="overview">
         <div class="container">
             <h2>What WSA Does</h2>
@@ -78,7 +93,7 @@
                 </div>
                 <div class="overview-card">
                     <h3>Autonomous Landing</h3>
-                    <p>AutoLand is WSA's own kOS guidance software for landing boosters, written instead of relying on MechJeb. It is still experimental.</p>
+                    <p>AutoLand is WSA's own kOS software for landing boosters, written instead of relying on MechJeb. Version 2.3 has landed an Aegis booster on its target pad.</p>
                 </div>
                 <div class="overview-card">
                     <h3>Orbital Infrastructure</h3>
@@ -106,8 +121,8 @@
             <div class="program-cards">
                 <div class="program-card">
                     <h3>Aegis</h3>
-                    <div class="status experimental">Experimental</div>
-                    <p>Reusable booster family that launches WSA's missions. Booster landing and recovery are still being tested, with 47+ recoveries on record.</p>
+                    <div class="status operational">Demonstrated</div>
+                    <p>Reusable booster family that launches WSA's missions. An Aegis booster has landed on its target pad with AutoLand V2.3.</p>
                     <a href="vehicles-programs.html#aegis" class="card-link">View Program →</a>
                 </div>
 
@@ -120,8 +135,8 @@
 
                 <div class="program-card">
                     <h3>AutoLand</h3>
-                    <div class="status development">In Development</div>
-                    <p>Autonomous landing software written in kOS. V1.6 was the last stable version; the V2.2a guidance track is in development.</p>
+                    <div class="status operational">Demonstrated</div>
+                    <p>Autonomous landing software written in kOS. V2.3 achieved the first target-pad landing; the next phase is repeatability.</p>
                     <a href="autoland.html" class="card-link">View Engineering →</a>
                 </div>
 
@@ -154,6 +169,11 @@
             <h2>Recent Milestones</h2>
             <div class="achievement-list">
                 <div class="achievement">
+                    <div class="achievement-marker operational">Demonstrated</div>
+                    <h4>AutoLand V2.3 Pad Landing</h4>
+                    <p>An Aegis booster touched down directly on its designated landing pad: AutoLand's first successful target-pad landing.</p>
+                </div>
+                <div class="achievement">
                     <div class="achievement-marker operational">Completed</div>
                     <h4>Minmus Firework</h4>
                     <p>A crewed flight on an Aegis Mk1.3 landed on Minmus, planted a flag and splashed down back on Kerbin.</p>
@@ -166,12 +186,7 @@
                 <div class="achievement">
                     <div class="achievement-marker operational">Flown</div>
                     <h4>Odysseus at Duna</h4>
-                    <p>WSA's fourth Duna attempt reached the planet, chose not to land with too little fuel, and came home with a Duna gravity assist.</p>
-                </div>
-                <div class="achievement">
-                    <div class="achievement-marker development">In Development</div>
-                    <h4>AutoLand V2.x and a Catch Concept</h4>
-                    <p>The V2.2a guidance track is in development, and an original chopstick-style booster catch system is an early concept.</p>
+                    <p>WSA's fourth Duna attempt entered orbit around the planet, chose not to land with too little fuel, and returned to Kerbin.</p>
                 </div>
             </div>
         </div>
@@ -201,9 +216,9 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=11"></script>
+    <script src="wsa-data.js?v=13"></script>
     <script src="navigation.js?v=10"></script>
-    <script src="features.js?v=5"></script>
+    <script src="features.js?v=6"></script>
     <script src="decorations.js?v=3"></script>
 </body>
 </html>

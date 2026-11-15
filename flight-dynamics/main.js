@@ -1,9 +1,8 @@
 // WSA Flight Dynamics Center: the page. Reads the form inputs, converts units to SI, calls calc.js and shows
 // the results. Each calculator card works on its own; results refresh as you type and on Calculate.
-import { BODIES, ENVIRONMENTS, body as findBody, surfaceGravity } from '../celestial-bodies.js';
+import { ENVIRONMENTS, DEFAULT_ENV, body as findBody, bodiesOf, surfaceGravity } from '../celestial-bodies.js';
 import * as C from './calc.js';
 
-const ENV = 'ksp-stock-opm';
 const DEFAULT_BODY = 'kerbin';
 const CUSTOM = 'custom';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -61,46 +60,72 @@ function duration(s) {
 
 /* ---------- Bodies ---------- */
 
-const envBodies = BODIES.filter(b => b.env === ENV);
-const depth = b => { let d = 0; for (let p = b.parent; p; p = findBody(p).parent) d++; return d; };
-const label = b => b.parent && depth(b) > 1 ? `${b.name} (moon of ${findBody(b.parent).name})` : b.name;
+// One planet system at a time, chosen at the top of the page: every body list shows only that system
+const SYSTEM_KEY = 'wsa-fdc-system';
+let ENV = (() => { try { const v = localStorage.getItem(SYSTEM_KEY); return ENVIRONMENTS[v] ? v : DEFAULT_ENV; } catch { return DEFAULT_ENV; } })();
+const findIn = id => findBody(id, ENV);
+const depth = b => { let d = 0; for (let p = b.parent; p; p = findIn(p).parent) d++; return d; };
+const label = b => b.parent && depth(b) > 1 ? `${b.name} (moon of ${findIn(b.parent).name})` : b.name;
+const startBody = () => (findIn(DEFAULT_BODY) ? DEFAULT_BODY : CUSTOM);
+
+// Keep the current choice when the new system has it. A custom body that was only chosen because the
+// previous system had no bodies (KSRSS) goes back to the default.
+function choose(select, keep) {
+    const keepable = keep && (keep === CUSTOM ? select.dataset.forced !== '1' : findIn(keep));
+    select.value = keepable ? keep : startBody();
+    select.dataset.forced = select.value === CUSTOM && !bodiesOf(ENV).length ? '1' : '';
+}
+
+function optgroup(title, options) {
+    const g = document.createElement('optgroup');
+    g.label = title;
+    g.append(...options);
+    return g;
+}
 
 function fillBodySelect(select) {
-    const stock = document.createElement('optgroup');
-    stock.label = 'Kerbol system (stock)';
-    const opm = document.createElement('optgroup');
-    opm.label = 'Outer Planets Mod';
-    for (const b of envBodies) {
-        const o = new Option(label(b), b.id);
-        (b.opm || (b.id === 'eeloo') ? opm : stock).append(o);
-    }
-    const other = document.createElement('optgroup');
-    other.label = 'Other';
-    other.append(new Option('Custom body: enter μ and radius', CUSTOM));
-    select.append(stock, opm, other);
-    select.value = DEFAULT_BODY;
+    const keep = select.value;
+    const bodies = bodiesOf(ENV);
+    const groups = [];
+    const stock = bodies.filter(b => !b.opm).map(b => new Option(label(b), b.id));
+    const opm = bodies.filter(b => b.opm).map(b => new Option(label(b), b.id));
+    if (stock.length) groups.push(optgroup(opm.length ? 'Stock bodies' : 'Stock Kerbol system', stock));
+    if (opm.length) groups.push(optgroup('Outer Planets Mod', opm));
+    groups.push(optgroup('Other', [new Option('Custom body: enter μ and radius', CUSTOM)]));
+    select.replaceChildren(...groups);
+    choose(select, keep);
 }
 
 function fillGravitySelect(select) {
-    const g = document.createElement('optgroup');
-    g.label = 'Surface gravity of a body';
-    for (const b of envBodies) {
-        if (b.id === 'kerbol') continue;
-        g.append(new Option(`${b.name} surface · ${formatNumber(surfaceGravity(b), 4)} m/s²`, b.id));
-    }
-    const other = document.createElement('optgroup');
-    other.label = 'Other';
-    other.append(new Option('Custom value', CUSTOM));
-    select.append(g, other);
-    select.value = DEFAULT_BODY;
+    const keep = select.value;
+    const options = bodiesOf(ENV).filter(b => b.id !== 'kerbol')
+        .map(b => new Option(`${b.name} surface · ${formatNumber(surfaceGravity(b), 4)} m/s²`, b.id));
+    const groups = options.length ? [optgroup('Surface gravity of a body', options)] : [];
+    groups.push(optgroup('Other', [new Option('Custom value', CUSTOM)]));
+    select.replaceChildren(...groups);
+    choose(select, keep);
 }
 
-/* ---------- Cards ---------- */
+/* ---------- Planet system ---------- */
 
-const env = ENVIRONMENTS[ENV];
-document.querySelector('[data-env-label]').textContent = env.label;
-document.querySelector('[data-env-note]').textContent = 'Radii and gravitational parameters come from the installation\'s own Kopernicus logs; each body\'s source is listed when you choose it.';
-document.querySelector('[data-ksrss-note]').textContent = ENVIRONMENTS.ksrss.note;
+const systemSelect = document.getElementById('fdc-system');
+const cards = [];
+for (const [id, e] of Object.entries(ENVIRONMENTS)) {
+    systemSelect.append(new Option(e.available === false ? `${e.label}: custom values only` : e.label, id));
+}
+systemSelect.value = ENV;
+function describeSystem() {
+    document.querySelector('[data-env-note]').textContent = ENVIRONMENTS[ENV].note;
+}
+describeSystem();
+systemSelect.addEventListener('change', () => {
+    ENV = systemSelect.value;
+    try { localStorage.setItem(SYSTEM_KEY, ENV); } catch { /* storage blocked: the choice lasts for this visit */ }
+    describeSystem();
+    cards.forEach(c => c.refresh());
+});
+
+/* ---------- Cards ---------- */
 
 function setupCard(card, compute) {
     const form = card.querySelector('form');
@@ -123,7 +148,7 @@ function setupCard(card, compute) {
     // Which body is selected, as { mu, radius, body }; custom values come from the μ and radius inputs
     function central() {
         const id = bodySelect.value;
-        if (id !== CUSTOM) { const b = findBody(id); return { mu: b.mu, radius: b.radius, body: b }; }
+        if (id !== CUSTOM) { const b = findIn(id); return { mu: b.mu, radius: b.radius, body: b }; }
         return { mu: get('mu'), radius: get('radius'), body: null };
     }
 
@@ -176,15 +201,22 @@ function setupCard(card, compute) {
     form.addEventListener('reset', e => {
         e.preventDefault();
         for (const [el, v] of defaults) el.value = v;
-        if (bodySelect) bodySelect.value = DEFAULT_BODY;
-        if (gravitySelect) gravitySelect.value = DEFAULT_BODY;
+        if (bodySelect) bodySelect.value = startBody();
+        if (gravitySelect) gravitySelect.value = startBody();
         run(false);
         live.textContent = 'Reset to the starting values.';
+    });
+    cards.push({
+        refresh() {
+            if (bodySelect) fillBodySelect(bodySelect);
+            if (gravitySelect) fillGravitySelect(gravitySelect);
+            run(false);
+        },
     });
     run(false);
 }
 
-const source = b => b ? sub(`Body data: ${b.name}, μ ${formatNumber(b.mu, 8)} m³/s², R ${formatNumber(b.radius, 8)} m (${b.opm ? 'Outer Planets Mod' : 'stock'}, from the KSP installation's Kopernicus logs).`) : sub('Custom body: your μ and radius.');
+const source = b => b ? sub(`Body data: ${b.name}, μ ${formatNumber(b.mu, 8)} m³/s², R ${formatNumber(b.radius, 8)} m (${ENVIRONMENTS[ENV].short}${b.opm ? ', added by the Outer Planets Mod' : ''}; from the KSP installation's Kopernicus logs).`) : sub('Custom body: your μ and radius.');
 const atmosphereNote = (b, alt, what, effect = 'drag would bring a real orbit down') => b && b.atmosphere && alt < b.atmosphere
     ? `<span class="fdc-warn">${what} is inside ${b.name}'s atmosphere, which reaches ${formatNumber(b.atmosphere / 1000, 4)} km: ${effect}.</span> `
     : '';
@@ -269,7 +301,7 @@ function drawTransfer(svg, r) {
 /* Thrust-to-weight */
 setupCard(document.getElementById('twr'), ({ form, get, scale }) => {
     const gs = form.elements.gsource.value;
-    const b = gs !== CUSTOM ? findBody(gs) : null;
+    const b = gs !== CUSTOM ? findIn(gs) : null;
     const g = b ? surfaceGravity(b) : get('g');
     const targetText = form.elements.target.value.trim();
     const massKg = get('mass') * scale('massUnit');

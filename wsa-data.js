@@ -9,6 +9,7 @@
  *  - Milestone: add an entry to MILESTONES. `stage` must be an id from STAGES.
  *  - Mission:   add an entry to MISSIONS (rules and fields are described above that list).
  *  - Image:     put the file in images/gallery/ and add an entry to GALLERY (example at the bottom).
+ *  - News:      add an entry at the top of NEWS. The home page shows the newest two; news.html shows them all.
  *
  * Every `status` must be a key of STATUSES. Links (`page`, `href`) are relative to the site root.
  */
@@ -20,6 +21,7 @@ window.WSA = {
         'completed':         { label: 'Completed',         tone: 'operational',  description: 'The mission reached its goal and the record confirms it.' },
         'flown':             { label: 'Flown',             tone: 'operational',  description: 'The mission or flight took place. Its record may include documented problems.' },
         'demonstrated':      { label: 'Demonstrated',      tone: 'operational',  description: 'Proof of concept achieved. It works, but may need further refinement.' },
+        'on-hold':           { label: 'On hold',           tone: 'planned',      description: 'Work has paused while the focus is elsewhere. It may resume.' },
         'partial':           { label: 'Partially successful', tone: 'experimental', description: 'Some goals were reached and others were not.' },
         'stranded':          { label: 'Stranded',          tone: 'experimental', description: 'The vehicle is intact but cannot get home or reach its goal on its own; a rescue or recovery is needed.' },
         'experimental':      { label: 'Experimental',      tone: 'experimental', description: 'Under active testing. Results may be inconsistent or limited.' },
@@ -27,7 +29,7 @@ window.WSA = {
         'planned':           { label: 'Planned',           tone: 'planned',      description: 'A defined future effort. Scope and details are not final.' },
         'concept':           { label: 'Concept',           tone: 'planned',      description: 'A possible direction that has been considered but not committed to.' },
         'failed':            { label: 'Failed',            tone: 'failed',       description: 'A test, build or mission that did not work, recorded so its lessons are not lost.' },
-        'lost':              { label: 'Lost',              tone: 'failed',       description: 'The vehicle was destroyed or contact with it was lost.' },
+        'lost':              { label: 'Lost',              tone: 'failed',       description: 'The vehicle or its crew was lost, or contact with the vehicle was lost.' },
         'record-incomplete': { label: 'Record incomplete', tone: 'undocumented', description: 'Known to exist, but the detailed record still needs to be documented.' },
         'undocumented':      { label: 'Undocumented',      tone: 'undocumented', description: 'Named in WSA records, with no details documented yet.' }
     },
@@ -64,20 +66,21 @@ window.WSA = {
             category: 'launch-vehicles',
             program: 'Aegis',
             role: 'Reusable booster family',
-            status: 'experimental',
-            summary: 'WSA\'s reusable booster family and the launcher behind many WSA missions, from the Minmus Firework flight to Odysseus, Project Kepler and FAMMOK-3. Landing and recovering the boosters is still experimental, guided by WSA\'s own AutoLand software.',
-            aliases: ['Quartet', 'Quintet', 'Nonet', 'Heavy', 'Super Heavy', 'Max', 'Mark II', 'Mark V', 'Aegis Mk1.3'],
+            status: 'demonstrated',
+            summary: 'WSA\'s reusable booster family and the launcher behind many WSA missions. Guided by WSA AutoLand V2.3, an Aegis booster has touched down directly on its designated landing pad. The newest design, Aegis Mk1.7, adds a hinge for WSA\'s future booster catch. The next step is making the landing repeatable and dependable.',
+            aliases: ['Quartet', 'Quintet', 'Nonet', 'Heavy', 'Super Heavy', 'Max', 'Mark II', 'Mark V', 'Aegis Mk1.3', 'Aegis Mk1.7'],
             specs: [
                 ['Configurations', 'Quartet, Quintet, Nonet, Heavy, Super Heavy, Max'],
                 ['Versions named in flight records', 'Aegis Mk1.3, Aegis-1.1 SH, Aegis Super Heavy-1 (AegisSH-1)'],
-                ['Recovery', 'Experimental: Super Heavy recovery test flights continue'],
-                ['Recovery directions', 'Mark II side-booster recovery (planned); Mark V main-booster recovery (possible); a booster catch system (early concept)']
+                ['Newest design', 'Aegis Mk1.7, which adds a hinge for the future booster catch'],
+                ['Landing', 'First successful target-pad landing, with AutoLand V2.3'],
+                ['Recovery next steps', 'Repeatability and reliability; a booster catch is in development']
             ],
             note: 'Configuration names only: engine counts and performance figures are not documented.',
             page: 'vehicles-programs.html#aegis',
-            links: [{ label: 'Photos in the Flight Gallery', href: 'gallery.html?album=aegis' }, { label: 'AutoLand Engineering', href: 'autoland.html' }],
+            links: [{ label: 'Watch the pad landing', href: 'autoland.html#pad-landing' }, { label: 'Photos in the Flight Gallery', href: 'gallery.html?album=aegis' }],
             related: ['aegis-1-super-heavy', 'lyra'],
-            evidence: ['Vessel names in the saves: "WSA Minmus Fireworks + Aegis mk1.3", "OYR-1P \\"Odysseus\\" + Aegis-1.1 SH", "Project Kepler + AegisSH-1", "FAMMOK-3 DRSE AegisSH-1", "KGOSS-1 ISRU + AegisSH-1", "Aegis Mk1.6 Crew-2", "KGOSS1-MD Aegis1.1SH to Aegis1.7SH Recovery" test flights']
+            evidence: ['Vessel names in the saves: "WSA Minmus Fireworks + Aegis mk1.3", "OYR-1P \"Odysseus\" + Aegis-1.1 SH", "Project Kepler + AegisSH-1", "FAMMOK-3 DRSE AegisSH-1", "KGOSS-1 ISRU + AegisSH-1", "Aegis Mk1.6 Crew-2", "KGOSS1-MD Aegis1.1SH to Aegis1.7SH Recovery" test flights', 'Pad landing: operator\'s confirmation and video (videos/source/padPercisionLanding.mp4, recorded 15 November 2026); the AutoLand script announces "WITH AEGIS RECOVERABLE BOOSTER"', 'Aegis Mk1.7 and its catch hinge: operator; AutoLand repository commit d371aca "added catch hinge"']
         },
         {
             id: 'aegis-1-super-heavy',
@@ -136,9 +139,9 @@ window.WSA = {
             designation: 'SELENE',
             category: 'launch-vehicles',
             program: 'Lyra',
-            role: 'Lyra tier',
+            role: 'Smallest tier',
             status: 'planned',
-            summary: 'One of the three tiers in the Lyra family naming system.',
+            summary: 'The smallest of the three tiers in the Lyra family.',
             page: 'vehicles-programs.html#lyra',
             related: ['lyra', 'lyra-sol', 'lyra-astra']
         },
@@ -148,9 +151,9 @@ window.WSA = {
             designation: 'SOL',
             category: 'launch-vehicles',
             program: 'Lyra',
-            role: 'Lyra tier',
+            role: 'Middle tier',
             status: 'planned',
-            summary: 'One of the three tiers in the Lyra family naming system.',
+            summary: 'The middle of the three tiers in the Lyra family.',
             page: 'vehicles-programs.html#lyra',
             related: ['lyra', 'lyra-selene', 'lyra-astra']
         },
@@ -160,12 +163,11 @@ window.WSA = {
             designation: 'ASTRA',
             category: 'launch-vehicles',
             program: 'Lyra',
-            role: 'Lyra tier',
+            role: 'Largest tier',
             status: 'planned',
-            summary: 'One of the three tiers in the Lyra family naming system. Not to be confused with the Astra-1 space telescope.',
+            summary: 'The largest of the three tiers in the Lyra family. Not to be confused with the Astra-1 space telescope.',
             page: 'vehicles-programs.html#lyra',
-            related: ['lyra', 'lyra-selene', 'lyra-sol'],
-            verify: ['Earlier site text called Selene the smallest tier and Astra the largest; that ordering is not in the current notes. Confirm it.']
+            related: ['lyra', 'lyra-selene', 'lyra-sol']
         },
         {
             id: 'blue-whale',
@@ -220,7 +222,7 @@ window.WSA = {
             program: 'Aircraft & spaceplanes',
             role: 'Single-stage-to-orbit spaceplane experiment',
             status: 'experimental',
-            summary: 'A single-stage-to-orbit design built around a Mk2 spaceplane configuration. A later version reached KGOSS\'s orbit with NERV engines but did not dock: reaching orbit is not the same as completing the mission.',
+            summary: 'A single-stage-to-orbit design built around a Mk2 spaceplane configuration. A later version reached KGOSS\'s orbit with NERV engines, but the docking was called off as too risky and it landed safely back at KSC.',
             aliases: ['Single-stage-to-orbit', 'Spaceplane', 'Station docking test'],
             specs: [
                 ['Mass (expanded)', '≈ 80 t'],
@@ -229,13 +231,12 @@ window.WSA = {
                 ['Intakes', '2 shock cone, 4 radial'],
                 ['Crew modules', '4'],
                 ['Monopropellant', '≈ 800 units'],
-                ['Best documented result', '≈ 200 km orbit near KGOSS; no docking'],
+                ['Best documented result', '≈ 200 km orbit near KGOSS; docking aborted; landed at KSC'],
                 ['Earlier design', 'Ran out of liquid fuel near 25 km']
             ],
             page: 'vehicles-programs.html#aircraft',
             related: ['kgoss-1'],
-            evidence: ['Saves "ssto rdvz2 kgoss1", "sstoexp kgoss1 dock1", "sstokgoss1 exp b4 deorbit": vessel "[CYAC] Station docking test" (Mk2 parts, 4 RAPIER, 2 NERV) at 200 × 205 km; its docking port never docked and KGOSS-1\'s docking records are unchanged'],
-            verify: ['Why it did not dock: the Hangar said "no RCS capability", the Vehicles page "not enough RCS propellant". Which is right?']
+            evidence: ['Saves "ssto rdvz2 kgoss1", "sstoexp kgoss1 dock1", "sstokgoss1 exp b4 deorbit": vessel "[CYAC] Station docking test" (Mk2 parts, 4 RAPIER, 2 NERV) at 200 × 205 km; never docked', 'Operator: docking was aborted because it had never been done with this craft and the risk of hitting the centrifuge was too great; it landed safely at KSC']
         },
         {
             id: 'fx-series',
@@ -311,18 +312,17 @@ window.WSA = {
             program: 'FAMMOK',
             role: 'Lander: Minmus, Mun and Duna',
             status: 'stranded',
-            summary: 'FAMMOK-2 made WSA\'s first landings on Minmus and on Duna, and landed on the Mun. After lifting off from Duna it stayed in Duna orbit, where it is stranded with three crew.',
+            summary: 'FAMMOK-2 made WSA\'s first landings on Minmus and on Duna, and landed on the Mun. At Duna it had about 2,300 m/s of delta-v: not enough to land and come home. The landing was attempted anyway; it succeeded, but it left FAMMOK-2 stranded in Duna orbit with three crew.',
             specs: [
                 ['Landings', 'Minmus (WSA\'s first), Mun, Duna (WSA\'s first)'],
-                ['Current state', 'Duna orbit, ≈ 81 × 202 km, 3 crew (current save)'],
-                ['Delta-v when stranded', '≈ 2,300 m/s (as reported)'],
+                ['Delta-v at Duna', '≈ 2,300 m/s, not enough to land and return'],
+                ['Current state', 'Stranded in Duna orbit, ≈ 81 × 202 km, 3 crew'],
                 ['Earlier campaign figures', '≈ 6,000 m/s before the injection burn; ≈ 3,690 m/s lander capability; ≈ 3,100 m/s in the Duna-orbit phase']
             ],
             note: 'The campaign figures are approximate and may refer to different configurations or flight phases.',
             page: 'missions-archive.html#fammok',
             related: ['fammok-1', 'fammok-3'],
-            evidence: ['Flags: "First WSA Minmus landing" (plaque "First ever landing on Minmus! Craft: Fammok 2"), "WSA second landing on Mum" (plaque "Second landing on Mum ... Craft: Fammok 2"), "First WSA landing on Duna" (plaque "Craft: WSA FAMMOK-2")', 'Current save: vessel "Fammok 2" ORBITING Duna 81 × 202 km, 3 crew, 182 LiquidFuel / 223 Oxidizer aboard'],
-            verify: ['The reported ≈ 2,300 m/s does not match the propellant in the current save (182 LF / 223 Ox, a rough estimate of well under 1,000 m/s for this craft). It may describe an earlier moment. Confirm the figure.']
+            evidence: ['Flags: "First WSA Minmus landing" (plaque "First ever landing on Minmus! Craft: Fammok 2"), "WSA second landing on Mum" (plaque "Second landing on Mum ... Craft: Fammok 2"), "First WSA landing on Duna" (plaque "Craft: WSA FAMMOK-2")', 'Current save: vessel "Fammok 2" ORBITING Duna 81 × 202 km, 3 crew', 'Operator: about 2,300 m/s at Duna, not enough to land and return; the attempt stranded them']
         },
         {
             id: 'fammok-3',
@@ -332,17 +332,16 @@ window.WSA = {
             program: 'FAMMOK',
             role: 'Duna rescue mission',
             status: 'stranded',
-            summary: 'A Duna rescue mission, flown as FAMMOK-3 DRSE on an Aegis-1 Super Heavy with two crew. It never reached Duna: it is in solar orbit in the current save.',
+            summary: 'FAMMOK-3 was sent to rescue FAMMOK-2\'s crew from Duna orbit. Flown as FAMMOK-3 DRSE on an Aegis-1 Super Heavy with two crew, it never reached Duna and is itself stranded in solar orbit. WSA intends a rescue in the future.',
             aliases: ['FAMMOK-3 DRSE', 'Duna Rescue'],
             specs: [
                 ['Launch vehicle', 'Aegis-1 Super Heavy (AegisSH-1)'],
                 ['Crew', '2'],
-                ['Current state', 'Solar orbit, short of Duna (current save)']
+                ['Current state', 'Stranded in solar orbit, short of Duna']
             ],
             page: 'missions-archive.html#fammok',
             related: ['aegis-1-super-heavy', 'fammok-2'],
-            evidence: ['Craft files "FAMMOK-3 Duna Rescue SE", "FAMMOK-3 DRSE AegisSH-1", "FAMMOK-3 DRSE AegisQI-1"', 'Current save: vessel "FAMMOK-3 DRSE AegisSH-1" ORBITING the Sun (about 17.0 million × 46.5 million km above Kerbol), 2 crew, with substantial propellant aboard (2,061 LF / 2,519 Ox)', 'Save "fam3 before atmpenc1" shows the same orbit'],
-            verify: ['Matched to the operator\'s "rescue craft stranded in solar orbit" by its name (Duna Rescue) and its state. Confirm that FAMMOK-3 is that craft, and whether it can still reach Duna with the propellant it has.']
+            evidence: ['Craft files "FAMMOK-3 Duna Rescue SE", "FAMMOK-3 DRSE AegisSH-1", "FAMMOK-3 DRSE AegisQI-1"', 'Current save: vessel "FAMMOK-3 DRSE AegisSH-1" ORBITING the Sun, 2 crew', 'Operator: FAMMOK-3 was the rescue craft, stranded in solar orbit, with a rescue intended in the future']
         },
         {
             id: 'silver-bridge',
@@ -350,34 +349,34 @@ window.WSA = {
             designation: 'SILVER BRIDGE',
             category: 'landers',
             program: 'Project Silver Bridge',
-            role: 'One-off Mun surface and ISRU mission',
+            role: 'Mun landing, mining and docking demonstrator',
             status: 'flown',
-            summary: 'A one-off Mun mission and launcher concept outside the numbered launcher families: a lander that drilled and ran ISRU experiments on the Mun.',
+            summary: 'A one-off three-part spacecraft built to prove that WSA could land on the Mun and dock back with another craft in Munar orbit: a lander, a command module carrying an ISRU unit, and a prototype LunaLink relay satellite.',
             aliases: ['Project Silver Bridge'],
             specs: [
-                ['Destination', 'Mun'],
-                ['Profile', 'Undock in low Munar orbit, surface drilling and ISRU operations, return to orbit and redock'],
-                ['Also supported', 'An experimental relay'],
-                ['Outcome', 'A docking-port size mismatch prevented the planned docking at KGOSS; a near-stranding in low Kerbin orbit followed']
+                ['Sections', 'Lander, command module with ISRU unit, LunaLink prototype relay'],
+                ['Crew', '3 (2 on the lander)'],
+                ['Demonstrated', 'Mun landing, surface mining, docking in Munar orbit, ISRU in Munar orbit, relay deployment'],
+                ['Not achieved', 'Docking at KGOSS-1: the docking ports did not match']
             ],
             page: 'missions-archive.html#silver-bridge',
-            related: ['kgoss-1'],
-            evidence: ['Saves "pjsb orbit 1" (Mun orbit 139 × 206 km), "pjsb orb2" (59 × 64 km), "pjsb b4 depart" ("Project Silver Bridge Lander" landed on the Mun, 2 crew); flag "Project Silver Bridge Landing Site" on the Mun']
+            related: ['kgoss-1', 'lunalink-1'],
+            evidence: ['Save "pjsb orbit 1": "Project Silver Bridge" (68 parts, 3 crew) with mk1-3pod, ISRU, MiniDrill, radial ore tanks, two large docking ports and a probe core with two antenna stacks', 'Save "pjsb b4 depart": lander (Mk2 lander cabin, drill, 2 crew) landed on the Mun; flag "Project Silver Bridge Landing Site"', 'The probe core and antennas match "Mum ComLink Sat-Exp" (in Mun orbit)', 'Operator: confirmed that this story belongs to Silver Bridge']
         },
         {
             id: 'odysseus',
             name: 'Odysseus (OYR-1P)',
             designation: 'OYR-1P',
             category: 'landers',
-            role: 'Crewed Duna spacecraft',
-            status: 'flown',
-            summary: 'The crewed spacecraft of WSA\'s fourth Duna attempt, launched on an Aegis-1.1 Super Heavy with three crew.',
+            program: 'Odysseus',
+            role: 'Lander development program',
+            status: 'on-hold',
+            summary: 'Odysseus is WSA\'s own program to build a better lander, launched on Aegis. Its crewed spacecraft made WSA\'s fourth Duna attempt. The program has been largely set aside as WSA\'s focus shifted to AutoLand.',
             aliases: ['Odysseus', 'OYR-1P', 'OYR-1P2', 'OYR'],
             specs: [['Launch vehicle', 'Aegis-1.1 Super Heavy'], ['Crew', '3']],
             page: 'missions-archive.html#odysseus',
             related: ['aegis-1-super-heavy'],
-            evidence: ['Vessels "OYR-1P \\"Odysseus\\" + Aegis-1.1 SH" and "OYR-1P2 \\"Odysseus\\" + Aegis-1.1 SH" (3 crew); craft files of the same names and "Odysseus P2"'],
-            verify: ['No program is recorded for Odysseus. Which program does it belong to?']
+            evidence: ['Vessels "OYR-1P \"Odysseus\" + Aegis-1.1 SH" and "OYR-1P2 \"Odysseus\" + Aegis-1.1 SH" (3 crew); craft files of the same names and "Odysseus P2"', 'Operator: its own program, built on Aegis as the launcher, an attempt at a better lander, largely abandoned as focus moved to AutoLand']
         },
         {
             id: 'project-kepler',
@@ -385,13 +384,13 @@ window.WSA = {
             designation: 'KEPLER',
             category: 'landers',
             program: 'Project Kepler',
-            role: 'Crewed asteroid rendezvous mission',
-            status: 'flown',
-            summary: 'A crewed asteroid mission with a grapple, drills and an ISRU unit, launched on an Aegis-1 Super Heavy.',
+            role: 'Crewed asteroid-capture test',
+            status: 'lost',
+            summary: 'A crewed spacecraft built to test asteroid capture, with a grapple, drills and an ISRU unit, launched on an Aegis-1 Super Heavy. Its command module was lost in a high-speed splashdown after a parachute failure, and its three crew were killed.',
             specs: [['Launch vehicle', 'Aegis-1 Super Heavy (AegisSH-1)'], ['Crew', '3'], ['Equipment', 'Grappling device, drills, ISRU unit']],
             page: 'missions-archive.html#project-kepler',
             related: ['aegis-1-super-heavy'],
-            evidence: ['Vessel "Project Kepler + AegisSH-1" (3 crew, GrapplingDevice, MiniDrill ×2, ISRU) in saves "pjkb4 final mvmr1", "pjk before rdzv", "pjk 1_3km", "pjk b4 redirect1", "pjk redrt and disarm 1", "pjk landing"']
+            evidence: ['Vessel "Project Kepler + AegisSH-1" (crew Hilwell, Aldory and Hilwig Kerman; GrapplingDevice, MiniDrill ×2, ISRU) in saves "pjkb4 final mvmr1" to "pjk landing"', 'Asteroid renamed OUU-729 "Kepler" in "pjk redrt and disarm 1"', 'Operator: parachute malfunction after reentry, high-speed splashdown, three crew lost']
         },
         {
             id: 'kgoss-1',
@@ -476,6 +475,20 @@ window.WSA = {
             evidence: ['Save "fuelmdl1 rdzv 1": "KGOSS-1 Fuel Mdl Mk1" (4 crew) at rendezvous; current save: KGOSS-1 docking record "KGOSS-1 Fuel Mdl Mk1"']
         },
         {
+            id: 'kgoss-isru',
+            name: 'KGOSS-1 ISRU Module',
+            designation: 'ISRU',
+            category: 'station',
+            program: 'KGOSS',
+            role: 'Station module (to be docked)',
+            status: 'planned',
+            summary: 'An ISRU module for KGOSS-1. Its first docking attempt was called off because it lacked the RCS to control the docking reliably, and it came back to a safe splashdown on Kerbin. WSA plans to dock it in the future.',
+            specs: [['Launch vehicle', 'Aegis-1 Super Heavy (AegisSH-1)'], ['Status', 'First docking attempt abandoned; to be docked later']],
+            page: 'kgoss.html',
+            related: ['kgoss-1', 'aegis-1-super-heavy'],
+            evidence: ['Save "isru1 kgosssmd det1": "KGOSS-1 ISRU + AegisSH-1" in Kerbin orbit; craft files "KGOSS-1 ISRU Module", "KGOSS-1 ISRU + AegisSH-1"', 'Operator: first docking failed for lack of RCS control; safe splashdown; to be docked in the future']
+        },
+        {
             id: 'astra-1',
             name: 'Astra-1 Kerbin Space Telescope',
             designation: 'ASTRA-1',
@@ -498,10 +511,11 @@ window.WSA = {
             program: 'LunaLink',
             role: 'Relay satellite at the Mun',
             status: 'flown',
-            summary: 'A relay satellite with an ion engine, in an 80 km circular orbit round the Mun in the current save.',
+            summary: 'A relay satellite with an ion engine, in an 80 km circular orbit round the Mun. It follows the LunaLink prototype relay that Project Silver Bridge carried to the Mun.',
             aliases: ['LunaLink'],
             specs: [['Orbit', '≈ 80 km circular round the Mun (current save)'], ['Propulsion', 'Ion engine']],
             page: 'missions-archive.html#lunalink',
+            related: ['silver-bridge'],
             evidence: ['Current save: vessel "LunaLink-1" (relay) ORBITING the Mun 80 × 80 km, with an ion engine and xenon; craft file "LunaLink-1"']
         }
     ],
@@ -533,7 +547,7 @@ window.WSA = {
         {
             id: 'autoland-v16', stage: 'foundations', program: 'AutoLand', status: 'demonstrated',
             title: 'AutoLand V1.6 Baseline',
-            description: 'The last stable version before the experimental A/B series. It could land a booster on water.',
+            description: 'AutoLand began as WSA\'s own landing software, written in kOS rather than relying on MechJeb. V1.6 was the last stable version before the experimental A/B series, and it could land a booster on water.',
             lesson: 'The booster could still tip over after touchdown.',
             href: 'autoland.html#history', linkLabel: 'AutoLand development history'
         },
@@ -551,9 +565,9 @@ window.WSA = {
             href: 'autoland.html#history', linkLabel: 'AutoLand development history'
         },
         {
-            id: 'autoland-v20', stage: 'landing-control', program: 'AutoLand', status: 'planned',
-            title: 'AutoLand V2.0 Designation',
-            description: 'A4 is intended to become V2.0 once it is formally accepted. Until then it remains experimental.',
+            id: 'autoland-v20', stage: 'landing-control', program: 'AutoLand', status: 'completed',
+            title: 'A4 Becomes AutoLand V2.0',
+            description: 'The A4 build was adopted as AutoLand V2.0, the start of the V2 line that went on to add entry-burn control, a drag model, landing prediction and diagnostics.',
             href: 'autoland.html#history', linkLabel: 'AutoLand development history'
         },
         {
@@ -566,7 +580,7 @@ window.WSA = {
         {
             id: 'kgoss-fuel', stage: 'infrastructure', program: 'KGOSS', status: 'in-service',
             title: 'KGOSS-1 Fuel Module',
-            description: 'A fuel module of about 84 tonnes is docked at KGOSS-1. A second matching tank is planned to make the station symmetrical.',
+            description: 'A fuel module of about 84 tonnes is docked at KGOSS-1. A second matching tank is planned to make the station symmetrical. An ISRU module\'s first docking attempt was called off for lack of RCS control; it splashed down safely and will be docked later.',
             href: 'kgoss.html', linkLabel: 'KGOSS Station', vehicle: 'kgoss-fuel-tanks'
         },
         {
@@ -596,27 +610,27 @@ window.WSA = {
         {
             id: 'fammok-2', stage: 'exploration', program: 'FAMMOK', status: 'stranded',
             title: 'FAMMOK-2: First Minmus and Duna Landings',
-            description: 'FAMMOK-2 made WSA\'s first landing on Minmus, landed on the Mun, and later made WSA\'s first landing on Duna. It lifted off again but stayed in Duna orbit, where it is stranded with three crew.',
+            description: 'FAMMOK-2 made WSA\'s first landing on Minmus, landed on the Mun, and later made WSA\'s first landing on Duna. With about 2,300 m/s left at Duna, not enough to land and come home, the landing was attempted anyway. It succeeded, but left FAMMOK-2 stranded in Duna orbit with three crew.',
             lesson: 'Landing is only half of a mission: the vehicle needs the margin to come home.',
             href: 'missions-archive.html#fammok', linkLabel: 'FAMMOK mission records', vehicle: 'fammok-2'
         },
         {
             id: 'silver-bridge', stage: 'exploration', program: 'Silver Bridge', status: 'partial',
             title: 'Project Silver Bridge',
-            description: 'A one-off Mun mission: undock in low Munar orbit, drill and run ISRU experiments on the surface, return to orbit and redock, and support an experimental relay.',
-            lesson: 'A docking-port size mismatch prevented the planned docking at KGOSS, and the vehicle was nearly stranded in low Kerbin orbit. Compatible docking hardware and rescue options matter.',
+            description: 'A three-part Mun mission that proved WSA could land on the Mun, mine its surface, dock back with the command module in Munar orbit, run ISRU there and deploy a prototype LunaLink relay.',
+            lesson: 'Its docking ports did not match KGOSS-1\'s, so the planned docking at the station was impossible. Compatible docking hardware matters.',
             href: 'missions-archive.html#silver-bridge', linkLabel: 'Silver Bridge record', vehicle: 'silver-bridge'
         },
         {
             id: 'fammok-3', stage: 'exploration', program: 'FAMMOK', status: 'stranded',
             title: 'FAMMOK-3 Duna Rescue',
-            description: 'A Duna rescue mission launched on an Aegis-1 Super Heavy with two crew. It never reached Duna and is in solar orbit.',
+            description: 'A rescue mission for FAMMOK-2\'s crew, launched on an Aegis-1 Super Heavy with two crew. It never reached Duna and is stranded in solar orbit; WSA intends a rescue in the future.',
             href: 'missions-archive.html#fammok', linkLabel: 'FAMMOK mission records', vehicle: 'fammok-3'
         },
         {
             id: 'odysseus', stage: 'exploration', program: 'Odysseus', status: 'flown',
             title: 'Odysseus: Fourth Duna Attempt',
-            description: 'Odysseus reached Duna. With too little fuel for a safe landing, it deliberately did not land and used a Duna gravity assist to return to Kerbin.',
+            description: 'Odysseus reached Duna and entered orbit. With too little fuel for a safe landing, it deliberately did not land and returned to Kerbin.',
             lesson: 'Turning back with the crew safe was the right call: getting there and home again is a result.',
             href: 'missions-archive.html#odysseus', linkLabel: 'Mission record', vehicle: 'odysseus'
         },
@@ -627,24 +641,38 @@ window.WSA = {
             href: 'missions-archive.html#minmus-firework', linkLabel: 'Mission record'
         },
         {
-            id: 'project-kepler', stage: 'exploration', program: 'Project Kepler', status: 'flown',
-            title: 'Project Kepler Asteroid Rendezvous',
-            description: 'A crewed asteroid mission that met an asteroid in solar orbit, grappled it, later released it, and came back into Kerbin\'s atmosphere.',
+            id: 'project-kepler', stage: 'exploration', program: 'Project Kepler', status: 'lost',
+            title: 'Project Kepler: Asteroid Capture',
+            description: 'A crewed test of asteroid capture. Project Kepler grappled an asteroid in solar orbit; bringing it into Kerbin orbit was judged too risky, so the crew renamed it "Kepler", released it and headed home. After reentry a parachute failed, and the command module\'s high-speed splashdown killed its three crew: Hilwell, Aldory and Hilwig Kerman.',
             href: 'missions-archive.html#project-kepler', linkLabel: 'Mission record', vehicle: 'project-kepler'
-        },
-        {
-            id: 'autoland-v2x', stage: 'guidance', program: 'AutoLand', status: 'in-development',
-            title: 'AutoLand V2.x Guidance',
-            description: 'Development of predictive targeting, empirical drag modelling, entry-burn logic, glide and powered-glide guidance and a redesigned landing burn, continuing in the V2.2a and V2.2aGT script track.',
-            lesson: 'In the Aeris 4A live test the landing missed by about 1.9 km, with weak guidance in the fall and a rough touchdown, but the vehicle stayed upright. Other test landings came down about 700 m from the target, rough touchdowns could damage engines, and an Aegis stabilizer setup flipped near apogee. These are test observations, not specifications.',
-            href: 'autoland.html#glide', linkLabel: 'Glide & landing guidance'
         },
         {
             id: 'ssto-orbit', stage: 'guidance', program: 'Aircraft', status: 'experimental',
             title: 'Mk2 SSTO Reaches Orbit',
             description: 'A Mk2-based single-stage-to-orbit design reached roughly 200 km orbit near KGOSS with NERV engines, after an earlier design ran out of liquid fuel near 25 km.',
-            lesson: 'It did not dock with KGOSS. Reaching orbit is not the same as completing the mission.',
+            lesson: 'It had never docked before and the risk of hitting KGOSS\'s centrifuge was too great, so the docking was called off. The SSTO came home and landed safely at KSC.',
             href: 'vehicles-programs.html#aircraft', linkLabel: 'Aircraft & SSTO program', vehicle: 'mk2-ssto'
+        },
+        {
+            id: 'autoland-v22-glide', stage: 'guidance', program: 'AutoLand', status: 'demonstrated',
+            title: 'AutoLand V2.2: Powered-Glide Guidance',
+            description: 'V2.2 brought powered-glide guidance and landing-target correction together. Instead of a straight vertical descent, the booster manages its horizontal motion while easing toward a near-vertical landing attitude. Earlier versions had struggled with leftover horizontal speed, inaccurate touchdown prediction and large landing offsets.',
+            lesson: 'In an early test the guidance was accurate enough to bring the booster down close to another booster. That attempt ended in a tip-over, but it showed how much the positioning had improved.',
+            href: 'autoland.html#v22', linkLabel: 'The road to the pad'
+        },
+        {
+            id: 'autoland-offset', stage: 'guidance', program: 'AutoLand', status: 'demonstrated',
+            title: 'AutoLand V2.2: Finding Kerbin\'s Rotation',
+            description: 'V2.2 kept missing its target by more than 1.6 km. A miss that large and that consistent made the team suspicious, and they realised the guidance was missing Kerbin\'s rotation: it was not separating inertial velocity from velocity relative to Kerbin\'s turning surface. With the rotation accounted for, V2.2 landed within about 500 m of its target.',
+            lesson: 'The remaining few hundred metres were closed in V2.3.',
+            href: 'autoland.html#offset', linkLabel: 'The road to the pad'
+        },
+        {
+            id: 'autoland-v23-pad', stage: 'guidance', program: 'AutoLand', status: 'demonstrated',
+            title: 'AutoLand V2.3: First Successful Target-Pad Landing',
+            description: 'V2.3 closed the remaining few hundred metres. Its first prototype touched down on the designated landing pad, though off-centre; a later precision landing, on video, brought an Aegis Mk1.7 booster down on the pad\'s marked centre. AutoLand\'s original objective has been demonstrated.',
+            lesson: 'The next phase is making the landing repeatable, dependable and ready for routine reusable-booster recovery.',
+            href: 'autoland.html#pad-landing', linkLabel: 'Watch the landing', vehicle: 'aegis'
         },
         {
             id: 'lyra-p1e', stage: 'next-gen', program: 'Lyra', status: 'in-development',
@@ -659,9 +687,27 @@ window.WSA = {
             href: 'vehicles-programs.html#lyra', linkLabel: 'Lyra program', vehicle: 'lyra'
         },
         {
-            id: 'aegis-catch', stage: 'next-gen', program: 'Aegis', status: 'concept',
-            title: 'Booster Catch System',
-            description: 'After an Aegis splashdown, WSA began work on an original chopstick-style system for catching boosters on their return. It is an early concept: nothing has been built yet.',
+            id: 'autoland-v30', stage: 'next-gen', program: 'AutoLand', status: 'planned',
+            title: 'AutoLand V3.0: A Dependable System',
+            description: 'V3.0 is meant to be the mature, dependable AutoLand: proving that target-pad landings repeat across many attempts, different trajectories and conditions, and different Aegis configurations. Its acceptance criteria are not final yet.',
+            href: 'autoland.html#roadmap', linkLabel: 'AutoLand roadmap'
+        },
+        {
+            id: 'autoland-sites', stage: 'next-gen', program: 'AutoLand', status: 'concept',
+            title: 'Landing-Site Intelligence',
+            description: 'Possible future AutoLand abilities: choosing custom landing sites, primary and backup recovery locations, and awareness of each site\'s characteristics.',
+            href: 'autoland.html#roadmap', linkLabel: 'AutoLand roadmap'
+        },
+        {
+            id: 'aegis-automation', stage: 'next-gen', program: 'Aegis', status: 'concept',
+            title: 'Aegis Flight Automation',
+            description: 'Ideas for automating more of an Aegis flight: ascent, staging, boostback burns and custom recovery locations. These are separate from AutoLand, which handles the powered descent and landing.',
+            href: 'vehicles-programs.html#aegis', linkLabel: 'Aegis program', vehicle: 'aegis'
+        },
+        {
+            id: 'aegis-catch', stage: 'next-gen', program: 'Aegis', status: 'in-development',
+            title: 'Booster Catch',
+            description: 'A separate recovery project: a mechanical structure to catch and secure returning Aegis boosters instead of landing them on legs or recovering them from the sea. After considering a capture ring and cable systems, WSA chose to pursue an original chopstick-style design. The new Aegis Mk1.7 adds a hinge for the catch. More about it will be released soon; a catch has not been demonstrated yet.',
             href: 'vehicles-programs.html#aegis', linkLabel: 'Aegis program', vehicle: 'aegis'
         },
         {
@@ -728,7 +774,7 @@ window.WSA = {
             program: 'KGOSS',
             objective: 'Build WSA\'s orbital station and assembly hub in Kerbin orbit.',
             destination: 'Kerbin orbit',
-            vehicles: ['kgoss-1', 'kgoss-centrifuge', 'kgoss-cabins', 'kgoss-fuel-tanks', 'seraph-spc-1'],
+            vehicles: ['kgoss-1', 'kgoss-centrifuge', 'kgoss-cabins', 'kgoss-fuel-tanks', 'kgoss-isru', 'seraph-spc-1'],
             relatedMissions: ['seraph-haven', 'mk2-ssto', 'silver-bridge'],
             status: 'in-service',
             outcome: 'Assembled and in service at about 200 km',
@@ -744,14 +790,17 @@ window.WSA = {
                   text: 'KGOSS-1\'s docking records show the core, the centrifuge (about 43 t), the fuel module (about 84 t) and the Seraph SPC-1 "Haven" capsule.' },
                 { at: 2, title: 'Current state', basis: 'save', source: 'save',
                   text: 'In the current save KGOSS-1 orbits Kerbin at about 200 × 204 km with 38 crew aboard.' },
+                { at: 2, title: 'ISRU module: first docking attempt called off', basis: 'operator', source: 'operator',
+                  text: 'An ISRU module launched on an Aegis-1 Super Heavy could not be controlled precisely enough for docking because it lacked RCS. A safe splashdown back on Kerbin was judged the best option.' },
+                { at: 2, kind: 'planned', title: 'Planned: dock the ISRU module', basis: 'operator', source: 'operator',
+                  text: 'WSA plans to dock the ISRU module in the future.' },
                 { at: 2, kind: 'planned', title: 'Planned: second fuel tank', basis: 'operator', source: 'operator',
                   text: 'A second tank matching the docked fuel module is planned, to make the station symmetrical.' }
             ],
             replayNote: 'Shows one representative module flight. The order in which the modules arrived is drawn from the saves only loosely.',
             notes: ['The working orbit was discussed at about 200 km, with about 250 km considered. Under the rescaled KSRSS Reborn system, the earlier working altitude turned out to be inside the atmosphere; the current save uses the stock-scale system.'],
             links: [{ label: 'KGOSS Station', href: 'kgoss.html' }],
-            evidence: ['See the kgoss-1 vehicle record'],
-            verify: ['Was the "KGOSS-1 ISRU + AegisSH-1" module docked? It is not in KGOSS-1\'s docking records.']
+            evidence: ['See the kgoss-1 vehicle record']
         },
         {
             id: 'seraph-haven',
@@ -779,14 +828,14 @@ window.WSA = {
         {
             id: 'aegis-tests',
             name: 'Aegis flight and recovery tests',
-            aliases: ['Aegis', 'booster recovery', 'AutoLand', 'Quartet', 'Quintet', 'Nonet', 'Super Heavy recovery'],
+            aliases: ['Aegis', 'booster recovery', 'AutoLand', 'pad landing', 'target-pad landing', 'Aegis Mk1.7', 'Quartet', 'Quintet', 'Nonet', 'Super Heavy recovery'],
             program: 'Aegis',
-            objective: 'Land and recover Aegis boosters under WSA\'s own AutoLand guidance.',
+            objective: 'Land and recover Aegis boosters on a designated pad under WSA\'s own AutoLand guidance.',
             destination: 'Kerbin',
             vehicles: ['aegis', 'aegis-1-super-heavy'],
-            status: 'experimental',
-            outcome: 'Recovery is still experimental',
-            summary: 'Aegis boosters fly and come back to land under WSA\'s own AutoLand guidance. Recovery remains experimental: test flights continue with the Super Heavy versions, and a booster catch system is an early concept.',
+            status: 'demonstrated',
+            outcome: 'First successful target-pad landing, with AutoLand V2.3',
+            summary: 'Aegis boosters fly and come back under WSA\'s own AutoLand guidance. With AutoLand V2.3, an Aegis booster touched down directly on its designated landing pad for the first time. The next phase is making that landing repeatable and dependable.',
             locations: ['kerbin'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/apex' }, { to: 'kerbin/surface@+45' }] },
             events: [
@@ -794,26 +843,26 @@ window.WSA = {
                   text: 'The Flight Gallery has Aegis on the launch pad at dawn and climbing at night.' },
                 { at: 1, title: 'Booster in space', basis: 'site', source: 'gallery',
                   text: 'Flight Gallery photo of an Aegis stage in space above the horizon.' },
-                { at: 1.6, title: 'AutoLand descent', basis: 'site', source: 'autoland',
-                  text: 'AutoLand works out whether the booster can reach a vertical descent with the thrust available, and smooths the throttle on the way down.' },
-                { at: 2, title: 'Landing and recovery', basis: 'site', source: 'vehicles',
-                  text: 'WSA\'s earlier records count more than 47 successful recoveries, including water landings. Boosters have sometimes tipped over after touchdown.' },
+                { at: 1.6, title: 'AutoLand descent', basis: 'operator', source: 'operator',
+                  text: 'AutoLand predicts where the booster will touch down and corrects toward the target with powered-glide guidance, easing the booster toward a near-vertical landing attitude.' },
+                { at: 2, title: 'Earlier recoveries', basis: 'site', source: 'vehicles',
+                  text: 'WSA\'s earlier records count more than 47 successful recoveries, including water landings. Boosters sometimes tipped over after touchdown.' },
                 { at: 2, title: 'Super Heavy recovery tests', basis: 'save', source: 'save',
                   text: 'Recovery test flights of Aegis Super Heavy versions 1.1 to 1.7 are in the saves, with boosters coming down on land and in the sea.' },
-                { at: 2, title: 'After a splashdown: a catch concept', basis: 'operator', source: 'operator',
-                  text: 'After an Aegis splashdown, WSA began work on an original chopstick-style system for catching boosters. It is an early concept; nothing has been built.' }
+                { at: 2, title: 'First target-pad landing', basis: 'operator', source: 'operator',
+                  text: 'Guided by AutoLand V2.3, an Aegis booster touched down on its designated landing pad: first off-centre, then, in a precision landing on video, on the pad\'s marked centre, where the Aegis Mk1.7 booster stayed upright. The AutoLand page has the video.' }
             ],
             replayNote: 'A representative flight profile built from the program record, not one particular flight.',
             notes: [
                 'AutoLand V1.6 could land a booster on water, but the booster could still tip over after touchdown.',
-                'AutoLand B1 failed in testing; the exact cause is not documented.',
-                'V2.x test landings came down roughly 700 m from the target; in the Aeris 4A live test the miss was about 1.9 km. These are test observations, not specifications.',
-                'An Aegis stabilizer setup has flipped near apogee.'
+                'AutoLand V2.2 kept missing its target by more than 1.6 km until the team realised it was missing Kerbin\'s rotation. Accounting for the rotation cut the miss to about 500 m; V2.3 closed the rest.',
+                'The game closed during the excitement after the pad landing. Nothing suggests AutoLand or the landing caused it.',
+                'The booster in the landing video is the new Aegis Mk1.7 design, which adds a hinge for WSA\'s future booster catch. The catch is a separate recovery project, not part of AutoLand; more about it will be released soon.'
             ],
-            links: [{ label: 'Aegis program', href: 'vehicles-programs.html#aegis' }, { label: 'AutoLand Engineering', href: 'autoland.html' },
+            links: [{ label: 'Watch the pad landing', href: 'autoland.html#pad-landing' }, { label: 'AutoLand Engineering', href: 'autoland.html' },
                     { label: 'Aegis photos', href: 'gallery.html?album=aegis' }],
-            evidence: ['Vessels "KGOSS1-MD Aegis1SH/1.2SH/1.3SH/1.5SH/1.6SH/1.7SH Recovery…" and "Aegis1.62SH Recovery" in the saves (LANDED and SPLASHED on Kerbin); craft files Aegis1.1SH–1.7SH recovery tests'],
-            verify: ['The "47+ successful recoveries" figure comes from the site\'s earlier text. Is it still right, and which vehicles does it count?']
+            evidence: ['Vessels "KGOSS1-MD Aegis1SH/1.2SH/1.3SH/1.5SH/1.6SH/1.7SH Recovery…" and "Aegis1.62SH Recovery" in the saves (LANDED and SPLASHED on Kerbin)', 'Pad landing: operator\'s confirmation and video (recorded 15 November 2026); AutoLand script repository commits 77df774 "Added stable V2.2 … error less than 600m", cdba0fc "V2.3 prototype, on pad uncentered" and d371aca "Percision pad landing, pending V3.0 cert, added catch hinge…"'],
+            verify: ['The "47+ successful recoveries" figure comes from the site\'s earlier text.']
         },
         {
             id: 'fammok-1',
@@ -877,11 +926,11 @@ window.WSA = {
             objective: 'Land on Duna.',
             destination: 'Duna',
             vehicles: ['fammok-2'],
-            relatedMissions: ['fammok-2-minmus-mun', 'fammok-3', 'duna-rescue-crash', 'odysseus'],
+            relatedMissions: ['fammok-2-minmus-mun', 'fammok-3', 'duna-crash', 'odysseus'],
             crew: 3,
             status: 'stranded',
             outcome: 'First WSA Duna landing; stranded in Duna orbit',
-            summary: 'A second FAMMOK-2 flew to Duna with three crew and made WSA\'s first landing there. It lifted off again but has stayed in Duna orbit since, stranded. WSA counts it as the first of four attempts to reach Duna.',
+            summary: 'A second FAMMOK-2 flew to Duna with three crew. With about 2,300 m/s of delta-v, not enough to land and come home, the landing was attempted anyway. FAMMOK-2 made WSA\'s first landing on Duna and lifted off again, but was left stranded in Duna orbit. WSA counts it as the first of four attempts to reach Duna.',
             locations: ['kerbin', 'duna', 'solar'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'duna/high' }, { to: 'duna/surface' }, { to: 'duna/low' }], endOrbit: true },
             events: [
@@ -889,108 +938,106 @@ window.WSA = {
                   text: 'FAMMOK-2 left Kerbin orbit for Duna with three crew.' },
                 { at: 2, title: 'Duna orbit', basis: 'save', source: 'save',
                   text: 'It arrived in an orbit of about 258 × 260 km round Duna.' },
+                { at: 2, kind: 'decision', title: 'Landing attempted without the margin to return', basis: 'operator', source: 'operator',
+                  text: 'About 2,300 m/s of delta-v was left: not enough to land on Duna and come home. The landing was attempted anyway.' },
                 { at: 2.5, title: 'Parachute problem', basis: 'site', source: 'archive',
                   text: 'WSA\'s archive records that the parachute malfunctioned or under-performed during the descent.' },
                 { at: 3, title: 'First WSA landing on Duna', basis: 'save', source: 'save',
                   text: 'FAMMOK-2 landed on Duna, and a flag reading "Craft: WSA FAMMOK-2" marks WSA\'s first Duna landing.' },
-                { at: 4, title: 'Back in Duna orbit', basis: 'save', source: 'save',
-                  text: 'It lifted off from the surface and returned to an orbit of about 81 × 202 km.' },
-                { at: 4, title: 'Stranded', basis: 'operator', source: 'operator',
-                  text: 'It became stranded at Duna with about 2,300 m/s of delta-v reported remaining. It is still in that orbit, with its three crew, in the current save.' }
+                { at: 4, title: 'Stranded in Duna orbit', basis: 'save', source: 'save',
+                  text: 'It lifted off and returned to an orbit of about 81 × 202 km, without the delta-v to come home. It is still there with its three crew.' }
             ],
             replayNote: 'Duna orbit, the landing and the return to orbit are recorded; the transfer is schematic.',
             notes: ['Earlier campaign figures (approximate, possibly from different configurations or phases): about 6,000 m/s before the injection burn, about 3,690 m/s lander capability, about 3,100 m/s in the Duna-orbit phase.'],
             conflicts: ['Duna orbit: the earlier archive gives about 440 × 260 km; the arrival checkpoint in the saves shows about 258 × 260 km. They may describe different moments.'],
             links: [{ label: 'FAMMOK program', href: 'missions-archive.html#fammok' }],
-            evidence: ['Saves "fm2dunab4tb", "fm2dunacrt1", "fm2dunaenroutr" (escaping Kerbin, 3 crew), "fm2dunaorb" (Duna 258 × 260 km), "fm2dunades" (flying at Duna), "fm2dunasf" and "fam2dunaleavesur" (landed on Duna), "fam2 duna b4 transfer" (Duna 81 × 202 km); current save: Fammok 2 in Duna orbit 81 × 202 km, 3 crew; flag "First WSA landing on Duna"'],
-            verify: ['The reported 2,300 m/s does not match the propellant aboard in the current save (182 LF / 223 Ox). When was the figure measured?', 'The parachute problem is from the earlier archive; the saves cannot confirm it.']
+            evidence: ['Saves "fm2dunab4tb" … "fam2 duna b4 transfer" (see the vehicle record); current save: Fammok 2 in Duna orbit 81 × 202 km, 3 crew; flag "First WSA landing on Duna"', 'Operator: about 2,300 m/s, not enough to land and return; the attempt stranded them'],
+            verify: ['The parachute problem is from the earlier archive; the saves cannot confirm it.']
         },
         {
             id: 'fammok-3',
             name: 'FAMMOK-3 Duna rescue',
             aliases: ['FAMMOK', 'FAMMOK-3', 'FAMMOK-3 DRSE', 'rescue', 'Duna rescue attempt', 'Aegis-1 Super Heavy'],
             program: 'FAMMOK',
-            objective: 'A rescue mission to Duna.',
+            objective: 'Rescue FAMMOK-2\'s crew from Duna orbit.',
             destination: 'Duna',
             launchVehicle: 'Aegis-1 Super Heavy',
             vehicles: ['fammok-3', 'aegis-1-super-heavy'],
-            relatedMissions: ['fammok-2', 'duna-rescue-crash', 'odysseus'],
+            relatedMissions: ['fammok-2', 'duna-crash', 'odysseus'],
             crew: 2,
             status: 'stranded',
             outcome: 'Stranded in solar orbit, short of Duna',
-            summary: 'A Duna rescue mission, flown as FAMMOK-3 DRSE on an Aegis-1 Super Heavy with two crew after FAMMOK-2 was stranded. It never reached Duna and was left in solar orbit.',
+            summary: 'FAMMOK-3 was sent to rescue FAMMOK-2\'s stranded crew. Flown as FAMMOK-3 DRSE on an Aegis-1 Super Heavy with two crew, it never reached Duna and is itself stranded in solar orbit. WSA intends a rescue in the future.',
             locations: ['kerbin', 'solar', 'duna'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'solar:kerbin>duna@0.55' }], endOrbit: true },
-            planned: [{ from: 1, legs: [{ to: 'duna/low' }], label: 'Intended: reach Duna' }],
+            planned: [{ from: 1, legs: [{ to: 'duna/low' }], label: 'Intended: reach FAMMOK-2 at Duna' }],
             events: [
                 { at: 0, title: 'Launch on Aegis-1 Super Heavy', basis: 'save', source: 'save',
                   text: 'FAMMOK-3 DRSE lifted off on an Aegis-1 Super Heavy with two crew.' },
                 { at: 2, title: 'Stranded in solar orbit', basis: 'operator', source: 'operator',
-                  text: 'The rescue craft became stranded in orbit round Kerbol. In the current save it is still there with its two crew, on an orbit round Kerbol that reaches from inside Duna\'s orbit to beyond Dres\'s.' }
+                  text: 'The rescue craft became stranded in orbit round Kerbol. In the current save it is still there with its two crew, on an orbit that reaches from inside Duna\'s orbit to beyond Dres\'s.' },
+                { at: 2, kind: 'planned', title: 'Planned: a future rescue', basis: 'operator', source: 'operator',
+                  text: 'WSA intends to carry out a rescue in the future.' }
             ],
             replayNote: 'Where it is in solar orbit is drawn for illustration only.',
             links: [{ label: 'FAMMOK program', href: 'missions-archive.html#fammok' }],
-            evidence: ['See the fammok-3 vehicle record'],
-            verify: ['Confirm that FAMMOK-3 is the rescue craft the operator described as stranded in solar orbit, and that it was the second Duna attempt (it launched after FAMMOK-2 was stranded and before Odysseus).']
+            evidence: ['See the fammok-3 vehicle record']
         },
         {
-            id: 'duna-rescue-crash',
-            name: 'Duna rescue craft (crashed into Duna)',
-            aliases: ['rescue', 'Duna rescue attempt', 'crash', 'third Duna attempt'],
+            id: 'duna-crash',
+            name: 'Duna attempt (crashed into Duna)',
+            aliases: ['Duna attempt', 'crash', 'Duna crash'],
             program: 'Not recorded',
-            objective: 'A rescue mission to Duna.',
             destination: 'Duna',
-            craft: ['Rescue craft (name not recorded)'],
+            craft: ['Craft (name not recorded)'],
             relatedMissions: ['fammok-2', 'fammok-3', 'odysseus'],
             status: 'lost',
             outcome: 'Crashed into Duna',
-            summary: 'One of the two rescue attempts after FAMMOK-2 was stranded at Duna. It reached Duna but crashed into the planet.',
+            summary: 'One of WSA\'s attempts to reach Duna before Odysseus. It reached Duna but crashed into the planet. The craft\'s name, its purpose and the cause of the crash are not recorded.',
             locations: ['kerbin', 'duna', 'solar'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'duna/near' }, { to: 'duna/surface' }] },
             events: [
                 { at: 3, title: 'Crashed into Duna', basis: 'operator', source: 'operator',
-                  text: 'The rescue craft crashed into Duna. Its name and the cause are not recorded.' }
+                  text: 'The craft crashed into Duna. Its name and the cause are not recorded.' }
             ],
             replayNote: 'Every leg is schematic; only the crash at Duna is recorded.',
             links: [],
-            verify: ['Which craft was this? A "Seraph SPC-1 \\"Haven\\" + Aegis1SHMD" was on the pad in save "spc-1-1 duna transferang"; is it related?', 'Was this the second or the third Duna attempt?']
+            verify: ['Which craft was it and what was it for? The operator says it was not a rescue craft.']
         },
         {
             id: 'odysseus',
             name: 'Odysseus',
-            aliases: ['Duna', 'gravity assist', 'fourth Duna attempt', 'OYR-1P', 'OYR'],
-            program: 'Not recorded',
+            aliases: ['Duna', 'fourth Duna attempt', 'OYR-1P', 'OYR'],
+            program: 'Odysseus',
             objective: 'Reach Duna, and land if it was safe to.',
             destination: 'Duna',
             launchVehicle: 'Aegis-1.1 Super Heavy',
             vehicles: ['odysseus', 'aegis-1-super-heavy'],
-            relatedMissions: ['fammok-2', 'fammok-3', 'duna-rescue-crash'],
+            relatedMissions: ['fammok-2', 'fammok-3', 'duna-crash'],
             crew: 3,
             status: 'flown',
-            outcome: 'Reached Duna, did not land, returned to Kerbin',
-            summary: 'The fourth attempt to reach Duna. Odysseus got there, but with too little fuel for a safe landing it deliberately did not try to land. It used a Duna gravity assist to head home to Kerbin instead.',
+            outcome: 'Reached Duna orbit, did not land, returned to Kerbin',
+            summary: 'The fourth attempt to reach Duna, flown by WSA\'s Odysseus lander program. Odysseus entered orbit around Duna, but with too little fuel for a safe landing it deliberately did not try to land, and returned to Kerbin instead.',
             locations: ['kerbin', 'duna', 'solar'],
-            route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'duna/near' }, { to: 'duna/near@+180', via: 'flyby' }, { to: 'kerbin/near' }] },
+            route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'duna/low' }, { to: 'kerbin/near' }] },
             planned: [{ from: 2, legs: [{ to: 'duna/surface' }], label: 'Intended landing (not attempted)' }],
             events: [
                 { at: 0, title: 'Launch on Aegis-1.1 Super Heavy', basis: 'save', source: 'save',
                   text: 'Odysseus (OYR-1P) lifted off on an Aegis-1.1 Super Heavy with three crew.' },
                 { at: 0, title: 'Fourth attempt to reach Duna', basis: 'operator', source: 'operator',
-                  text: 'Odysseus followed the stranded FAMMOK-2 and the two failed rescue attempts.' },
-                { at: 2, title: 'Arrived at Duna', basis: 'operator', source: 'operator',
-                  text: 'Odysseus reached Duna.' },
+                  text: 'Odysseus followed FAMMOK-2, the FAMMOK-3 rescue mission and a craft that crashed into Duna.' },
+                { at: 2, title: 'In orbit around Duna', basis: 'save', source: 'save',
+                  text: 'Odysseus entered an orbit of about 95 × 108 km round Duna.' },
                 { at: 2, kind: 'decision', title: 'Landing not attempted', basis: 'operator', source: 'operator',
                   text: 'The fuel left was not enough to make a landing acceptably safe, so the landing was deliberately not attempted.' },
-                { at: 3, title: 'Duna gravity assist', basis: 'operator', source: 'operator',
-                  text: 'Odysseus used a gravity assist at Duna to head back to Kerbin.' },
-                { at: 4, title: 'Returned to Kerbin', basis: 'operator', source: 'operator',
-                  text: 'Odysseus returned to Kerbin.' }
+                { at: 3, title: 'Returned to Kerbin', basis: 'operator', source: 'operator',
+                  text: 'Odysseus left Duna orbit and returned to Kerbin.' }
             ],
-            replayNote: 'Transfers and the flyby are schematic. Whether Odysseus entered Duna orbit before leaving is not recorded.',
-            notes: ['The Flight Gallery has an "Odysseus Test" photo of a test flight high above the planet. How that test relates to the Duna mission is not recorded.'],
+            replayNote: 'The transfers are schematic.',
+            notes: ['The Odysseus program was an attempt to build a better lander, launched on Aegis. It has been largely set aside as WSA\'s focus shifted to AutoLand.',
+                    'The Flight Gallery has an "Odysseus Test" photo of a test flight high above the planet.'],
             links: [{ label: 'Odysseus test photo', href: 'gallery.html?album=odysseus' }],
-            evidence: ['Vessels "OYR-1P \\"Odysseus\\" + Aegis-1.1 SH" and "OYR-1P2 \\"Odysseus\\" + Aegis-1.1 SH", 3 crew, in saves "oyrtransstart1", "oyrp2 during trans", "oyrp2 before midc1", "oyr-1 midcorse1", "oyr-1 aftermid", "oyr1 duna orbit ar" (Duna 95 × 108 km), "oyr1 before entry" (Duna 24 × 99 km), "oyyrp2PlanA b4 entry", "oyr1p2 plan a land" and "oyr1p2 plan a b4 dp" (OYR-1P2 LANDED on Duna), "oyr1p2 before pa tt" (Duna 53 × 84 km, 17 parts)', 'None of these is in the current save: they are later in game time than it, so they look like branches that were not kept'],
-            verify: ['Two Odysseus variants (OYR-1P and OYR-1P2 "Plan A") appear in the saves, and in two saves OYR-1P2 is landed on Duna. This conflicts with "no landing attempted". Which branch is the official mission? The site follows the operator\'s account until this is settled.']
+            evidence: ['See the odysseus vehicle record. Saves "oyr1 duna orbit ar" (Duna 95 × 108 km), "oyr1 before entry"; a "Plan A" branch (OYR-1P2) landed on Duna in "oyr1p2 plan a land", but the operator confirms Odysseus never landed: that branch was not kept']
         },
         {
             id: 'jool-satellite',
@@ -999,10 +1046,10 @@ window.WSA = {
             program: 'Not recorded',
             objective: 'Orbit Duna.',
             destination: 'Duna (intended); Jool system',
-            craft: ['Satellite (name not recorded)'],
+            craft: ['Relay Probe wdy'],
             status: 'lost',
             outcome: 'Contact lost; last known in Jool orbit',
-            summary: 'A satellite meant for Duna orbit. An accidental gravity assist sent it to Vall instead. It later tried to reach Laythe, lost contact with Kerbin during the capture burn, and was last known to be in Jool orbit.',
+            summary: 'A relay probe, Relay Probe wdy, meant for Duna orbit. An accidental gravity assist sent it to Vall instead. It later tried to reach Laythe, lost contact with Kerbin during the capture burn, and was last known to be in Jool orbit.',
             locations: ['kerbin', 'duna', 'solar', 'jool', 'vall', 'laythe'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'vall/near' }, { to: 'laythe/near' }, { to: 'jool/1.85' }], endOrbit: true },
             planned: [
@@ -1024,8 +1071,9 @@ window.WSA = {
                   text: 'Its last known state is an orbit around Jool, not Laythe. It did not enter Laythe orbit. Its present orbit and condition are not recorded.' }
             ],
             replayNote: 'Every leg is schematic. The final Jool orbit is drawn for illustration only.',
+            notes: ['Flown in an earlier save that used a different set of mods. It is WSA\'s only craft in the Jool system.'],
             links: [],
-            verify: ['A probe called "Relay Probe wdy" orbits and then leaves a body the save calls Vall in the earlier [NEW]MODDEDWSASANDBOX save, within days of launch. That save used a different planet setup, so it cannot be matched to this story with confidence. Is that the satellite, and what is its name?']
+            evidence: ['A probe called "Relay Probe wdy" orbits and then leaves a body the save calls Vall in the earlier [NEW]MODDEDWSASANDBOX save, within days of launch. That save used a different planet setup, so it cannot be matched to this story with confidence. Is that the satellite, and what is its name?']
         },
         {
             id: 'minmus-firework',
@@ -1058,33 +1106,35 @@ window.WSA = {
         {
             id: 'project-kepler',
             name: 'Project Kepler',
-            aliases: ['Kepler', 'asteroid', 'grapple', 'asteroid rendezvous'],
+            aliases: ['Kepler', 'asteroid', 'grapple', 'asteroid capture', 'OUU-729'],
             program: 'Project Kepler',
-            objective: 'Rendezvous with an asteroid.',
+            objective: 'Test asteroid capture with a crewed spacecraft.',
             destination: 'An asteroid in solar orbit',
             launchVehicle: 'Aegis-1 Super Heavy',
             vehicles: ['project-kepler', 'aegis-1-super-heavy'],
             crew: 3,
-            status: 'flown',
-            outcome: 'Grappled an asteroid; back in Kerbin\'s atmosphere',
-            summary: 'A crewed asteroid mission. It left Kerbin, met an asteroid in solar orbit, grappled it, later released it, and came back into Kerbin\'s atmosphere.',
+            status: 'lost',
+            outcome: 'Asteroid captured; crew lost at splashdown',
+            summary: 'A crewed test of asteroid capture. Project Kepler grappled an asteroid in solar orbit, but bringing it into Kerbin orbit was judged too risky, so the crew renamed it "Kepler", released it and headed home. After reentry a parachute failed, and the command module\'s high-speed splashdown killed its three crew: Hilwell Kerman, Aldory Kerman and Hilwig Kerman.',
             locations: ['kerbin', 'solar'],
-            route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'solar:kerbin>eve@0.08' }, { to: 'kerbin/air' }] },
+            route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'solar:kerbin>eve@0.08' }, { to: 'kerbin/air' }, { to: 'kerbin/surface' }] },
+            planned: [{ from: 2, legs: [{ to: 'kerbin/high' }], label: 'Considered: bring the asteroid to Kerbin orbit' }],
             events: [
                 { at: 1, title: 'Leaving Kerbin', basis: 'save', source: 'save',
                   text: 'Project Kepler left Kerbin\'s sphere of influence with three crew, a grapple, drills and an ISRU unit.' },
-                { at: 2, title: 'Asteroid rendezvous', basis: 'save', source: 'save',
-                  text: 'It met an asteroid in solar orbit near Kerbin\'s own orbit round Kerbol.' },
-                { at: 2, title: 'Asteroid grappled', basis: 'save', source: 'save',
-                  text: 'The asteroid was attached to the spacecraft by its grapple. Later it was released again.' },
-                { at: 3, title: 'Back into Kerbin\'s atmosphere', basis: 'save', source: 'save',
-                  text: 'The spacecraft came back into Kerbin\'s atmosphere with its three crew. The landing itself is not recorded.' }
+                { at: 2, title: 'Asteroid captured', basis: 'save', source: 'save',
+                  text: 'It met an asteroid in solar orbit near Kerbin\'s own orbit round Kerbol and grabbed it with its grapple.' },
+                { at: 2, kind: 'decision', title: 'Not brought to Kerbin', basis: 'operator', source: 'operator',
+                  text: 'Bringing the asteroid into Kerbin orbit was judged too risky. The crew renamed it OUU-729 "Kepler", released it and headed home.' },
+                { at: 3, title: 'Reentry', basis: 'save', source: 'save',
+                  text: 'The spacecraft came back into Kerbin\'s atmosphere with its three crew.' },
+                { at: 4, title: 'Parachute failure', basis: 'operator', source: 'operator',
+                  text: 'A parachute malfunctioned, and the command module hit the sea at high speed. Hilwell Kerman, Aldory Kerman and Hilwig Kerman were killed.' }
             ],
             replayNote: 'The asteroid\'s position is drawn for illustration only.',
-            notes: ['Whether the asteroid was moved to a new orbit, and whether any sample was brought home, is not recorded.'],
+            notes: ['In memory of Hilwell Kerman, Aldory Kerman and Hilwig Kerman.'],
             links: [],
-            evidence: ['See the project-kepler vehicle record. "pjk b4 redirect1": asteroid (PotatoRoid) attached; "pjk redrt and disarm 1": no longer attached; "pjk landing": FLYING in Kerbin\'s atmosphere, 35 parts'],
-            verify: ['Was the asteroid redirected, and did the crew land safely?']
+            evidence: ['See the project-kepler vehicle record. The asteroid "OUU-729 \"Kepler\"" appears from save "pjk redrt and disarm 1"']
         },
         {
             id: 'astra-telescope',
@@ -1119,7 +1169,8 @@ window.WSA = {
             vehicles: ['lunalink-1'],
             status: 'flown',
             outcome: 'In an 80 km orbit round the Mun',
-            summary: 'A relay satellite with an ion engine. In the current save it is in an 80 km circular orbit round the Mun.',
+            summary: 'A relay satellite with an ion engine, following the LunaLink prototype that Project Silver Bridge released at the Mun. In the current save it is in an 80 km circular orbit round the Mun.',
+            relatedMissions: ['silver-bridge'],
             locations: ['kerbin', 'mun'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'mun/low' }], endOrbit: true },
             events: [
@@ -1132,46 +1183,46 @@ window.WSA = {
         {
             id: 'silver-bridge',
             name: 'Project Silver Bridge',
-            aliases: ['Silver Bridge', 'ISRU', 'Mun drilling'],
+            aliases: ['Silver Bridge', 'ISRU', 'Mun mining', 'LunaLink prototype'],
             program: 'Project Silver Bridge',
-            objective: 'Land on the Mun, drill and run ISRU experiments, then return and dock with KGOSS.',
+            objective: 'Prove that WSA could land on the Mun and dock back with another craft in Munar orbit.',
             destination: 'Mun',
             vehicles: ['silver-bridge'],
-            relatedMissions: ['silver-connect', 'kgoss-1'],
+            craft: ['LunaLink prototype relay'],
+            relatedMissions: ['lunalink', 'kgoss-1'],
             crew: 3,
             status: 'partial',
-            outcome: 'Mun surface work done; could not dock with KGOSS',
-            summary: 'A one-off Mun mission: undock in low Munar orbit, drill and run ISRU experiments on the surface, return to orbit and redock. A docking-port size mismatch then stopped the planned docking with KGOSS.',
+            outcome: 'Mun landing, mining, docking and ISRU proved; could not dock at KGOSS',
+            summary: 'A three-part spacecraft (a lander, a command module carrying an ISRU unit, and a prototype LunaLink relay) that proved WSA could land on the Mun, mine its surface, dock back in Munar orbit and run ISRU there. Its docking ports did not match KGOSS-1\'s, so the planned final docking at the station was impossible.',
             locations: ['kerbin', 'lko', 'kgoss', 'mun'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'mun/low' }, { to: 'mun/surface' }, { to: 'mun/low' }, { to: 'kerbin/low' }] },
-            planned: [{ from: 5, legs: [{ to: 'kgoss' }], label: 'Intended: dock with KGOSS' }],
+            planned: [{ from: 5, legs: [{ to: 'kgoss' }], label: 'Intended: dock with KGOSS-1' }],
             events: [
                 { at: 2, title: 'Low Munar orbit', basis: 'save', source: 'save',
                   text: 'Project Silver Bridge reached Munar orbit with three crew and lowered its orbit to about 60 km.' },
-                { at: 3, title: 'Surface operations', basis: 'save', source: 'save',
-                  text: 'The lander touched down on the Mun with two crew, who planted a flag named "Project Silver Bridge Landing Site". The archive records drilling and ISRU experiments there.' },
-                { at: 4, title: 'Back in orbit and redocked', basis: 'site', source: 'archive',
-                  text: 'The lander returned to Munar orbit and redocked. The archive says the docking-port mismatch was discovered at this point.' },
-                { at: 5, title: 'Could not dock with KGOSS', basis: 'site', source: 'archive',
-                  text: 'Its docking port did not match the size of KGOSS\'s ports, so the planned docking was impossible and the vehicle was nearly stranded in low Kerbin orbit.' },
+                { at: 3, title: 'Landing and mining on the Mun', basis: 'save', source: 'save',
+                  text: 'The lander touched down with two crew, who planted a flag named "Project Silver Bridge Landing Site". The mission proved WSA can mine on the Mun\'s surface.' },
+                { at: 4, title: 'Docked back in Munar orbit', basis: 'operator', source: 'operator',
+                  text: 'The lander returned to orbit and docked with the command module, which carries the ISRU unit, and ISRU was run in Munar orbit.' },
+                { at: 4, title: 'LunaLink prototype deployed', basis: 'operator', source: 'operator',
+                  text: 'The prototype LunaLink relay was released at the Mun. WSA has since put LunaLink-1 into Munar orbit.' },
+                { at: 5, title: 'Could not dock with KGOSS', basis: 'operator', source: 'operator',
+                  text: 'The plan was to bring the command module and lander home together and dock them at KGOSS-1, but their docking ports did not match the station\'s.' },
                 { at: 5, title: 'Recovery', basis: 'site', source: 'archive',
-                  text: 'The archive records that a rescue mission recovered the vehicle and crew from Kerbin orbit.' }
+                  text: 'WSA\'s earlier archive records that the vehicle was nearly stranded in low Kerbin orbit and that a rescue mission recovered the vehicle and crew.' }
             ],
             replayNote: 'The order of events is documented; the legs between them are schematic.',
-            notes: [
-                'Also supported an experimental relay. When and where is not recorded, so it is not placed on the route.',
-                'Lesson: compatible docking hardware, return options and rescue planning are essential.'
-            ],
+            notes: ['Lesson: compatible docking hardware, return options and rescue planning are essential.'],
             conflicts: ['Recovery: the earlier archive says a rescue mission recovered the vehicle and crew; the Hangar and Development Timeline said only that the near-stranding required recovery planning.'],
             links: [{ label: 'Silver Bridge in the Hangar', href: 'vehicles-programs.html?vehicle=silver-bridge#hangar' }],
-            evidence: ['See the silver-bridge vehicle record'],
-            verify: ['Was "Project Silver Connect" the rescue? It launched later with three crew, landed on the Mun and ended in Kerbin orbit, which does not obviously fit a rescue from Kerbin orbit.', 'Is the probe "Mum ComLink Sat-Exp" (in Mun orbit, launched shortly after Silver Bridge) the experimental relay?']
+            evidence: ['See the silver-bridge vehicle record; the relay is probably the vessel "Mum ComLink Sat-Exp" (same parts) still in Mun orbit'],
+            verify: ['Which craft carried out the rescue from low Kerbin orbit, if there was one?']
         },
         {
             id: 'silver-connect',
             name: 'Project Silver Connect',
             aliases: ['Silver Connect', 'Mun landing'],
-            program: 'Project Silver Bridge',
+            program: 'Not recorded',
             destination: 'Mun',
             launchVehicle: 'AG-1 SH',
             craft: ['Project Silver Connect'],
@@ -1179,7 +1230,7 @@ window.WSA = {
             crew: 3,
             status: 'record-incomplete',
             outcome: 'Landed on the Mun; later in Kerbin orbit',
-            summary: 'A crewed flight that landed on the Mun, where its crew planted a flag named "Project Silver Connect Landing Site". Later saves have it in Kerbin orbit with three crew. Its purpose has not been documented.',
+            summary: 'A later crewed flight that landed on the Mun, where its crew planted a flag named "Project Silver Connect Landing Site". Later saves have it in Kerbin orbit with three crew. Its purpose has not been documented yet.',
             locations: ['kerbin', 'mun'],
             route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'mun/low' }, { to: 'mun/surface' }, { to: 'mun/low' }, { to: 'kerbin/low' }], endOrbit: true },
             events: [
@@ -1191,7 +1242,7 @@ window.WSA = {
             replayNote: 'Every leg is schematic.',
             links: [],
             evidence: ['Vessel "Project Silver Connect (AG-1 SH ERCY)" (3 crew) in 21 saves; craft file of the same name; flag "Project Silver Connect Landing Site" (plaque "Craft: Project Silver Connect … Aiming For the Stars")'],
-            verify: ['What was Silver Connect for (the name suggests a link to Silver Bridge), and what do "AG-1 SH" and "ERCY" stand for?']
+            verify: ['What was Silver Connect for, and what do "AG-1 SH" and "ERCY" stand for? Its crew included Hilwell, Barley and Hilwig Kerman.']
         },
         {
             id: 'mk2-ssto',
@@ -1203,22 +1254,23 @@ window.WSA = {
             vehicles: ['mk2-ssto'],
             relatedMissions: ['kgoss-1'],
             crew: 2,
-            status: 'experimental',
-            outcome: 'Reached KGOSS\'s orbit; did not dock',
-            summary: 'A Mk2-based single-stage-to-orbit spaceplane reached KGOSS\'s orbit at about 200 km with RAPIER and NERV engines, but did not dock with the station.',
+            status: 'partial',
+            outcome: 'Reached KGOSS\'s orbit; docking aborted; landed at KSC',
+            summary: 'A Mk2-based single-stage-to-orbit spaceplane reached KGOSS\'s orbit at about 200 km with RAPIER and NERV engines. Docking had never been done with it before and the risk of hitting the station\'s centrifuge was too great, so the docking was aborted and the SSTO flew home, landing safely at KSC.',
             locations: ['kerbin', 'lko', 'kgoss'],
-            route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }] },
+            route: { start: 'kerbin/surface', legs: [{ to: 'kerbin/low' }, { to: 'kerbin/surface@+60' }] },
             planned: [{ from: 1, legs: [{ to: 'kgoss' }], label: 'Intended: dock with KGOSS' }],
             events: [
                 { at: 0, title: 'Earlier design: out of fuel near 25 km', basis: 'site', source: 'hangar',
                   text: 'An earlier version of the design ran out of liquid fuel near 25 km.' },
                 { at: 1, title: 'In KGOSS\'s orbit', basis: 'save', source: 'save',
                   text: 'The docking-test version, with four RAPIER and two NERV engines and two crew, reached an orbit of about 200 × 205 km near the station.' },
-                { at: 1, title: 'No docking with KGOSS', basis: 'save', source: 'save',
-                  text: 'Its docking port never engaged and KGOSS-1\'s docking records are unchanged. Reaching orbit is not the same as completing the mission.' }
+                { at: 1, kind: 'decision', title: 'Docking aborted', basis: 'operator', source: 'operator',
+                  text: 'Docking had never been done with it before, and the risk of hitting KGOSS\'s centrifuge was too great, so the attempt was called off.' },
+                { at: 2, title: 'Landed at KSC', basis: 'operator', source: 'operator',
+                  text: 'The SSTO returned and landed safely back at KSC.' }
             ],
-            replayNote: 'The climb to orbit is schematic.',
-            conflicts: ['Why it did not dock: the Hangar said it lacked RCS capability; the Vehicles & Programs page said it lacked enough RCS propellant.'],
+            replayNote: 'The climb to orbit and the return are schematic.',
             links: [{ label: 'Aircraft & SSTO program', href: 'vehicles-programs.html#aircraft' }]
         },
         {
@@ -1321,6 +1373,18 @@ window.WSA = {
             ]
         },
         {
+            id: 'autoland-pad-landing',
+            title: 'AutoLand V2.3 Pad Landing',
+            summary: 'An Aegis booster on its landing pad after AutoLand\'s first target-pad landing',
+            categories: ['landings'],
+            related: { label: 'Watch the landing on the AutoLand page', href: 'autoland.html#pad-landing' },
+            images: [
+                { src: 'images/gallery/missions/autoland-pad-landing.jpg', thumb: 'images/gallery/missions/thumbs/autoland-pad-landing.jpg',
+                  alt: 'Aegis Mk1.7 booster standing upright on the landing pad, with smoke drifting across the grass after touchdown',
+                  caption: 'An Aegis Mk1.7 on the pad after AutoLand V2.3\'s precision landing' }
+            ]
+        },
+        {
             id: 'minmus-firework',
             title: 'Minmus Firework',
             summary: 'From Kerbin orbit to the surface of Minmus and back to splashdown',
@@ -1407,11 +1471,42 @@ window.WSA = {
     ],
 
     /* Pages and programs that site search can jump to (vehicles are added automatically). */
+    /*
+     * News, newest first. The home page shows the first two entries; news.html shows them all.
+     *   id        unique; news.html#<id> links to the story                                   required
+     *   date      'YYYY-MM-DD'                                                                 required
+     *   title, summary                                                                         required
+     *   topic     a short label shown next to the date
+     *   image     { src, thumb, alt }
+     *   body      paragraphs of plain text, shown on news.html
+     *   links     [{ label, href }]
+     */
+    NEWS: [
+        {
+            id: 'autoland-v23-pad-landing',
+            date: '2026-11-15',
+            topic: 'AutoLand',
+            title: 'AutoLand V2.3 lands an Aegis booster on its target pad',
+            summary: 'WSA\'s own landing software has brought an Aegis booster down directly on its designated landing pad. AutoLand\'s original objective is demonstrated; next comes making the landing repeatable and dependable.',
+            image: { src: 'images/gallery/missions/autoland-pad-landing.jpg', thumb: 'images/gallery/missions/thumbs/autoland-pad-landing.jpg',
+                     alt: 'Aegis Mk1.7 booster standing upright on its landing pad after touchdown' },
+            body: [
+                'AutoLand V2.2 kept missing its target by more than 1.6 km. A miss that large and that consistent made the team suspicious, and they realised the guidance was missing Kerbin\'s rotation. With the rotation accounted for, V2.2 came down within about 500 m of its target.',
+                'V2.3 closed the remaining few hundred metres. Its first prototype touched down on the pad, though off-centre. The precision landing in the video put the booster down on the pad\'s marked centre, where it stayed upright.',
+                'The booster in the video is the new Aegis Mk1.7 design. It adds a hinge for WSA\'s future booster catch, and more about the catch will be released soon.',
+                'Next, AutoLand has to show that the landing can be repeated reliably, on the way to V3.0: a mature, dependable system for routine booster recovery.'
+            ],
+            links: [{ label: 'Watch the landing and read the full story', href: 'autoland.html#pad-landing' },
+                    { label: 'Photo in the Flight Gallery', href: 'gallery.html?album=autoland-pad-landing' }]
+        }
+    ],
+
     SEARCH_PAGES: [
         { title: 'Vehicle Hangar',               href: 'vehicles-programs.html#hangar',      type: 'Registry', keywords: 'vehicles registry' },
         { title: 'Development Timeline',         href: 'goals-achievements.html#timeline',   type: 'Timeline', keywords: 'milestones history progress' },
         { title: 'Flight Gallery',               href: 'gallery.html',                       type: 'Gallery',  keywords: 'images screenshots photos' },
-        { title: 'AutoLand Engineering',         href: 'autoland.html',                      type: 'Program',  keywords: 'kOS landing guidance V1.6 A1 A4 B1 V2.0 V2.x glide' },
+        { title: 'AutoLand Engineering',         href: 'autoland.html',                      type: 'Program',  keywords: 'kOS landing guidance V1.6 A1 A4 B1 V2.0 V2.1 V2.2 V2.3 V3.0 glide pad landing Kerbin rotation video' },
+        { title: 'News',                         href: 'news.html',                          type: 'Page',     keywords: 'news latest updates announcements breakthrough' },
         { title: 'KGOSS Station',                href: 'kgoss.html',                         type: 'Program',  keywords: 'station KGOSS-1 KGOSS-3 Haven Seraph centrifuge orbit' },
         { title: 'Flight Dynamics Center',       href: 'flight-dynamics.html',               type: 'Tools',    keywords: 'calculator tools orbit circular orbital speed period escape velocity Hohmann transfer delta-v rocket equation Isp TWR thrust weight mu gravitational parameter' },
         { title: 'Games',                        href: 'games.html',                         type: 'Page',     keywords: 'game games play minigame builder simulator' },
@@ -1421,7 +1516,7 @@ window.WSA = {
         { title: 'Orbital Rendezvous Challenge', href: 'orbital-rendezvous.html',            type: 'Game',     keywords: 'game orbit orbital rendezvous transfer Hohmann intercept KGOSS docking delta-v prograde retrograde velocity' },
         { title: 'FAMMOK Program',               href: 'missions-archive.html#fammok',       type: 'Program',  keywords: 'Mun Minmus Duna lander' },
         { title: 'Project Silver Bridge',        href: 'missions-archive.html#silver-bridge', type: 'Mission', keywords: 'Mun ISRU drilling docking relay' },
-        { title: 'Aegis Program',                href: 'vehicles-programs.html#aegis',       type: 'Program',  keywords: 'booster recovery Mark II Mark V' },
+        { title: 'Aegis Program',                href: 'vehicles-programs.html#aegis',       type: 'Program',  keywords: 'booster recovery Mark II Mark V Mk1.7 catch hinge chopstick' },
         { title: 'Lyra Program',                 href: 'vehicles-programs.html#lyra',        type: 'Program',  keywords: 'booster Selene Sol Astra P-1E' },
         { title: 'Aircraft & Spaceplane Program', href: 'vehicles-programs.html#aircraft',   type: 'Program',  keywords: 'SSTO Swift-1X spaceplane' },
         { title: 'Mission Map',                  href: 'mission-map.html',                   type: 'Map',      keywords: 'map 3D solar system Kerbol planets moons OPM outer planets replay timeline route Duna Jool Mun Minmus Odysseus' },

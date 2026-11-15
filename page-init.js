@@ -17,7 +17,7 @@
     }
 
     // Slide direction follows the tab order, like swiping between tabs
-    var PAGE_ORDER = ['index.html', 'about.html', 'goals-achievements.html', 'vehicles-programs.html',
+    var PAGE_ORDER = ['index.html', 'news.html', 'about.html', 'goals-achievements.html', 'vehicles-programs.html',
         'missions-archive.html', 'mission-map.html', 'gallery.html', 'autoland.html', 'flight-dynamics.html', 'games.html', 'game.html', 'docking-simulator.html', 'ssto-landing.html', 'orbital-rendezvous.html', 'kgoss.html', 'support.html', 'contact.html'];
 
     function pageIndex(url) {

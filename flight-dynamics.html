@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flight Dynamics Center | Woody Space Agency</title>
-    <script src="page-init.js?v=10"></script>
+    <script src="page-init.js?v=11"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
-    <link rel="stylesheet" href="styles.css?v=14">
-    <link rel="stylesheet" href="flight-dynamics.css?v=1">
+    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="flight-dynamics.css?v=2">
     <link rel="stylesheet" href="liquid-glass.css?v=18">
     <script src="liquid-glass.js?v=19"></script>
     <link rel="icon" type="image/png" href="images/favicon.png">
@@ -19,6 +19,7 @@
             <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="goals-achievements.html">Goals & Achievements</a></li>
                 <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
@@ -65,8 +66,12 @@
             </nav>
 
             <div class="fdc-env" id="fdc-env">
-                <p><b>Body data:</b> <span data-env-label>KSP 1.12.5 · Kerbol system with Outer Planets Mod</span>. <span data-env-note></span></p>
-                <p><b>Using KSRSS or another planet pack?</b> <span data-ksrss-note></span></p>
+                <div class="fdc-env-row">
+                    <label for="fdc-system">Planet system</label>
+                    <select id="fdc-system"></select>
+                </div>
+                <p data-env-note></p>
+                <p class="fdc-env-small">Each system is kept separate, so a calculation never mixes stock, Outer Planets Mod and KSRSS values. For another planet pack, choose a custom body and enter its μ and radius.</p>
             </div>
             <noscript><p class="fdc-noscript">The calculators need JavaScript to run.</p></noscript>
 
@@ -413,10 +418,10 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=11"></script>
+    <script src="wsa-data.js?v=13"></script>
     <script src="navigation.js?v=10"></script>
-    <script src="features.js?v=5"></script>
+    <script src="features.js?v=6"></script>
     <script src="decorations.js?v=3"></script>
-    <script type="module" src="flight-dynamics/main.js?v=1"></script>
+    <script type="module" src="flight-dynamics/main.js?v=2"></script>
 </body>
 </html>

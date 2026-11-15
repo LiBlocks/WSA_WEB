@@ -1,0 +1,171 @@
+/* AutoLand Engineering (autoland.html): status strip, the pad-landing video, the road-to-the-pad steps
+   and the before/after figures. Everything else uses the shared site styles. */
+
+.al-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 1rem;
+}
+
+.al-status-item {
+    padding: 1rem 1.1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.al-status-item .status {
+    margin: 0 0 0.6rem;
+}
+
+.al-status-item p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.al-status-item strong {
+    color: var(--text-primary);
+}
+
+.al-kicker {
+    margin-bottom: 0.4rem;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+#pad-landing h2 {
+    margin-bottom: 1.75rem;
+}
+
+.al-feature {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+.al-video {
+    margin: 0;
+}
+
+.al-video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    background-color: #05080f;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.al-video figcaption {
+    margin-top: 0.6rem;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.al-feature-text p + p {
+    margin-top: 1rem;
+}
+
+.al-small {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.al-steps {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+}
+
+.al-steps > li {
+    position: relative;
+    padding: 1.25rem 1.4rem 1.25rem 4rem;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    counter-increment: step;
+}
+
+.al-steps > li::before {
+    content: counter(step);
+    position: absolute;
+    top: 1.15rem;
+    left: 1.25rem;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    color: var(--accent);
+    font-weight: 700;
+    line-height: 1.7rem;
+    text-align: center;
+}
+
+.al-steps h3 {
+    margin-bottom: 0.5rem;
+}
+
+.al-steps p + p,
+.al-steps p + .al-figure-row,
+.al-steps .al-figure-row + p {
+    margin-top: 0.75rem;
+}
+
+.al-figure-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+}
+
+.al-figure-row > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.al-figure {
+    font: 700 1.6rem/1.2 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    color: var(--text-primary);
+}
+
+.al-figure-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.al-arrow {
+    color: var(--accent);
+    font-size: 1.4rem;
+}
+
+@media (max-width: 860px) {
+    .al-feature {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .al-steps > li {
+        padding: 1rem 1rem 1rem 3.4rem;
+    }
+
+    .al-steps > li::before {
+        left: 0.9rem;
+    }
+
+    .al-figure {
+        font-size: 1.3rem;
+    }
+}

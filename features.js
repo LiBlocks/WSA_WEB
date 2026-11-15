@@ -1,5 +1,5 @@
-// Interactive features: site search, Vehicle Hangar, Development Timeline, mission records, status legend and
-// Flight Gallery albums.
+// Interactive features: site search, Vehicle Hangar, Development Timeline, mission records, news, status legend
+// and Flight Gallery albums.
 // All content comes from wsa-data.js; this file only renders it.
 (function () {
     const data = window.WSA;
@@ -97,6 +97,10 @@
             ...(data.MISSIONS || []).map(m => ({
                 title: m.name, type: 'Mission', href: `missions-archive.html#${encodeURIComponent(m.id)}`,
                 name: normalize(m.name), text: normalize([m.name, ...(m.aliases || []), m.program, m.destination, m.outcome].filter(Boolean).join(' '))
+            })),
+            ...newsByDate().map(n => ({
+                title: n.title, type: 'News', href: newsHref(n),
+                name: normalize(n.title), text: normalize([n.title, n.topic, 'news'].filter(Boolean).join(' '))
             }))
         ];
 
@@ -605,6 +609,58 @@
         openFromHash();
     }
 
+    /* ---------- News ---------- */
+
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const newsDate = iso => { const [y, m, d] = iso.split('-').map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
+    const newsHref = n => `news.html#${encodeURIComponent(n.id)}`;
+    // Newest first; stories on the same day keep their order in wsa-data.js
+    function newsByDate() {
+        return (data.NEWS || []).map((n, i) => [n, i]).sort((a, b) => b[0].date.localeCompare(a[0].date) || a[1] - b[1]).map(([n]) => n);
+    }
+    const newsMeta = n => `<p class="news-meta"><time datetime="${esc(n.date)}">${esc(newsDate(n.date))}</time>${n.topic ? ` · ${esc(n.topic)}` : ''}</p>`;
+
+    // Home page: the newest one or two stories, with a link to the rest on news.html
+    function initLatestNews() {
+        const root = document.getElementById('latest-news-root');
+        if (!root) return;
+        const items = newsByDate().slice(0, 2);
+        if (!items.length) { root.closest('section').hidden = true; return; }
+        root.classList.toggle('single', items.length === 1);
+        root.innerHTML = items.map(n => {
+            const more = (n.links || [])[0];
+            return `
+            <article class="overview-card news-card">
+                ${n.image ? `<a class="news-card-image" href="${newsHref(n)}" tabindex="-1" aria-hidden="true"><img src="${esc(n.image.thumb || n.image.src)}" alt="" width="640" height="400" loading="lazy"></a>` : ''}
+                <div class="news-card-body">
+                    ${newsMeta(n)}
+                    <h3><a href="${newsHref(n)}">${esc(n.title)}</a></h3>
+                    <p class="news-summary">${esc(n.summary)}</p>
+                    ${more ? `<a class="card-link" href="${esc(more.href)}">${esc(more.label)} →</a>` : ''}
+                </div>
+            </article>`;
+        }).join('');
+    }
+
+    // news.html: every story, newest first
+    function initNews() {
+        const root = document.getElementById('news-root');
+        if (!root) return;
+        const items = newsByDate();
+        root.innerHTML = items.length ? items.map(n => `
+            <article class="module-card news-article" id="${esc(n.id)}" aria-labelledby="${esc(n.id)}-title">
+                ${newsMeta(n)}
+                <h2 id="${esc(n.id)}-title">${esc(n.title)}</h2>
+                <p class="news-lede">${esc(n.summary)}</p>
+                ${n.image ? `<figure class="news-article-image"><a href="${esc(((n.links || [])[0] || { href: n.image.src }).href)}"><img src="${esc(n.image.src)}" alt="${esc(n.image.alt || '')}" width="1600" height="1000" loading="lazy"></a></figure>` : ''}
+                ${(n.body || []).length ? `<div class="news-article-body">${n.body.map(p => `<p>${esc(p)}</p>`).join('')}</div>` : ''}
+                ${(n.links || []).length ? `<p class="news-links">${n.links.map(l => `<a class="card-link" href="${esc(l.href)}">${esc(l.label)} →</a>`).join('')}</p>` : ''}
+            </article>`).join('') : '<p class="muted">No news yet.</p>';
+        const key = location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : '';
+        const target = key && document.getElementById(key);
+        if (target && root.contains(target)) target.scrollIntoView({ block: 'start' });
+    }
+
     function initStatusLegend() {
         const root = document.getElementById('status-legend-root');
         if (!root) return;
@@ -833,6 +889,8 @@
     initSearch();
     initTimeline();
     initMissionArchive();
+    initLatestNews();
+    initNews();
     initStatusLegend();
     initGallery();
 })();

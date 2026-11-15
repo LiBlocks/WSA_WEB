@@ -126,7 +126,13 @@ header.show {
     display: none;
 }
 
-@media (min-width: 1200px) {
+/* The full name needs a wider bar than the 1200px page column: from 1340px the bar widens to 1260px.
+   Below that the bar shows the short logo. */
+@media (min-width: 1340px) {
+    .navbar {
+        max-width: 1260px;
+    }
+
     .navbar .logo-short {
         display: none;
     }
@@ -860,6 +866,13 @@ footer {
 @media (max-width: 1199px) {
     .navbar > .nav-menu {
         gap: 1.25rem;
+    }
+}
+
+/* The narrowest desktop bar: all ten links, search, theme and Liquid Glass switches on one row */
+@media (min-width: 1081px) and (max-width: 1199px) {
+    .navbar > .nav-menu {
+        gap: 0.875rem;
     }
 }
 
