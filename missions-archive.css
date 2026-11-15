@@ -1,0 +1,146 @@
+/* Missions & Project Archive (missions-archive.html): the mission records rendered by features.js from
+   WSA.MISSIONS. The expandable items reuse the Development Timeline's .tl-* styles. */
+
+.mission-group {
+    margin-top: 2rem;
+    padding: 0;
+    border-top: 0;
+    scroll-margin-top: 90px;
+}
+
+.mission-group h3 {
+    margin-bottom: 0.75rem;
+}
+
+.mission-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mission-item {
+    scroll-margin-top: 90px;
+}
+
+.mission-outcome {
+    margin-top: 0.15rem;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.mission-facts dt {
+    min-width: 110px;
+}
+
+.mission-subhead {
+    margin: 1.1rem 0 0.5rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.mission-events {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: event;
+}
+
+.mission-events li {
+    position: relative;
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.55rem 0 0.55rem 2rem;
+    border-bottom: 1px solid var(--border);
+    counter-increment: event;
+}
+
+.mission-events li::before {
+    content: counter(event);
+    position: absolute;
+    top: 0.6rem;
+    left: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.3rem;
+    text-align: center;
+}
+
+.mission-events li.is-planned {
+    border-bottom-style: dashed;
+}
+
+.mission-events li.is-planned::before {
+    border-style: dashed;
+}
+
+.mission-event-title {
+    font-weight: 600;
+}
+
+.mission-event-text {
+    font-size: 0.95rem;
+}
+
+.mission-basis {
+    justify-self: start;
+    margin-top: 0.15rem;
+    padding: 0.05rem 0.5rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.mission-basis.basis-site {
+    color: var(--success);
+}
+
+.mission-basis.basis-operator {
+    color: var(--accent);
+}
+
+.mission-basis.basis-save {
+    color: var(--warning);
+}
+
+.mission-notes {
+    margin: 0 0 0 1.1rem;
+    font-size: 0.92rem;
+}
+
+.mission-notes li {
+    margin-bottom: 0.3rem;
+}
+
+.mission-conflicts {
+    color: var(--text-secondary);
+}
+
+.mission-related {
+    margin: 1rem 0 0.75rem;
+    font-size: 0.92rem;
+}
+
+.mission-related a {
+    color: var(--accent);
+}
+
+.archive-note {
+    background-color: var(--bg-secondary);
+}
+
+.archive-note-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: 1.5rem 2rem;
+}
+
+.archive-note-grid p {
+    color: var(--text-secondary);
+}

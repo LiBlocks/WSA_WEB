@@ -1,0 +1,479 @@
+/* WSA Flight Dynamics Center (flight-dynamics.html). Input panels follow the site theme; each calculator's
+   results sit in a dark instrument panel, the same in light and dark mode, like the games' consoles. */
+
+.fdc-kicker {
+    margin-bottom: 0.4rem;
+    font: 700 0.78rem/1.3 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.fdc-section {
+    --panel: #0a1222;
+    --panel-2: #0f1a30;
+    --panel-line: #1f2d47;
+    --panel-text: #dbe6f3;
+    --panel-muted: #8c9bb2;
+    --readout: #9ad0ff;
+    --amber: #ffbf5c;
+    --good: #7ce8b2;
+    --mono: 'Monaco', 'Menlo', 'Ubuntu Mono', ui-monospace, monospace;
+    padding-top: 1.5rem;
+}
+
+/* Jump list */
+.fdc-index {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.fdc-index-label {
+    margin-right: 0.15rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fdc-index-label:not(:first-child) {
+    margin-left: 0.75rem;
+}
+
+.fdc-index a {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.fdc-index a:hover,
+.fdc-index a:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.fdc-env {
+    max-width: 920px;
+    margin-bottom: 2rem;
+    padding: 0.8rem 1rem;
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.fdc-env p + p {
+    margin-top: 0.4rem;
+}
+
+.fdc-noscript {
+    color: var(--danger);
+}
+
+.fdc-group {
+    margin: 2.5rem 0 1.25rem;
+    font-size: 1.6rem;
+}
+
+/* Calculator cards */
+.fdc-card {
+    margin-bottom: 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+    scroll-margin-top: 90px;
+}
+
+.fdc-card-head {
+    padding: 1.1rem 1.4rem 0;
+}
+
+.fdc-card-head h3 {
+    margin-bottom: 0.25rem;
+}
+
+.fdc-card-head p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.fdc-body {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 1.4rem;
+    padding: 1.1rem 1.4rem 1.2rem;
+}
+
+.fdc-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.fdc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.fdc-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.fdc-optional {
+    margin-left: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.fdc-field input,
+.fdc-field select,
+.fdc-input-unit select {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.7rem;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.fdc-field input {
+    font-family: var(--mono);
+}
+
+.fdc-field input:focus,
+.fdc-field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.fdc-field [aria-invalid="true"] {
+    border-color: var(--danger);
+}
+
+.fdc-input-unit {
+    display: flex;
+    align-items: stretch;
+}
+
+.fdc-input-unit input {
+    flex: 1;
+    min-width: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.fdc-input-unit select,
+.fdc-unit {
+    flex: none;
+    width: auto;
+    min-width: 4.5rem;
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.fdc-unit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.6rem;
+    border: 1px solid var(--border);
+    border-left: 0;
+    border-radius: 0 4px 4px 0;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.fdc-help {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.fdc-error {
+    color: var(--danger);
+    font-size: 0.85rem;
+}
+
+.fdc-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 0.8rem;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+}
+
+.fdc-advanced summary {
+    color: var(--accent);
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.fdc-advanced .fdc-field {
+    margin-top: 0.6rem;
+}
+
+.fdc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.2rem;
+}
+
+.fdc-actions .btn {
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+/* Instrument panel */
+.fdc-output {
+    align-self: start;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    background: linear-gradient(160deg, var(--panel-2), var(--panel));
+    color: var(--panel-text);
+}
+
+.fdc-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem 1rem;
+    margin: 0;
+}
+
+.fdc-readouts > div {
+    min-width: 0;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--panel-line);
+}
+
+.fdc-readouts .fdc-primary {
+    grid-column: span 1;
+}
+
+.fdc-readouts dt {
+    margin-bottom: 0.2rem;
+    color: var(--panel-muted);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.fdc-readouts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.fdc-num {
+    color: #ffffff;
+    font: 600 1.08rem/1.3 var(--mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.fdc-primary .fdc-num {
+    color: var(--readout);
+    font-size: 1.4rem;
+}
+
+.fdc-u {
+    color: var(--panel-muted);
+    font-size: 0.85rem;
+}
+
+.fdc-sub {
+    display: block;
+    margin-top: 0.1rem;
+    color: var(--panel-muted);
+    font: 0.78rem/1.35 var(--mono);
+}
+
+.fdc-text {
+    color: var(--panel-text);
+    font-size: 0.92rem;
+}
+
+.fdc-empty .fdc-readouts dd {
+    color: var(--panel-muted);
+}
+
+.fdc-changed .fdc-num {
+    animation: fdc-flash 0.6s ease-out;
+}
+
+@keyframes fdc-flash {
+    from { color: var(--amber); }
+}
+
+.fdc-note {
+    margin-top: 0.8rem;
+    color: var(--panel-muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.fdc-note:empty {
+    display: none;
+}
+
+.fdc-note .fdc-sub {
+    margin-top: 0.4rem;
+    font-size: 0.74rem;
+}
+
+.fdc-warn {
+    color: var(--amber);
+}
+
+.fdc-ok {
+    color: var(--good);
+}
+
+.fdc-info {
+    color: var(--panel-text);
+}
+
+/* Hohmann diagram */
+.fdc-diagram {
+    float: right;
+    width: 150px;
+    margin: -0.2rem -0.2rem 0.4rem 0.8rem;
+}
+
+.fdc-diagram figcaption {
+    margin-top: 0.2rem;
+    color: var(--panel-muted);
+    font-size: 0.68rem;
+    text-align: center;
+}
+
+.fdc-diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.fdc-d-body { fill: #2f6f9e; }
+.fdc-d-orbit1 { fill: none; stroke: var(--readout); stroke-width: 1.5; }
+.fdc-d-orbit2 { fill: none; stroke: var(--amber); stroke-width: 1.5; }
+.fdc-d-transfer { fill: none; stroke: #ffffff; stroke-width: 2; stroke-dasharray: 5 4; }
+.fdc-d-burn { fill: #ffffff; }
+.fdc-d-label { fill: var(--panel-muted); font: 10px var(--mono); }
+
+.fdc-diagram + .fdc-readouts {
+    clear: none;
+}
+
+/* Formula and assumptions */
+.fdc-formula {
+    border-top: 1px solid var(--border);
+}
+
+.fdc-formula summary {
+    padding: 0.75rem 1.4rem;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.fdc-formula-body {
+    padding: 0 1.4rem 1.1rem;
+    font-size: 0.92rem;
+}
+
+.fdc-eq {
+    display: inline-block;
+    margin: 0 0.5rem 0.5rem 0;
+    padding: 0.35rem 0.7rem;
+    border-radius: 4px;
+    background-color: var(--panel);
+    color: var(--panel-text);
+    font: 0.92rem/1.5 var(--mono);
+}
+
+.fdc-formula-body ul {
+    margin: 0.4rem 0 0 1.1rem;
+    color: var(--text-primary);
+}
+
+.fdc-formula-body li {
+    margin-bottom: 0.35rem;
+    line-height: 1.5;
+}
+
+.fdc-formula-body a {
+    color: var(--accent);
+}
+
+.fdc-disclaimer {
+    max-width: 920px;
+    margin-top: 2rem;
+    padding: 0.8rem 1rem;
+    border-left: 3px solid var(--warning);
+    border-radius: 4px;
+    background-color: rgba(245, 158, 11, 0.1);
+    font-size: 0.9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fdc-changed .fdc-num {
+        animation: none;
+    }
+}
+
+@media (max-width: 860px) {
+    .fdc-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .fdc-card-head,
+    .fdc-body {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .fdc-formula summary,
+    .fdc-formula-body {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .fdc-readouts {
+        grid-template-columns: 1fr;
+    }
+
+    .fdc-diagram {
+        float: none;
+        width: 140px;
+        margin: 0 auto 0.6rem;
+    }
+
+    .fdc-group {
+        font-size: 1.35rem;
+    }
+}

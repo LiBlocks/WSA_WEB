@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vehicles & Programs | Woody Space Agency</title>
-    <script src="page-init.js?v=9"></script>
+    <script src="page-init.js?v=10"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=14">
@@ -24,6 +24,7 @@
                 <li><a href="missions-archive.html">Missions</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="flight-dynamics.html">Tools</a></li>
                 <li><a href="games.html">Games</a></li>
             </ul>
             <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
@@ -65,7 +66,7 @@
                 <div>
                     <h2>Aegis: Reusable Booster Family</h2>
                     <p style="margin-bottom: 2rem; max-width: 900px;">
-                        Aegis is WSA's proven reusable booster family, developed from early recovery experiments to reliable, flight-tested hardware. The family includes multiple configurations optimized for different mission payloads and operational scenarios.
+                        Aegis is WSA's reusable booster family and the launcher behind many WSA missions. Recovering its boosters is the heart of WSA's reuse experiments, and it is still experimental.
                     </p>
                 </div>
                 <a class="mission-patch" href="gallery.html?album=aegis" title="Aegis photos in the Flight Gallery">
@@ -75,146 +76,66 @@
 
             <div class="expandable-section expanded">
                 <div class="expandable-header">
-                    <h3>Development History</h3>
+                    <h3>Configurations and Versions</h3>
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Aegis evolved through multiple iterations as WSA tested recovery methods, refined booster structure, and improved landing guidance:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Early Experiments:</strong> Initial subscale tests of reusable-booster concepts and atmospheric-entry recovery methods.</li>
-                        <li><strong>First Full-Scale Tests:</strong> Multiple test flights with varying payloads and recovery approaches. First successful booster recovery achieved.</li>
-                        <li><strong>Landing Guidance Development:</strong> Autonomous landing algorithms refined through repeated flights. AutoLand guidance system matured across multiple versions.</li>
-                        <li><strong>Family Expansion:</strong> Development of multiple configurations (Quartet, Quintet, Nonet, Heavy, Super Heavy, Max) to support different mission profiles.</li>
-                        <li><strong>Operational Maturation:</strong> 47+ successful recoveries achieved. Booster family now transitioned toward crewed-certification readiness.</li>
-                        <li><strong>Advanced Recovery Concepts:</strong> Research into Mark II (side-booster) and Mark V (main-stage) recovery architectures for larger launch vehicles.</li>
+                    <p style="margin-bottom: 1rem;">Aegis configurations are named Quartet, Quintet, Nonet, Heavy, Super Heavy and Max. Engine counts and performance figures for each are not documented.</p>
+                    <p style="margin-bottom: 0.5rem;">Versions named in WSA flight records include:</p>
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Aegis Mk1.3:</strong> launched the Minmus Firework mission.</li>
+                        <li><strong>Aegis-1 Super Heavy (AegisSH-1):</strong> launched FAMMOK-3, Project Kepler and a KGOSS-1 ISRU module.</li>
+                        <li><strong>Aegis-1.1 Super Heavy:</strong> launched Odysseus.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Landing and Recovery</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <p style="margin-bottom: 1rem;">Aegis boosters are brought back under AutoLand, WSA's own kOS guidance software, written instead of relying on MechJeb.</p>
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Descent prediction:</strong> AutoLand works out whether the booster can reach a vertical descent with the thrust available.</li>
+                        <li><strong>Throttle control:</strong> it smooths the throttle through the landing burn.</li>
+                        <li><strong>Results:</strong> WSA's records count more than 47 successful recoveries, including water landings, but boosters have sometimes tipped over after touchdown, and recovery is still experimental.</li>
+                        <li><strong>Super Heavy recovery tests:</strong> a series of test flights of Super Heavy versions 1.1 to 1.7 has brought boosters down on land and in the sea.</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">See <a href="autoland.html" style="color: var(--accent);">AutoLand Engineering</a> for the guidance software.</p>
+                </div>
+            </div>
+
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <h3>Future Recovery Directions</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Booster catch system (early concept):</strong> after an Aegis splashdown, WSA began work on an original chopstick-style system for catching returning boosters. Nothing has been built yet.</li>
+                        <li><strong>Mark II (planned):</strong> recovering side boosters.</li>
+                        <li><strong>Mark V (possible):</strong> recovering the main booster.</li>
                     </ul>
                 </div>
             </div>
 
             <div class="expandable-section">
                 <div class="expandable-header">
-                    <h3>Configurations & Variants</h3>
+                    <h3>Failures and Lessons</h3>
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Aegis configurations are named for their engine count or capability tier:</p>
-
-                    <div class="module-list">
-                        <div class="module-card">
-                            <div class="module-name">Quartet (4-engine)</div>
-                            <div class="module-spec">Smaller configuration. Used for subscale testing and lower-mass payloads.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Quintet (5-engine)</div>
-                            <div class="module-spec">Mid-range configuration. Primary test and early-operational configuration.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Nonet (9-engine)</div>
-                            <div class="module-spec">Higher-thrust variant for larger payloads and higher-velocity missions.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Heavy</div>
-                            <div class="module-spec">Increased capacity. Designed for ambitious mission profiles and larger orbital infrastructure payloads.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Super Heavy</div>
-                            <div class="module-spec">Largest Aegis variant. Used for Aegis-1 Super Heavy heavy-lift configuration and FAMMOK-3 planning.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Max</div>
-                            <div class="module-spec">Experimental variant exploring maximum performance of the Aegis platform architecture.</div>
-                        </div>
-                    </div>
-
-                    <p style="margin-top: 2rem; color: var(--text-secondary);">
-                        <strong>Note:</strong> Configuration designations describe relative capability within the Aegis family. Precise performance specifications vary by test and mission profile. All configurations have demonstrated autonomous landing capability.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Landing & Recovery</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Aegis boosters use AutoLand autonomous guidance for reliable recovery:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Descent Prediction:</strong> AutoLand calculates whether current trajectory can achieve vertical descent with available thrust.</li>
-                        <li><strong>Throttle Control:</strong> Smooth throttle adjustments maintain controlled descent rate and landing envelope.</li>
-                        <li><strong>Landing Accuracy:</strong> Guidance targets designated landing zones. Typical landing errors range from on-target to several kilometers depending on conditions.</li>
-                        <li><strong>Touchdown Management:</strong> Final-approach phase aims for gentle vertical descent and manageable touchdown velocity.</li>
-                        <li><strong>Proven Performance:</strong> 47+ successful recoveries across varied landing sites, environmental conditions, and payload scenarios.</li>
-                    </ul>
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        See the <a href="autoland.html" style="color: var(--accent);">AutoLand Engineering</a> page for detailed guidance system documentation.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Advanced Recovery Concepts</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">WSA is exploring advanced multi-booster recovery architectures:</p>
-
-                    <div class="module-list">
-                        <div class="module-card">
-                            <div class="module-name">Mark II Direction (Side-Booster Recovery)</div>
-                            <p>Concept for recovering side boosters on a multi-booster configuration. Involves coordinating separation, staging, and autonomous recovery of multiple vehicle segments.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Status:</strong> Demonstrated in concept; integration with full launch vehicle ongoing.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Mark V Direction (Main-Stage Recovery)</div>
-                            <p>Architecture for recovering the main booster stage after upper-stage separation. Requires management of velocity reduction, attitude control, and autonomous targeting.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Status:</strong> Design phase; flight validation pending.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Aegis-1 Super Heavy</div>
-                            <p>Heavy-lift configuration combining multiple Aegis-class boosters with single recoverable main stage. Intended for FAMMOK-3 deep-space rescue missions.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Status:</strong> Planning phase for FAMMOK-3 application.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Failures & Lessons</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Aegis development involved failures that drove important engineering improvements:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Early Recovery Challenges:</strong> Initial tests showed that surviving descent and landing required more than structural design—active control and prediction were essential.</li>
-                        <li><strong>Guidance Refinement:</strong> Early landing guidance produced inconsistent results. Throttle smoothing, descent prediction tuning, and altitude-management algorithms required iteration.</li>
-                        <li><strong>Post-Landing Stability:</strong> Boosters occasionally tipped over after landing, damaging fins or engines. This drove development of better landing-gear design and touchdown-velocity management.</li>
-                        <li><strong>Scaling Challenges:</strong> Moving from smaller to larger configurations revealed issues with fuel reserves, thrust-to-weight ratios, and guidance system margins.</li>
-                        <li><strong>Environmental Factors:</strong> Water landings, rough terrain, and variable wind conditions required more robust guidance and better sensor reliability.</li>
-                    </ul>
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        Each failure led to documented improvements. The 47+ successful recoveries represent learning accumulated through test flights and operational missions.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Current Status & Next Steps</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Operational Status:</strong> Aegis family is mature and operationally ready for regular missions.</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Recovery Capability:</strong> High reliability demonstrated across all tested configurations. Ready for frequent-flight operations.</li>
-                        <li><strong>Crewed Certification:</strong> Preparing for certification testing to support crewed missions to KGOSS and beyond.</li>
-                        <li><strong>Legacy Role:</strong> Aegis continues to serve existing mission requirements while Lyra development progresses for future high-capacity needs.</li>
-                        <li><strong>Research Platform:</strong> AutoLand development and advanced recovery concepts use Aegis as the test bed for new guidance and control algorithms.</li>
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Tipping after touchdown:</strong> even AutoLand V1.6, the last stable version, could land a booster that then tipped over.</li>
+                        <li><strong>AutoLand B1:</strong> an experimental build that failed in testing.</li>
+                        <li><strong>Flipping near apogee:</strong> an Aegis stabilizer setup has flipped near apogee.</li>
+                        <li><strong>Splashdown:</strong> an Aegis splashdown is what led to the catch-system concept.</li>
                     </ul>
                 </div>
             </div>
+
         </div>
     </section>
 
@@ -222,121 +143,40 @@
         <div class="container">
             <h2>Lyra: Next-Generation Booster Family</h2>
             <p style="margin-bottom: 2rem; max-width: 900px;">
-                Lyra represents a new direction in WSA's launch-vehicle development. Built on lessons from Aegis, Lyra offers higher capacity, refined staging, and improved operational efficiency for supporting KGOSS expansion and more ambitious mission architectures.
+                Lyra is a newer, larger and more powerful reusable booster family, intended for future high-capacity missions and KGOSS construction. It is in development: no Lyra flight is recorded yet.
             </p>
 
             <div class="expandable-section expanded">
                 <div class="expandable-header">
-                    <h3>Design Philosophy</h3>
+                    <h3>Tiers and Prototype</h3>
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Lyra was designed to address lessons from Aegis development and requirements for future WSA missions:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Higher Payload Capacity:</strong> Exceeds Aegis payload envelope to support KGOSS construction, deep-space missions, and crewed operations.</li>
-                        <li><strong>Cleaner Architecture:</strong> Simplified staging and integration compared to some Aegis experimental variants.</li>
-                        <li><strong>Autonomous Recovery:</strong> Builds on proven AutoLand technology for booster recovery across all variants.</li>
-                        <li><strong>Operational Efficiency:</strong> Designed for rapid turnaround and frequent flights, reducing refurbishment time between missions.</li>
-                        <li><strong>Scalability:</strong> Three-tier architecture (Selene, Sol, Astra) provides mission flexibility while maintaining design commonality.</li>
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Tiers:</strong> Selene, Sol and Astra.</li>
+                        <li><strong>Lyra P-1E:</strong> Prototype 1 Experimental, the first Lyra prototype. A design exists; it has not flown.</li>
                     </ul>
                 </div>
             </div>
 
             <div class="expandable-section expanded">
                 <div class="expandable-header">
-                    <h3>Three-Tier Architecture</h3>
+                    <h3>Engine Concept</h3>
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 2rem;">Lyra's capability is organized into three named tiers rather than simple variant lists:</p>
-
-                    <div class="module-list">
-                        <div class="module-card">
-                            <div class="module-name">Lyra Selene (Smaller Tier)</div>
-                            <p>Entry-level variant optimized for rapid turnaround and frequent operations. Lower payload capacity supports small-satellite deployment, crew rotation for orbital stations, and subscale mission testing.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Development Status:</strong> Prototype integration underway (Lyra P-1E).</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Lyra Sol (Medium Tier)</div>
-                            <p>Primary operational configuration balancing payload capacity, operational cost, and mission flexibility. Designed as the workhorse for regular logistics, medium-mass payloads, and diverse mission profiles.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Development Status:</strong> Design phase; prototype construction to follow.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Lyra Astra (Larger Tier)</div>
-                            <p>High-capacity variant for ambitious missions. Maximum payload envelope supports KGOSS module delivery, crewed deep-space missions, and scientific payloads. Designed for orbital infrastructure deployment.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Development Status:</strong> Early design phase; integration pending completion of smaller variants.</div>
-                        </div>
-                    </div>
-
-                    <p style="margin-top: 2rem; color: var(--text-secondary);">
-                        <strong>Note:</strong> All three tiers share common booster architecture, AutoLand guidance system, and recovery procedures. Scaling focuses on payload section, engine arrangement, and propellant capacity.
-                    </p>
+                    <p>The Lyra concept uses 21 main Vector engines, with up to 9 more on each side depending on the configuration. These are concept-level figures, not final production specifications; the actual design and thrust will be confirmed when the vehicle is built and tested.</p>
                 </div>
             </div>
 
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Prototype & Development Status</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Lyra P-1E:</strong> Prototype 1 Experimental—the current development vehicle for the Lyra family.</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Status:</strong> Integration of primary systems underway. First flight testing planned.</li>
-                        <li><strong>Configuration:</strong> Experimental prototype with flexible payload bay for various test loads.</li>
-                        <li><strong>Role:</strong> Validation of Lyra booster architecture, staging separation, landing guidance, and autonomous-recovery procedures.</li>
-                        <li><strong>Expected Outcome:</strong> Successful first flight will clear path for Lyra Selene production and scaling.</li>
-                    </ul>
-
-                    <p style="margin-top: 2rem; color: var(--text-secondary);">
-                        <strong>Development Timeline:</strong> P-1E first flight is the critical path item for Lyra program. Completion allows qualification testing and transition to operational Selene, Sol, and Astra variants.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Multi-Engine Architecture Concepts</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Lyra development has explored various engine arrangements to optimize thrust, cost, and performance:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Main Stage:</strong> Multi-engine arrangement (up to 21 engines on main stage in some concepts) to achieve target thrust and provide redundancy.</li>
-                        <li><strong>Side Stages (Proposed):</strong> Additional booster segments for heavy-lift configurations. Concepts include up to 39 total engines across all stages.</li>
-                        <li><strong>Engine Commonality:</strong> All variants designed to use the same engine type to simplify manufacturing, logistics, and spare parts management.</li>
-                        <li><strong>Thrust Redundancy:</strong> Multi-engine design allows throttling or shutdown of individual engines if needed, improving robustness.</li>
-                    </ul>
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        <strong>Note:</strong> Engine arrangements are design concepts undergoing validation. Final configurations will be determined through testing and operational requirements.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Role in WSA Future</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Lyra is essential to several WSA strategic goals:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>KGOSS Construction:</strong> Higher payload capacity supports station modules, fuel tanks, and expansion capabilities beyond current assembly limits.</li>
-                        <li><strong>Deep-Space Missions:</strong> Enables ambitious FAMMOK-3 rescue and exploration missions requiring larger launch vehicles.</li>
-                        <li><strong>Crewed Spaceflight:</strong> Supports crewed missions to distant destinations and transport of heavy payloads requiring human supervision.</li>
-                        <li><strong>Next-Generation Infrastructure:</strong> Enables future orbital refueling stations, larger habitats, and advanced mission architectures requiring high-capacity launch.</li>
-                        <li><strong>Autonomous Flight Research:</strong> Lyra serves as a platform for advancing AutoLand and autonomous operations on more powerful, faster-flying vehicles.</li>
-                    </ul>
-                </div>
-            </div>
         </div>
     </section>
 
     <section id="aircraft">
         <div class="container">
-            <h2>Aircraft & Spaceplane Program</h2>
+            <h2>Aircraft &amp; Spaceplane Program</h2>
             <p style="margin-bottom: 2rem; max-width: 900px;">
-                WSA operates experimental aircraft and spaceplane programs to develop flight-control concepts, test atmospheric aerodynamics, and explore reusable orbital transportation.
+                WSA builds aircraft and spaceplanes to try out flight-control ideas, high-speed flight and reusable transport to orbit. Many of the designs below are still undocumented.
             </p>
 
             <div class="expandable-section expanded">
@@ -345,103 +185,52 @@
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Swift-1X</strong> is a stable, fast, small aircraft used for testing flight-control concepts, atmospheric handling, and aerodynamic behavior.</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Role:</strong> Technology demonstrator for flight-control algorithms and atmospheric research.</li>
-                        <li><strong>Configuration:</strong> Flexible for crewed and uncrewed operation, allowing various sensor and payload arrangements.</li>
-                        <li><strong>Applications:</strong> Testing autopilot concepts, high-speed flight control, atmospheric-entry dynamics, and vehicle stability across speed regimes.</li>
-                        <li><strong>Status:</strong> Active test platform. Routine flight program ongoing.</li>
+                    <p>A stable, fast, small aircraft used for testing aircraft concepts. It can fly crewed or uncrewed.</p>
+                </div>
+            </div>
+
+            <div class="expandable-section expanded">
+                <div class="expandable-header">
+                    <h3>Crew Return Craft</h3>
+                    <span class="expand-toggle">▼</span>
+                </div>
+                <div class="expandable-content">
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Blue Whale 1 / BWP-1LC:</strong> a special crew return craft in the Atlas line, associated with rare pickup and recovery operations on Kerbin. One configuration carries six engineers with about 6,600 m/s of delta-v before RCS. No individual flights are documented yet.</li>
+                        <li><strong>Manta Ray (MRR-1XLR), "Starfield":</strong> a spaceplane photographed above the planet at sunrise. Its role and flights still need documenting.</li>
                     </ul>
                 </div>
             </div>
 
             <div class="expandable-section">
                 <div class="expandable-header">
-                    <h3>Crew Transport Lines</h3>
+                    <h3>Other Designations</h3>
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">WSA has developed several spaceplane concepts for crew transport and return:</p>
-
-                    <div class="module-list">
-                        <div class="module-card">
-                            <div class="module-name">Blue Whale / Atlas Line</div>
-                            <p>Crew transport and return configuration designed for safe entry, recovery, and logistics operations.</p>
-                            <div class="module-spec" style="margin-top: 0.75rem;"><strong>Known Capability:</strong> Crewed for up to six engineers. Approximately 6,600 m/s delta-v before RCS accounting.</div>
-                        </div>
-                        <div class="module-card">
-                            <div class="module-name">Manta Ray / Starfield Line</div>
-                            <p>Alternative crew transport and spaceplane development series. Status and capabilities under evaluation.</p>
-                        </div>
-                    </div>
-
-                    <p style="margin-top: 2rem; color: var(--text-secondary);">
-                        Detailed specifications for these configurations are still being documented. Additional information will be added as crew-transport programs progress.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Experimental Designation Series</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">WSA maintains several experimental aircraft and spaceplane development lines:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>FX Series (FX-1, FX-2, FX-3):</strong> Experimental aircraft designs exploring various aerodynamic and structural concepts.</li>
-                        <li><strong>FAX Series (FAX-1, FAX-2, FAX-3, FAX-3E, FAX-3C, FAX-3S):</strong> Advanced experimental spacecraft with variations for specific mission roles.</li>
-                        <li><strong>SRX-1:</strong> Special research experimental craft designation. Purpose and specifications under evaluation.</li>
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>FSX series</strong> (FSX-1P, FSX-2, FSX-2S, FSX-3): FSX-3 has been flown to Mach 5.</li>
+                        <li><strong>FX series</strong> (FX-1 to FX-4), <strong>FAX series</strong> (FAX-1, FAX-2, FAX-3, FAX-3E, FAX-3C, FAX-3S) and <strong>SRX-1</strong>: named designs that are not documented yet.</li>
                     </ul>
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        Most of these experimental designations have limited operational history. Detailed records will be added as projects mature and documented results become available.
-                    </p>
                 </div>
             </div>
 
-            <div class="expandable-section">
+            <div class="expandable-section expanded">
                 <div class="expandable-header">
                     <h3>SSTO Development</h3>
                     <span class="expand-toggle">▼</span>
                 </div>
                 <div class="expandable-content">
-                    <p style="margin-bottom: 2rem;">Single-stage-to-orbit (SSTO) development explores whether a spaceplane can reach orbit without staging:</p>
-
-                    <div style="background-color: var(--bg-secondary); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1.5rem;">
-                        <h4>Mk2 Spaceplane-Based SSTO</h4>
-                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                            A developing SSTO concept based on Mk2 spaceplane fuselage has evolved to approximately 80 tonnes after design iterations.
-                        </p>
-                        <p style="margin-bottom: 1rem; color: var(--text-secondary);"><strong>Atmospheric Phase:</strong></p>
-                        <ul style="margin-left: 2rem; color: var(--text-secondary);">
-                            <li>Four engines (air-breathing) in expanded configuration</li>
-                            <li>Two shock cone intakes and four radial intakes for air intake</li>
-                            <li>Approximately 800 units monopropellant for RCS</li>
-                        </ul>
-                        <p style="margin-top: 1rem; margin-bottom: 1rem; color: var(--text-secondary);"><strong>Orbital Phase:</strong></p>
-                        <ul style="margin-left: 2rem; color: var(--text-secondary);">
-                            <li>NERV engines for vacuum operation</li>
-                            <li>Four crew modules for crewed missions</li>
-                            <li>Docking port for orbital rendezvous</li>
-                        </ul>
-                    </div>
-
-                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);"><strong>Development Challenges:</strong></p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Fuel Depletion:</strong> Early atmospheric-to-orbital transition was difficult. Early designs exhausted liquid fuel near 25 km altitude, requiring incomplete ascent or staged recovery.</li>
-                        <li><strong>Orbital Achievement:</strong> Later designs using NERV engines reached approximately 200 km orbit, but without sufficient RCS propellant for docking maneuvers.</li>
-                        <li><strong>Docking Problem:</strong> Achieving orbit proved insufficient for mission success. The SSTO reached orbit but lacked RCS capability needed for rendezvous with KGOSS.</li>
+                    <p style="margin-bottom: 1rem;">Single-stage-to-orbit work asks whether a spaceplane can reach orbit, and KGOSS, without dropping stages.</p>
+                    <ul style="margin-left: 2rem; line-height: 1.9;">
+                        <li><strong>Design:</strong> a Mk2-based spaceplane of about 80 tonnes in its expanded form, with four engines, two shock-cone and four radial intakes, four crew modules and about 800 units of monopropellant.</li>
+                        <li><strong>Earlier design:</strong> ran out of liquid fuel near 25 km.</li>
+                        <li><strong>Later design:</strong> with RAPIER and NERV engines, it reached KGOSS's orbit at about 200 km but did not dock with the station.</li>
+                        <li><strong>Lesson:</strong> reaching orbit is not the same as completing the mission. A single stage has to carry the fuel for the climb, the rendezvous, the docking and the trip home.</li>
                     </ul>
-
-                    <p style="margin-top: 2rem; padding: 1.5rem; background-color: rgba(59, 130, 246, 0.05); border: 1px solid var(--accent); border-radius: 4px; color: var(--text-secondary);">
-                        <strong>Key Lesson:</strong> Reaching orbit is not the same as completing a mission. Systems must be designed not just to achieve altitude, but to perform the full mission profile including rendezvous, docking, and return. SSTO designers must balance fuel for ascent, orbital maneuvers, and return—a difficult trade on a single stage.
-                    </p>
-
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        <strong>Current Status:</strong> SSTO development continues as an experimental program. The fundamental trade-offs between atmospheric efficiency, orbital capability, and mission flexibility remain active research areas.
-                    </p>
                 </div>
             </div>
+
         </div>
     </section>
 
@@ -453,9 +242,9 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=10"></script>
+    <script src="wsa-data.js?v=11"></script>
     <script src="navigation.js?v=10"></script>
-    <script src="features.js?v=4"></script>
+    <script src="features.js?v=5"></script>
     <script src="decorations.js?v=3"></script>
 </body>
 </html>

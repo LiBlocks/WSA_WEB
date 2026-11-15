@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoLand Engineering | Woody Space Agency</title>
-    <script src="page-init.js?v=9"></script>
+    <script src="page-init.js?v=10"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=14">
@@ -24,6 +24,7 @@
                 <li><a href="missions-archive.html">Missions</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="flight-dynamics.html">Tools</a></li>
                 <li><a href="games.html">Games</a></li>
             </ul>
             <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
@@ -44,7 +45,7 @@
         <div class="container">
             <h1 style="margin-bottom: 0.5rem;">AutoLand Engineering</h1>
             <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
-                WSA's autonomous guidance and control system for reliable booster landing. Developed in kOS. Central to all reusable-booster operations.
+                WSA's own guidance and control software for landing boosters, written in kOS rather than relying on MechJeb. It is homemade WSA software, not a stock KSP feature, and it is still experimental.
             </p>
             <div style="padding: 1rem; background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;">
                 <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">
@@ -83,14 +84,14 @@
 
                 <div class="module-card">
                     <div class="module-name">V2.0</div>
-                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Standardized version</div>
-                    <p style="margin-top: 0.75rem;">The intended stable version designation after A4 experimental work. Represents consolidation of successful improvements and establishment of a reliable baseline for operational use.</p>
+                    <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Planned designation</div>
+                    <p style="margin-top: 0.75rem;">A4 is intended to become V2.0 once it is formally accepted. Until then it remains experimental, and V1.6 is the last stable version.</p>
                 </div>
 
                 <div class="module-card">
                     <div class="module-name">V2.x Development</div>
                     <div class="module-spec" style="margin-top: 0.5rem;"><strong>Status:</strong> Active R&D</div>
-                    <p style="margin-top: 0.75rem;">Ongoing improvements exploring predictive targeting, empirical drag modeling, entry-burn logic, glide and powered-glide guidance, and redesigned landing burn. Some tests improved guidance but showed landing errors and rough touchdowns.</p>
+                    <p style="margin-top: 0.75rem;">Ongoing improvements exploring predictive targeting, empirical drag modeling, entry-burn logic, glide and powered-glide guidance, and a redesigned landing burn, continuing in the V2.2a and V2.2aGT script track. Some tests improved guidance but showed landing errors and rough touchdowns.</p>
                 </div>
             </div>
 
@@ -98,7 +99,8 @@
                 <h4 style="margin-bottom: 1rem;">Test Performance Observations</h4>
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">Later versions improved guidance but revealed remaining challenges:</p>
                 <ul style="margin-left: 2rem; color: var(--text-secondary);">
-                    <li><strong>Landing Accuracy:</strong> Some test flights landed roughly 700 m from target. Other tests showed approximately 1.9 km landing error.</li>
+                    <li><strong>Landing Accuracy:</strong> Some test flights landed roughly 700 m from target. In the Aeris 4A live test the landing missed by about 1.9 km, with weak guidance during the fall and a rough touchdown, but the vehicle stayed upright.</li>
+                    <li><strong>Flipping near apogee:</strong> an Aegis stabilizer setup has flipped near apogee.</li>
                     <li><strong>Touchdown Issues:</strong> Rough landings occasionally damaged engines or caused propulsion-system anomalies after touchdown.</li>
                     <li><strong>Stability on Landing:</strong> Varying results on touchdown stability and vehicle integrity immediately after landing.</li>
                 </ul>
@@ -327,66 +329,48 @@ CONSTANT:G<br/>
                     <thead>
                         <tr>
                             <th>Version</th>
-                            <th>Vehicle / Config</th>
-                            <th>Landing Error</th>
-                            <th>Touchdown Speed (V)</th>
-                            <th>Stability</th>
-                            <th>Damage</th>
-                            <th>Notes</th>
+                            <th>What it explored</th>
+                            <th>Documented results</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>V1.6</td>
-                            <td>Aegis-Quintet</td>
-                            <td class="placeholder">On-target / nominal</td>
-                            <td class="placeholder">Gentle</td>
-                            <td>Occasional tip-over</td>
-                            <td class="placeholder">Fin damage</td>
-                            <td>Baseline performance. Post-landing stability issue drove later improvements.</td>
+                            <td>Automated booster landing</td>
+                            <td>Could land a booster on water; boosters could still tip over after touchdown.</td>
+                            <td>Last stable version</td>
                         </tr>
                         <tr>
                             <td>B1</td>
-                            <td>Aegis-Quintet</td>
-                            <td class="placeholder">Significant error</td>
-                            <td class="placeholder">High</td>
-                            <td>Failed control</td>
-                            <td>Severe</td>
-                            <td>Experimental build. Poor performance led to failure analysis and A-series development.</td>
+                            <td>An experimental build in the A/B series</td>
+                            <td>Failed in testing. The exact cause is not documented.</td>
+                            <td>Failed</td>
                         </tr>
                         <tr>
                             <td>A1–A4</td>
-                            <td>Aegis-Quintet / Heavy</td>
-                            <td class="placeholder">Improved gradually</td>
-                            <td class="placeholder">Smoother</td>
-                            <td>Improving</td>
-                            <td>Reduced</td>
-                            <td>Iterative refinement. Throttle smoothing improved. Prepared for V2.0 standardization.</td>
+                            <td>Throttle smoothing and increasingly autonomous landing</td>
+                            <td>Successive experimental improvements.</td>
+                            <td>Experimental</td>
                         </tr>
                         <tr>
                             <td>V2.0</td>
-                            <td>Aegis-Heavy / Nonet</td>
-                            <td class="placeholder">Consistent</td>
-                            <td class="placeholder">Controlled</td>
-                            <td>Good</td>
-                            <td>Minimal</td>
-                            <td>Stable version. Used for operational booster recovery. 47+ successful recoveries achieved.</td>
+                            <td>The intended designation for A4</td>
+                            <td>Not yet formally accepted.</td>
+                            <td>Planned</td>
                         </tr>
                         <tr>
-                            <td>V2.x (ongoing)</td>
-                            <td>Aegis / Lyra prototypes</td>
-                            <td>~700 m to ~1.9 km</td>
-                            <td>Variable</td>
-                            <td>Variable</td>
-                            <td>Occasional engine damage</td>
-                            <td>Development phase. Glide guidance, predictive targeting, improved drag modeling under test.</td>
+                            <td>V2.x, V2.2a, V2.2aGT</td>
+                            <td>Predictive targeting, drag modelling, entry burn, glide guidance, landing burn</td>
+                            <td>Test landings about 700 m from target; the Aeris 4A live test missed by about 1.9 km with a rough touchdown but stayed upright; rough touchdowns could damage engines.</td>
+                            <td>In development</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <p style="margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
-                <strong>Note:</strong> Placeholder entries indicate typical or nominal performance that has not yet been formally documented. Specific test flight data is recorded as missions are conducted and analyzed.
+                <strong>Note:</strong> Only documented results are listed. These are test observations, not performance specifications.
             </p>
         </div>
     </section>
@@ -483,9 +467,9 @@ CONSTANT:G<br/>
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=10"></script>
+    <script src="wsa-data.js?v=11"></script>
     <script src="navigation.js?v=10"></script>
-    <script src="features.js?v=4"></script>
+    <script src="features.js?v=5"></script>
     <script src="decorations.js?v=3"></script>
 </body>
 </html>

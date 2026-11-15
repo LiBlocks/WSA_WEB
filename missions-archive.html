@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Missions & Archive | Woody Space Agency</title>
-    <script src="page-init.js?v=9"></script>
+    <script src="page-init.js?v=10"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=14">
+    <link rel="stylesheet" href="missions-archive.css?v=1">
     <link rel="stylesheet" href="liquid-glass.css?v=18">
     <script src="liquid-glass.js?v=19"></script>
     <link rel="icon" type="image/png" href="images/favicon.png">
@@ -24,6 +25,7 @@
                 <li><a href="missions-archive.html">Missions</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="flight-dynamics.html">Tools</a></li>
                 <li><a href="games.html">Games</a></li>
             </ul>
             <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
@@ -57,235 +59,33 @@
         </div>
     </section>
 
-    <section id="fammok">
+    <section id="missions">
         <div class="container">
-            <h2>FAMMOK: Planetary Exploration Program</h2>
-            <p style="margin-bottom: 2rem; max-width: 900px;">
-                FAMMOK is WSA's lander and planetary-mission development program. Mission numbers indicate progression in capability and ambition, not merely cosmetic changes. Each FAMMOK mission builds on previous experience and explores new operational challenges.
-            </p>
-
-            <div class="expandable-section expanded">
-                <div class="expandable-header">
-                    <h3>FAMMOK-1: Mun Capability Baseline</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Mission Objective:</strong> Establish a Mun-capable lander and develop foundational capability for planetary landing operations.</p>
-
-                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                        <span class="placeholder">The detailed historical record for FAMMOK-1 is incomplete in the current archive. This mission represents the baseline lander capability that underpins subsequent FAMMOK programs. Verified mission details, vehicle specifications, landing location, and engineering results will be added when documented records are available.</span>
-                    </p>
-
-                    <p style="color: var(--text-secondary);"><strong>Significance:</strong> FAMMOK-1 established that WSA could successfully land on and return from the Mun. This capability enabled all subsequent planetary missions.</p>
-                </div>
-            </div>
-
-            <div class="expandable-section expanded">
-                <div class="expandable-header">
-                    <h3>FAMMOK-2: Minmus & Duna Exploration</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Mission Objective:</strong> Extended operations to Minmus and Duna, advancing planetary exploration capability and testing long-range mission architecture.</p>
-
-                    <div style="background-color: var(--bg-secondary); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1.5rem;">
-                        <h4 style="margin-bottom: 1rem;">Campaign Performance Record</h4>
-                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">The following figures are recorded from FAMMOK-2 campaign logs and represent approximate performance characteristics across the mission profile:</p>
-
-                        <div class="technical-details">
-                            <strong>Pre-Burn (Injection Phase):</strong> ~6,000 m/s delta-v<br/>
-                            <strong>Lander Capability:</strong> ~3,690 m/s delta-v (surface-to-orbit)<br/>
-                            <strong>Duna Orbit Achieved:</strong> Ap ~440 km, Pe ~260 km<br/>
-                            <strong>Duna Orbit Phase Delta-v:</strong> ~3,100 m/s<br/>
-                            <strong>Duna Landing Attempt:</strong> ~2,300 m/s remaining at surface contact
-                        </div>
-
-                        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                            <strong>Note:</strong> These are approximate figures from campaign records. They represent various stages of the mission and should not be interpreted as specifications for a single vehicle configuration. Different stages and vehicles may have contributed different values.
-                        </p>
-                    </div>
-
-                    <p style="margin-bottom: 1.5rem;"><strong>Key Events:</strong></p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Duna Orbit Achievement:</strong> Orbital insertion successful around Duna with established elliptical orbit. Navigation and long-range transfer proved viable.</li>
-                        <li><strong>Entry & Landing Attempt:</strong> Duna landing sequence initiated. Vehicle descended toward surface with parachute deployment.</li>
-                        <li><strong>Parachute Issue:</strong> Parachute malfunction or performance problem during Duna descent. Lander reached surface with high residual velocity (~2,300 m/s).</li>
-                        <li><strong>Survivability:</strong> Lander survived surface contact despite high velocity. Vehicle integrity preserved for recovery operations.</li>
-                    </ul>
-
-                    <p style="margin-top: 2rem; padding: 1.5rem; background-color: rgba(245, 158, 11, 0.05); border: 1px solid var(--warning); border-radius: 4px; color: var(--text-secondary);">
-                        <strong>Engineering Lesson:</strong> Parachute design and deployment reliability are critical for planetary landing. Duna's atmosphere requires careful parachute sizing—too small and the vehicle arrives too fast, too large and staging becomes problematic. FAMMOK-2's parachute issue drove subsequent design improvements and backup-system planning.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section expanded">
-                <div class="expandable-header">
-                    <h3>FAMMOK-3: Rescue & Deep-Space Operations</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Mission Objective:</strong> Future rescue and high-capacity deep-space mission, leveraging improved launch capability and addressing contingency scenarios.</p>
-
-                    <p style="margin-bottom: 1.5rem;"><strong>Current Status:</strong> Planned / In Planning Phase. Not yet flown.</p>
-
-                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">FAMMOK-3 represents the next evolution of WSA's planetary-exploration capability. The mission architecture incorporates several advances:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Launch Vehicle:</strong> Intended to use Aegis-1 Super Heavy heavy-lift configuration, providing greater payload capacity than previous missions.</li>
-                        <li><strong>Rescue Capability:</strong> Mission designed to address contingency scenarios and support rescue operations for stranded vehicles or crew from earlier missions.</li>
-                        <li><strong>Improved Parachute System:</strong> Incorporates lessons from FAMMOK-2 parachute issues. Redundant and improved descent systems planned.</li>
-                        <li><strong>Extended Mission Duration:</strong> Designed for more ambitious surface operations and longer orbital phases than FAMMOK-2.</li>
-                        <li><strong>Return Architecture:</strong> Full return vehicle and recovery capability planned, not just lander descent.</li>
-                    </ul>
-
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        <strong>Note:</strong> FAMMOK-3 details and architecture remain under development. Specific objectives, destination, and timeline will be updated as planning progresses.
-                    </p>
-                </div>
+            <h2>Mission Records</h2>
+            <p class="section-intro">Every WSA mission on record, from the same records as the Mission Map. Each event says where it comes from: WSA's earlier records, the operator's own history, or WSA's KSP save files. Unknown details are left out rather than guessed, and open questions are listed with the mission.</p>
+            <div id="missions-root">
+                <noscript><p>The mission records need JavaScript to display. The Mission Map and the Vehicle Hangar show the same missions and vehicles.</p></noscript>
             </div>
         </div>
     </section>
 
-    <section id="silver-bridge">
+    <section id="programs-note" class="archive-note">
         <div class="container">
-            <div class="section-lead">
+            <h2>Reading the Records</h2>
+            <div class="archive-note-grid">
                 <div>
-                    <h2>Project Silver Bridge</h2>
-                    <p style="margin-bottom: 2rem; max-width: 900px;">
-                        Silver Bridge was an experimental, one-off mission designed to test surface operations on the Mun and evaluate return-and-dock procedures with KGOSS orbital station.
-                    </p>
+                    <h3>FAMMOK numbering</h3>
+                    <p>FAMMOK is WSA's lander and upper-stage family. Mission numbers mark steps in capability and ambition, from the first Mun landing (FAMMOK-1) to the first Minmus and Duna landings (FAMMOK-2) and a Duna rescue mission (FAMMOK-3).</p>
                 </div>
-                <a class="mission-patch" href="gallery.html?album=insignia" title="Mission patches in the Flight Gallery">
-                    <img src="images/gallery/silver-bridge-patch.png" alt="Project Silver Bridge mission patch" width="140" height="140">
-                </a>
-            </div>
-
-            <div class="expandable-section expanded">
-                <div class="expandable-header">
-                    <h3>Mission Concept & Objectives</h3>
-                    <span class="expand-toggle">▼</span>
+                <div>
+                    <h3>Statuses</h3>
+                    <p>Missions are not simply successes or failures. A mission can be completed, flown with problems, partially successful, stranded (intact but unable to get home), lost, or still only planned. A deliberate decision, such as Odysseus turning back from Duna, is recorded as a decision.</p>
                 </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Primary Goals:</strong></p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li>Travel to the Mun and achieve lunar orbit</li>
-                        <li>Undock from orbit to descend to surface</li>
-                        <li>Conduct surface operations: drilling and ISRU-related experiments</li>
-                        <li>Return to Munar orbit for rendezvous</li>
-                        <li>Execute docking with KGOSS for return to Kerbin</li>
-                        <li>Support experimental relay operations</li>
-                    </ul>
-
-                    <p style="margin-top: 2rem; color: var(--text-secondary);"><strong>Mission Status:</strong> Partially successful. Critical docking-compatibility issue prevented completion of planned return sequence.</p>
+                <div>
+                    <h3>Sources</h3>
+                    <p>Facts from the save files are read without changing them: vessel states, flags and docking records. A save file's name alone never counts as evidence that something happened.</p>
                 </div>
             </div>
-
-            <div class="expandable-section expanded">
-                <div class="expandable-header">
-                    <h3>Critical Issue: Docking Port Mismatch</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>The Problem:</strong></p>
-                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">
-                        Silver Bridge's return vehicle possessed a docking port size that did not match KGOSS's available docking ports. The incompatibility was discovered after the lander returned to Munar orbit, making the planned docking impossible.
-                    </p>
-
-                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                        <strong>Consequences:</strong> The vehicle could not dock with KGOSS as intended. This forced improvised recovery procedures and created a contingency scenario requiring coordinated rescue planning.
-                    </p>
-
-                    <p style="margin-top: 1.5rem; padding: 1.5rem; background-color: rgba(239, 68, 68, 0.05); border: 1px solid var(--danger); border-radius: 4px; color: var(--text-secondary);">
-                        <strong>Critical Lesson:</strong> Docking compatibility cannot be assumed. All vehicles operating in the same mission architecture must have verified compatible docking ports. This failure drove subsequent WSA policy requiring formal compatibility reviews before any crewed or complex multi-vehicle missions. Silver Bridge demonstrates why compatible docking hardware, return options, and contingency rescue planning are not optional extras—they are essential mission-success requirements.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Near-Stranding in Kerbin Orbit</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;"><strong>Secondary Issue:</strong> After the Munar-phase docking incompatibility became apparent, the return vehicle faced a contingency situation in low Kerbin orbit.</p>
-
-                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                        Unable to dock with KGOSS as planned, the vehicle required alternative recovery procedures. WSA coordinated rescue and recovery operations to retrieve the stranded vehicle and crew.
-                    </p>
-
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        <strong>Resolution:</strong> Rescue mission successfully recovered the vehicle and crew from Kerbin orbit. This operation demonstrated WSA's contingency-planning capability and the importance of maintaining rescue readiness for unexpected situations.
-                    </p>
-                </div>
-            </div>
-
-            <div class="expandable-section">
-                <div class="expandable-header">
-                    <h3>Significance & Legacy</h3>
-                    <span class="expand-toggle">▼</span>
-                </div>
-                <div class="expandable-content">
-                    <p style="margin-bottom: 1.5rem;">Silver Bridge is recorded not as a failure, but as a valuable and honest example of mission planning challenges:</p>
-                    <ul style="margin-left: 2rem; color: var(--text-secondary); line-height: 2;">
-                        <li><strong>Documented Lesson:</strong> Incompatibility discovery led to formal docking-compatibility procedures and design reviews.</li>
-                        <li><strong>Rescue Capability Proof:</strong> WSA's ability to execute unexpected rescue operations was validated and documented.</li>
-                        <li><strong>Contingency Planning:</strong> Demonstrated that WSA systems and procedures could handle unexpected situations without total mission loss.</li>
-                        <li><strong>Operational Improvement:</strong> Incident drove improvements in vehicle design reviews, mission planning, and compatibility validation.</li>
-                    </ul>
-                    <p style="margin-top: 1.5rem; color: var(--text-secondary);">
-                        This mission is a model of why WSA documents failures and problems—they drive real engineering improvements and inform future decision-making.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section style="background-color: var(--bg-secondary);">
-        <div class="container">
-            <h2>Mission Archive Status</h2>
-            <p style="margin-bottom: 2rem;">The following mission categories have records available or planned for documentation:</p>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
-                    <h4>KGOSS Logistics Missions</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Station assembly, supply transport, crew rotation, and expansion module delivery. Archive under development.</p>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Status: <span style="font-weight: 600;">Partial Records</span></div>
-                </div>
-
-                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
-                    <h4>Crewed Transport Operations</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Crew rotation to KGOSS, crew transport to lunar orbit, and crewed deep-space operations. Records available for recent flights.</p>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Status: <span style="font-weight: 600;">In Development</span></div>
-                </div>
-
-                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
-                    <h4>Rescue Operations</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Contingency recovery, crew rescue, and vehicle recovery from unplanned scenarios. Examples: Silver Bridge recovery.</p>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Status: <span style="font-weight: 600;">Limited Records</span></div>
-                </div>
-
-                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
-                    <h4>Booster Recovery Test Flights</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Aegis family recovery missions, AutoLand validation flights, and booster development testing. 47+ successful recoveries archived.</p>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Status: <span style="font-weight: 600;">Aggregate Records</span></div>
-                </div>
-
-                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
-                    <h4>Scientific & Research Missions</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Satellite deployment, atmospheric research, orbital experiments, and technology demonstrations.</p>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Status: <span style="font-weight: 600;">Planned</span></div>
-                </div>
-
-                <div style="padding: 1.5rem; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 4px;">
-                    <h4>Experimental & Future Programs</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Upcoming Lyra first flight, SSTO orbital attempts, FAMMOK-3 deep-space mission, and other developing programs.</p>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Status: <span style="font-weight: 600;">In Planning</span></div>
-                </div>
-            </div>
-
-            <p style="margin-top: 3rem; color: var(--text-secondary); font-size: 0.95rem;">
-                The mission archive is continuously updated as new flights occur and historical records are compiled. Detailed records for each major mission will be expanded and linked as information is verified and documented.
-            </p>
         </div>
     </section>
 
@@ -297,9 +97,9 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=10"></script>
+    <script src="wsa-data.js?v=11"></script>
     <script src="navigation.js?v=10"></script>
-    <script src="features.js?v=4"></script>
+    <script src="features.js?v=5"></script>
     <script src="decorations.js?v=3"></script>
 </body>
 </html>

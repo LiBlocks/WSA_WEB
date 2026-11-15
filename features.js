@@ -1,4 +1,5 @@
-// Interactive features: site search, Vehicle Hangar, Development Timeline, status legend and Flight Gallery albums.
+// Interactive features: site search, Vehicle Hangar, Development Timeline, mission records, status legend and
+// Flight Gallery albums.
 // All content comes from wsa-data.js; this file only renders it.
 (function () {
     const data = window.WSA;
@@ -92,6 +93,10 @@
             ...data.VEHICLES.map(v => ({
                 title: v.name, type: data.VEHICLE_CATEGORIES[v.category] || 'Vehicle', href: hangarHref(v.id),
                 vehicleId: v.id, name: normalize(v.name), text: vehicleSearchText(v)
+            })),
+            ...(data.MISSIONS || []).map(m => ({
+                title: m.name, type: 'Mission', href: `missions-archive.html#${encodeURIComponent(m.id)}`,
+                name: normalize(m.name), text: normalize([m.name, ...(m.aliases || []), m.program, m.destination, m.outcome].filter(Boolean).join(' '))
             }))
         ];
 
@@ -100,7 +105,7 @@
         dialog.innerHTML = `
             <div class="search-box">
                 ${ICONS.search}
-                <input type="text" class="search-input" placeholder="Search vehicles, programs and pages" autocomplete="off" spellcheck="false"
+                <input type="text" class="search-input" placeholder="Search vehicles, missions, programs and pages" autocomplete="off" spellcheck="false"
                     role="combobox" aria-expanded="true" aria-controls="site-search-results" aria-autocomplete="list" aria-label="Search WSA" enterkeyhint="go">
                 <button type="button" class="icon-button dialog-close" aria-label="Close search">${ICONS.close}</button>
             </div>
@@ -486,6 +491,120 @@
         openFromHash();
     }
 
+    /* ---------- Mission records (missions-archive.html), from WSA.MISSIONS ---------- */
+
+    const BASIS = { site: 'Earlier WSA records', operator: 'Operator\'s history', save: 'KSP save records' };
+    const slug = text => normalize(text).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const missionPrograms = () => {
+        const programs = [...new Set((data.MISSIONS || []).map(m => m.program || 'Not recorded'))];
+        return programs.sort((a, b) => (a === 'Not recorded') - (b === 'Not recorded'));
+    };
+    const programTitle = p => (p === 'Not recorded' ? 'Other missions' : p);
+
+    function missionItem(m) {
+        const status = statusOf(m.status);
+        const vehicles = (m.vehicles || []).map(id => vehiclesById.get(id)).filter(Boolean);
+        const craft = [...vehicles.map(v => v.name), ...(m.craft || [])];
+        const facts = [
+            ['Objective', m.objective], ['Destination', m.destination], ['Launch vehicle', m.launchVehicle],
+            ['Spacecraft', craft.join(', ')], ['Crew', m.crew != null ? String(m.crew) : null], ['Outcome', m.outcome],
+            ['Status', `${status.label}: ${status.description}`]
+        ].filter(([, v]) => v);
+        const sources = data.MISSION_SOURCES || {};
+        const events = (m.events || []).map(e => {
+            const src = e.basis === 'site' && sources[e.source] ? ` · ${esc(sources[e.source].label)}` : '';
+            return `<li class="${e.kind ? `is-${esc(e.kind)}` : ''}">
+                <span class="mission-event-title">${e.kind === 'planned' ? 'Planned: ' : ''}${esc(e.title.replace(/^Planned: /, ''))}</span>
+                <span class="mission-event-text">${esc(e.text)}</span>
+                <span class="mission-basis basis-${esc(e.basis)}">${esc(BASIS[e.basis] || e.basis)}${src}</span>
+            </li>`;
+        }).join('');
+        const related = (m.relatedMissions || []).map(id => (data.MISSIONS || []).find(x => x.id === id)).filter(Boolean);
+        const id = esc(m.id);
+        return `
+            <li class="tl-item mission-item tone-${status.tone}" id="${id}" data-program="${esc(m.program || 'Not recorded')}">
+                <button type="button" class="tl-toggle" aria-expanded="false" aria-controls="${id}-panel">
+                    <span class="tl-heading">
+                        <span class="tl-program">${esc(m.destination || programTitle(m.program || 'Not recorded'))}</span>
+                        <span class="tl-title">${esc(m.name)}</span>
+                        ${m.outcome ? `<span class="mission-outcome">${esc(m.outcome)}</span>` : ''}
+                    </span>
+                    ${badge(m.status)}
+                    ${ICONS.chevron}
+                </button>
+                <div class="tl-panel" id="${id}-panel">
+                    <div class="tl-panel-inner"><div class="tl-panel-content">
+                        <p>${esc(m.summary)}</p>
+                        <dl class="tl-facts mission-facts">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+                        ${events ? `<h4 class="mission-subhead">What happened</h4><ol class="mission-events">${events}</ol>` : ''}
+                        ${(m.notes || []).length ? `<h4 class="mission-subhead">Notes</h4><ul class="mission-notes">${m.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+                        ${(m.conflicts || []).length ? `<h4 class="mission-subhead">Open questions in the record</h4><ul class="mission-notes mission-conflicts">${m.conflicts.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+                        ${related.length ? `<p class="mission-related">Related: ${related.map(r => `<a href="#${esc(r.id)}">${esc(r.name)}</a>`).join(', ')}</p>` : ''}
+                        <div class="tl-links">
+                            ${m.locations && m.locations.length ? `<a class="btn btn-secondary btn-small" href="mission-map.html?mission=${encodeURIComponent(m.id)}">Replay on the Mission Map</a>` : ''}
+                            ${vehicles.map(v => `<a class="btn btn-secondary btn-small" href="${esc(hangarHref(v.id))}">${esc(v.name)} in the Hangar</a>`).join('')}
+                            ${(m.links || []).filter(l => !/vehicle=/.test(l.href)).map(l => `<a class="btn btn-secondary btn-small" href="${esc(l.href)}">${esc(l.label)}</a>`).join('')}
+                        </div>
+                    </div></div>
+                </div>
+            </li>`;
+    }
+
+    function initMissionArchive() {
+        const root = document.getElementById('missions-root');
+        if (!root || !data.MISSIONS) return;
+        const programs = missionPrograms();
+        root.innerHTML = `
+            <div class="timeline-controls">
+                <div class="chip-group" role="group" aria-label="Filter by program">
+                    ${chip('all', 'All missions', data.MISSIONS.length, true)}
+                    ${programs.map(p => chip(p, programTitle(p), data.MISSIONS.filter(m => (m.program || 'Not recorded') === p).length)).join('')}
+                </div>
+                <button type="button" class="link-button tl-expand-all" aria-pressed="false">Expand all</button>
+            </div>
+            ${programs.map(p => `
+                <section class="mission-group" id="program-${esc(slug(programTitle(p)))}" data-program="${esc(p)}" aria-labelledby="program-${esc(slug(programTitle(p)))}-title">
+                    <h3 id="program-${esc(slug(programTitle(p)))}-title">${esc(programTitle(p))}</h3>
+                    <ol class="mission-list">${data.MISSIONS.filter(m => (m.program || 'Not recorded') === p).map(missionItem).join('')}</ol>
+                </section>`).join('')}`;
+
+        const items = [...root.querySelectorAll('.mission-item')];
+        const expandAll = root.querySelector('.tl-expand-all');
+        const setOpen = (item, open) => {
+            item.classList.toggle('open', open);
+            item.querySelector('.tl-toggle').setAttribute('aria-expanded', String(open));
+        };
+        root.addEventListener('click', e => {
+            const toggle = e.target.closest('.mission-item .tl-toggle');
+            if (toggle) { const item = toggle.closest('.mission-item'); setOpen(item, !item.classList.contains('open')); }
+        });
+        expandAll.addEventListener('click', () => {
+            const expand = expandAll.getAttribute('aria-pressed') !== 'true';
+            items.filter(item => !item.closest('[hidden]')).forEach(item => setOpen(item, expand));
+            expandAll.setAttribute('aria-pressed', String(expand));
+            expandAll.textContent = expand ? 'Collapse all' : 'Expand all';
+        });
+        bindChips(root.querySelector('.chip-group'), program => {
+            root.querySelectorAll('.mission-group').forEach(g => { g.hidden = program !== 'all' && g.dataset.program !== program; });
+        });
+
+        // Deep links: #<mission id> opens that mission; #<program> (e.g. #fammok) shows the program's group
+        function openFromHash() {
+            const key = location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : '';
+            const target = key && (document.getElementById(key) || document.getElementById(`program-${key}`));
+            if (!target || !root.contains(target)) return;
+            if (target.classList.contains('mission-item')) {
+                setOpen(target, true);
+                target.scrollIntoView({ block: 'start' });
+                target.querySelector('.tl-toggle').focus({ preventScroll: true });
+            } else if (target.classList.contains('mission-group')) {
+                target.scrollIntoView({ block: 'start' });
+            }
+        }
+        window.addEventListener('hashchange', openFromHash);
+        openFromHash();
+    }
+
     function initStatusLegend() {
         const root = document.getElementById('status-legend-root');
         if (!root) return;
@@ -713,6 +832,7 @@
     initHangar();
     initSearch();
     initTimeline();
+    initMissionArchive();
     initStatusLegend();
     initGallery();
 })();

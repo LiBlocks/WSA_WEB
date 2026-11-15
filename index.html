@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Woody Space Agency</title>
-    <script src="page-init.js?v=9"></script>
+    <script src="page-init.js?v=10"></script>
     <link rel="stylesheet" href="intro.css?v=8">
     <script src="intro.js?v=8"></script>
     <link rel="stylesheet" href="styles.css?v=14">
@@ -24,6 +24,7 @@
                 <li><a href="missions-archive.html">Missions</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="flight-dynamics.html">Tools</a></li>
                 <li><a href="games.html">Games</a></li>
             </ul>
             <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
@@ -61,7 +62,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">3</div>
-                    <div class="stat-label">Celestial Destinations</div>
+                    <div class="stat-label">Worlds Landed On</div>
                 </div>
             </div>
         </div>
@@ -73,19 +74,19 @@
             <div class="overview-grid">
                 <div class="overview-card">
                     <h3>Reusable Launch Vehicles</h3>
-                    <p>Aegis and Lyra families enable rapid, cost-effective spaceflight through proven recovery and reflight capability.</p>
+                    <p>The Aegis family launches WSA's missions while its booster recovery is tested and improved. Lyra is the larger next-generation family in development.</p>
                 </div>
                 <div class="overview-card">
                     <h3>Autonomous Landing</h3>
-                    <p>AutoLand is a homemade kOS guidance system that enables reliable, repeatable booster landings without external assistance.</p>
+                    <p>AutoLand is WSA's own kOS guidance software for landing boosters, written instead of relying on MechJeb. It is still experimental.</p>
                 </div>
                 <div class="overview-card">
                     <h3>Orbital Infrastructure</h3>
-                    <p>KGOSS station provides docking, logistics, and assembly capabilities for sustained orbital operations.</p>
+                    <p>KGOSS-1, assembled in Kerbin orbit module by module, is WSA's station and assembly hub.</p>
                 </div>
                 <div class="overview-card">
                     <h3>Planetary Exploration</h3>
-                    <p>FAMMOK lander program extends WSA capabilities to the Mun, Minmus, and Duna with precision landing and return.</p>
+                    <p>FAMMOK landers made WSA's first landings on the Mun, Minmus and Duna, and crewed missions have reached Duna and an asteroid.</p>
                 </div>
                 <div class="overview-card">
                     <h3>Aircraft & Spaceplanes</h3>
@@ -105,43 +106,43 @@
             <div class="program-cards">
                 <div class="program-card">
                     <h3>Aegis</h3>
-                    <div class="status operational">Operational</div>
-                    <p>Proven reusable booster family with autonomous landing. Multiple configurations tested. 47+ successful recoveries.</p>
+                    <div class="status experimental">Experimental</div>
+                    <p>Reusable booster family that launches WSA's missions. Booster landing and recovery are still being tested, with 47+ recoveries on record.</p>
                     <a href="vehicles-programs.html#aegis" class="card-link">View Program →</a>
                 </div>
 
                 <div class="program-card">
                     <h3>Lyra</h3>
                     <div class="status development">In Development</div>
-                    <p>Next-generation reusable launcher. Three capability tiers (Selene, Sol, Astra). Lyra P-1E prototype under development.</p>
+                    <p>Next-generation reusable booster family with three tiers (Selene, Sol, Astra). The Lyra P-1E prototype has not flown yet.</p>
                     <a href="vehicles-programs.html#lyra" class="card-link">View Program →</a>
                 </div>
 
                 <div class="program-card">
                     <h3>AutoLand</h3>
-                    <div class="status development">Active R&D</div>
-                    <p>Autonomous landing controller written in kOS. Guidance, throttle control, landing accuracy. V2.0+ development ongoing.</p>
+                    <div class="status development">In Development</div>
+                    <p>Autonomous landing software written in kOS. V1.6 was the last stable version; the V2.2a guidance track is in development.</p>
                     <a href="autoland.html" class="card-link">View Engineering →</a>
                 </div>
 
                 <div class="program-card">
                     <h3>KGOSS Station</h3>
-                    <div class="status operational">Operational</div>
-                    <p>Orbital assembly hub at ~200 km orbit. Docking, logistics, crew operations, and future expansion platform.</p>
+                    <div class="status operational">In Service</div>
+                    <p>Orbital station at about 200 km, with a centrifuge, three cabins, a fuel module and the Haven rescue capsule docked.</p>
                     <a href="kgoss.html" class="card-link">View Station →</a>
                 </div>
 
                 <div class="program-card">
                     <h3>FAMMOK</h3>
-                    <div class="status development">Advancing</div>
-                    <p>Planetary exploration and lander development. Mun, Minmus, and Duna operations. FAMMOK-3 in planning phase.</p>
+                    <div class="status operational">Flown</div>
+                    <p>WSA's landers: first landings on the Mun, Minmus and Duna. FAMMOK-2 is now stranded in Duna orbit.</p>
                     <a href="missions-archive.html#fammok" class="card-link">View Missions →</a>
                 </div>
 
                 <div class="program-card">
                     <h3>Aircraft Program</h3>
                     <div class="status development">Experimental</div>
-                    <p>Swift-1X, SSTO development, and atmospheric flight-control research. High-speed and orbital-transition testing.</p>
+                    <p>Swift-1X, the FSX series and SSTO development: flight-control research, high-speed flight and spaceplanes to orbit.</p>
                     <a href="vehicles-programs.html#aircraft" class="card-link">View Program →</a>
                 </div>
             </div>
@@ -154,23 +155,23 @@
             <div class="achievement-list">
                 <div class="achievement">
                     <div class="achievement-marker operational">Completed</div>
-                    <h4>Aegis Maturation Milestone</h4>
-                    <p>Booster family achieved high reliability with 47+ successful recoveries across all test campaigns. Preparing for crewed certification.</p>
+                    <h4>Minmus Firework</h4>
+                    <p>A crewed flight on an Aegis Mk1.3 landed on Minmus, planted a flag and splashed down back on Kerbin.</p>
                 </div>
                 <div class="achievement">
-                    <div class="achievement-marker development">In Progress</div>
-                    <h4>Lyra Development</h4>
-                    <p>P-1E prototype integration underway. Three-tier architecture (Selene, Sol, Astra) established. First flight targeted.</p>
+                    <div class="achievement-marker operational">Flown</div>
+                    <h4>Astra-1 and LunaLink-1</h4>
+                    <p>A space telescope in a 561 km orbit round Kerbin, and an ion-engined relay satellite in orbit round the Mun.</p>
                 </div>
                 <div class="achievement">
-                    <div class="achievement-marker development">In Progress</div>
-                    <h4>AutoLand V2.x Development</h4>
-                    <p>Glide guidance, improved landing accuracy, and predictive targeting under active development. Test flights ongoing.</p>
+                    <div class="achievement-marker operational">Flown</div>
+                    <h4>Odysseus at Duna</h4>
+                    <p>WSA's fourth Duna attempt reached the planet, chose not to land with too little fuel, and came home with a Duna gravity assist.</p>
                 </div>
                 <div class="achievement">
-                    <div class="achievement-marker operational">Completed</div>
-                    <h4>KGOSS Operational Status</h4>
-                    <p>Station assembly and docking operations proven. Seraph SPC-1 "Haven" rescue capability integrated. Ready for logistics missions.</p>
+                    <div class="achievement-marker development">In Development</div>
+                    <h4>AutoLand V2.x and a Catch Concept</h4>
+                    <p>The V2.2a guidance track is in development, and an original chopstick-style booster catch system is an early concept.</p>
                 </div>
             </div>
         </div>
@@ -200,9 +201,9 @@
         </div>
     </footer>
 
-    <script src="wsa-data.js?v=10"></script>
+    <script src="wsa-data.js?v=11"></script>
     <script src="navigation.js?v=10"></script>
-    <script src="features.js?v=4"></script>
+    <script src="features.js?v=5"></script>
     <script src="decorations.js?v=3"></script>
 </body>
 </html>

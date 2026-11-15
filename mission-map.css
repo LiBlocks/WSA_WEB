@@ -1039,6 +1039,10 @@
     color: var(--accent);
 }
 
+.mm-basis.is-save {
+    color: var(--warning);
+}
+
 .mm-basis.is-planned {
     border-style: dashed;
     color: var(--text-secondary);

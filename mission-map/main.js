@@ -1,11 +1,12 @@
-// Mission Map (mission-map.html): ties the mission records (mission-map-data.js), the side panel and the
+// Mission Map (mission-map.html): ties the mission records (WSA.MISSIONS in wsa-data.js), the side panel and the
 // replay controls to the 3D view (scene.js). Without WebGL the panel and replay timeline still work.
 import { BODIES, REGIONS, body, place, describe, children } from './bodies.js';
 import { buildRoute, buildPlanned, buildTimeline, sampleTimeline, eventTime, validateMission } from './routes.js';
 
 const $ = id => document.getElementById(id);
 const WSA = window.WSA || {};
-const DATA = window.WSA_MISSION_MAP || { MISSIONS: [], AWAITING: [], SOURCES: {} };
+// The missions are shared with the Missions archive, so both pages always tell the same story
+const DATA = { MISSIONS: WSA.MISSIONS || [], AWAITING: WSA.MISSIONS_AWAITING || [], SOURCES: WSA.MISSION_SOURCES || {} };
 const STATUSES = WSA.STATUSES || {};
 const VEHICLES = WSA.VEHICLES || [];
 const COLORS = ['#ffb454', '#5ad1ff', '#7ee2a8', '#c3a6ff', '#ff8f7a', '#f2d86b'];
@@ -243,10 +244,10 @@ function backToBrowse() {
 }
 
 /* ---------- Replay ---------- */
-const BASIS = { site: 'Documented on this site', operator: 'From the operator\'s history' };
+const BASIS = { site: 'Documented on this site', operator: 'From the operator\'s history', save: 'From WSA\'s KSP saves' };
 function sourceLink(e) {
     const s = DATA.SOURCES[e.source];
-    if (!s || e.basis === 'operator') return '';   // the basis tag already says so
+    if (!s || e.basis !== 'site') return '';   // operator and save events: the basis tag already says so
     return s.href ? `<a href="${esc(s.href)}">${esc(s.label)}</a>` : esc(s.label);
 }
 

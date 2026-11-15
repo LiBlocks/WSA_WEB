@@ -349,7 +349,7 @@ export function validateMission(m, statuses, vehicles = []) {
     let last = -Infinity;
     (m.events || []).forEach((e, k) => {
         if (!e.title || !e.text) problems.push(`${where}: event ${k + 1} needs a title and text.`);
-        if (e.basis !== 'site' && e.basis !== 'operator') problems.push(`${where}: event "${e.title}" needs basis 'site' or 'operator'.`);
+        if (!['site', 'operator', 'save'].includes(e.basis)) problems.push(`${where}: event "${e.title}" needs basis 'site', 'operator' or 'save'.`);
         if (typeof e.at !== 'number' || e.at < 0 || e.at > legCount) problems.push(`${where}: event "${e.title}" is outside the route.`);
         if (e.at < last) problems.push(`${where}: events are out of order at "${e.title}".`);
         last = e.at;
