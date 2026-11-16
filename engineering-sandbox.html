@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSA Engineering Sandbox | Woody Space Agency</title>
+    <meta name="description" content="Explore the engineering behind spaceflight: an interactive 3D laboratory for propulsion, staging, orbital mechanics and booster landing.">
+    <script src="page-init.js?v=12"></script>
+    <link rel="stylesheet" href="intro.css?v=8">
+    <script src="intro.js?v=8"></script>
+    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="engineering-sandbox.css?v=1">
+    <link rel="stylesheet" href="liquid-glass.css?v=18">
+    <script src="liquid-glass.js?v=19"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <!-- three.js r186 and its add-ons are vendored in vendor/three (no CDN); the add-ons import "three" -->
+    <script type="importmap">
+        { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+    </script>
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="flight-dynamics.html">Tools</a></li>
+                <li><a href="games.html">Games</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head es-head" style="padding: 2.25rem 2rem 1.25rem;">
+        <div class="container">
+            <p class="es-back"><a href="games.html">&larr; Games</a></p>
+            <h1 style="margin-bottom: 0.4rem;">WSA Engineering Sandbox</h1>
+            <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 860px;">
+                Explore the engineering behind spaceflight. Experiment with propulsion, staging, orbital mechanics and recovery systems in an interactive three-dimensional environment.
+            </p>
+        </div>
+    </section>
+
+    <section class="es-section">
+        <div class="es" id="es" data-mode="basic" data-state="ready">
+            <div class="es-toolbar">
+                <div class="es-title-block">
+                    <button type="button" class="btn btn-secondary btn-small" id="es-scenarios">Scenarios</button>
+                    <h2 class="es-title" id="es-title">Engineering Sandbox</h2>
+                    <span class="es-chip" id="es-level">Introductory</span>
+                </div>
+                <div class="es-toolbar-actions">
+                    <button type="button" class="btn btn-secondary btn-small" id="es-help-btn" aria-keyshortcuts="H">Help</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="es-fullscreen">Full screen</button>
+                </div>
+            </div>
+
+            <div class="es-stage">
+                <div class="es-main">
+                    <div class="es-view" id="es-view" tabindex="0" role="application" aria-label="3D view. Drag to orbit the camera, scroll or pinch to zoom. Keyboard controls are listed in Help.">
+                        <canvas class="es-canvas" id="es-canvas"></canvas>
+                        <div class="es-labels" id="es-labels" aria-hidden="true"></div>
+
+                        <div class="es-hud" aria-hidden="true">
+                            <div class="es-hud-top">
+                                <span class="es-hud-chip es-hud-objective" id="es-objective">Free experiment</span>
+                                <span class="es-hud-chip" id="es-status" data-state="ready">READY</span>
+                                <span class="es-hud-chip" id="es-clock">T+0.0 s</span>
+                            </div>
+                            <div class="es-hud-readouts" id="es-hud-readouts"></div>
+                        </div>
+
+                        <div class="es-camctl" role="group" aria-label="Camera">
+                            <button type="button" class="es-icon-btn" data-cam="in" aria-label="Zoom in" title="Zoom in">+</button>
+                            <button type="button" class="es-icon-btn" data-cam="out" aria-label="Zoom out" title="Zoom out">−</button>
+                            <button type="button" class="es-icon-btn es-wide" data-cam="reset" title="Reset the camera (C)">Reset view</button>
+                            <button type="button" class="es-icon-btn es-wide" id="es-follow" aria-pressed="true" title="Follow the vehicle (F)">Follow</button>
+                        </div>
+
+                        <div class="es-pilot" id="es-pilot" hidden>
+                            <div class="es-pilot-thr" id="es-pilot-throttle"><span>Throttle</span><b>0%</b><i aria-hidden="true"></i></div>
+                            <div class="es-pilot-pad" role="group" aria-label="Manual flight controls">
+                                <button type="button" class="es-icon-btn" data-hold="up" aria-label="Throttle up">THR +</button>
+                                <button type="button" class="es-icon-btn" data-hold="down" aria-label="Throttle down">THR −</button>
+                                <button type="button" class="es-icon-btn" data-hold="left" aria-label="Lean left">◀</button>
+                                <button type="button" class="es-icon-btn" data-hold="right" aria-label="Lean right">▶</button>
+                                <button type="button" class="es-icon-btn" data-hold="fwd" aria-label="Lean forward">▲</button>
+                                <button type="button" class="es-icon-btn" data-hold="back" aria-label="Lean back">▼</button>
+                            </div>
+                            <p class="es-pilot-note">Manual control is active when <b>Who flies</b> is set to you.</p>
+                        </div>
+
+                        <div class="es-overlay" id="es-loading">
+                            <div class="es-card es-card-small"><p class="es-card-text">Loading the 3D laboratory…</p></div>
+                        </div>
+
+                        <div class="es-overlay" id="es-error" hidden>
+                            <div class="es-card es-card-small" role="alert">
+                                <h3 class="es-card-title">The 3D view is unavailable</h3>
+                                <p class="es-card-text"></p>
+                                <div class="es-card-actions"><button type="button" class="btn btn-secondary btn-small" onclick="this.closest('.es-overlay').hidden = true">Continue without 3D</button></div>
+                            </div>
+                        </div>
+
+                        <div class="es-overlay es-overlay-scroll" id="es-debrief" hidden>
+                            <div class="es-card" role="dialog" aria-labelledby="es-debrief-title">
+                                <p class="es-kicker">Experiment debrief</p>
+                                <div class="es-debrief-top">
+                                    <div>
+                                        <h3 class="es-card-title es-debrief-title" id="es-debrief-title">Experiment complete</h3>
+                                        <p class="es-debrief-met" data-met="yes">Objective achieved</p>
+                                    </div>
+                                    <p class="es-debrief-score"><b>0</b><span>out of 100</span></p>
+                                </div>
+                                <p class="es-debrief-summary"></p>
+                                <dl class="es-debrief-metrics es-dl"></dl>
+                                <p class="es-debrief-lesson"></p>
+                                <div class="es-card-actions">
+                                    <button type="button" class="btn btn-primary btn-small" data-action="again">Try again</button>
+                                    <button type="button" class="btn btn-secondary btn-small" data-action="replay">Watch replay</button>
+                                    <button type="button" class="btn btn-secondary btn-small" data-action="close">Adjust settings</button>
+                                    <button type="button" class="btn btn-secondary btn-small" data-action="scenarios">Other scenarios</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <noscript>
+                            <div class="es-overlay"><div class="es-card es-card-small"><p class="es-card-text">The Engineering Sandbox needs JavaScript to run.</p></div></div>
+                        </noscript>
+                    </div>
+
+                    <div class="es-play" role="group" aria-label="Playback">
+                        <button type="button" class="btn btn-primary btn-small es-start" id="es-start">Start</button>
+                        <button type="button" class="btn btn-secondary btn-small" id="es-reset" aria-keyshortcuts="R">Reset</button>
+                        <button type="button" class="btn btn-secondary btn-small" id="es-replay" disabled>Replay</button>
+                        <span class="es-scale" role="group" aria-label="Simulation speed">
+                            <button type="button" class="es-icon-btn" id="es-slower" aria-label="Slower" title="Slower (,)">«</button>
+                            <output id="es-scale" aria-label="Simulation speed">1×</output>
+                            <button type="button" class="es-icon-btn" id="es-faster" aria-label="Faster" title="Faster (.)">»</button>
+                        </span>
+                        <span class="es-actions" id="es-actions" role="group" aria-label="Experiment actions"></span>
+                    </div>
+                    <p class="es-pending" id="es-pending" hidden>Some changes only apply to a new run. <button type="button" class="btn btn-secondary btn-small">Reset to apply</button></p>
+                </div>
+
+                <aside class="es-panel" aria-label="Experiment settings and telemetry">
+                    <div class="es-mode" role="group" aria-label="Detail level">
+                        <button type="button" id="es-mode-basic" aria-pressed="true">Basic</button>
+                        <button type="button" id="es-mode-pro" aria-pressed="false">Pro</button>
+                    </div>
+                    <p class="es-learn" id="es-learn"></p>
+
+                    <div class="es-block">
+                        <label class="es-block-label" for="es-challenge">Objective</label>
+                        <select id="es-challenge"></select>
+                        <p class="es-challenge-text" id="es-challenge-text"></p>
+                    </div>
+                    <div class="es-block">
+                        <label class="es-block-label" for="es-preset" id="es-preset-label">Preset</label>
+                        <div class="es-row">
+                            <select id="es-preset"></select>
+                            <button type="button" class="btn btn-secondary btn-small" id="es-preset-reset">Reset to preset</button>
+                        </div>
+                    </div>
+                    <p class="es-hidden-pro" id="es-hidden-pro" hidden><b>0</b> Pro settings differ from the preset. <button type="button" class="es-link">Show them</button></p>
+                    <form class="es-params" id="es-params" novalidate onsubmit="return false"></form>
+                    <p class="es-note" id="es-note" aria-live="polite"></p>
+
+                    <details class="es-details" open>
+                        <summary>Calculated before the run</summary>
+                        <dl class="es-dl" id="es-derived"></dl>
+                    </details>
+                    <details class="es-details" open>
+                        <summary>Live telemetry</summary>
+                        <dl class="es-dl es-telemetry" id="es-telemetry"></dl>
+                    </details>
+                    <details class="es-details" open>
+                        <summary>Systems</summary>
+                        <ul class="es-system" id="es-system"></ul>
+                    </details>
+                    <details class="es-details">
+                        <summary>View options</summary>
+                        <label class="es-check"><input type="checkbox" id="es-vectors"> Show force and velocity arrows</label>
+                        <label class="es-block-label" for="es-quality">Graphics quality</label>
+                        <select id="es-quality"><option value="high">High (shadows, sharper)</option><option value="low">Low (faster on older devices)</option></select>
+                        <p class="es-legend"><i style="--c:#ff9a3c"></i>Thrust <i style="--c:#b48cff"></i>Weight <i style="--c:#5ee09a"></i>Velocity <i style="--c:#ffb547"></i>Planned burn</p>
+                    </details>
+                </aside>
+            </div>
+
+            <div class="es-bottom">
+                <div class="es-box es-box-graphs">
+                    <h3>Performance</h3>
+                    <div class="es-graphs" id="es-graphs"></div>
+                </div>
+                <div class="es-box">
+                    <h3>Event log</h3>
+                    <ol class="es-log" id="es-log" aria-label="Simulation events, newest first"></ol>
+                </div>
+                <div class="es-box">
+                    <h3>Compare runs</h3>
+                    <div id="es-compare"></div>
+                    <button type="button" class="btn btn-secondary btn-small" id="es-pin" disabled>Pin latest result</button>
+                </div>
+                <details class="es-box es-assumptions-box">
+                    <summary>Model assumptions</summary>
+                    <ul id="es-assumptions"></ul>
+                    <p class="es-muted">Worlds use stock KSP radius and gravity values from the same data as the <a href="flight-dynamics.html">Flight Dynamics Center</a>. Engines and vehicles are illustrative and are not KSP part data or WSA vehicle specifications. The landing guidance is an illustrative controller, not WSA's AutoLand software.</p>
+                </details>
+            </div>
+
+            <div class="es-overlay es-overlay-page" id="es-select" hidden>
+                <div class="es-card es-card-wide" role="dialog" aria-labelledby="es-select-title">
+                    <div class="es-select-head">
+                        <div>
+                            <p class="es-kicker">WSA Engineering Sandbox</p>
+                            <h3 class="es-card-title" id="es-select-title">Choose an experiment</h3>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" id="es-select-close" hidden>Close</button>
+                    </div>
+                    <div class="es-select-grid" id="es-select-grid"></div>
+                </div>
+            </div>
+
+            <div class="es-overlay es-overlay-page" id="es-help" hidden>
+                <div class="es-card" role="dialog" aria-labelledby="es-help-title">
+                    <h3 class="es-card-title" id="es-help-title">Controls and help</h3>
+                    <dl class="es-help-list">
+                        <div><dt>Camera</dt><dd>Drag in the 3D view to orbit, scroll or pinch to zoom, right-drag or two-finger drag to pan. <kbd>C</kbd> or Reset view puts the camera back; <kbd>F</kbd> or Follow keeps it on the vehicle.</dd></div>
+                        <div><dt>Run</dt><dd><kbd>Space</kbd> start, pause and resume. <kbd>R</kbd> reset. <kbd>,</kbd> <kbd>.</kbd> slower and faster simulation. Replay re-runs your last experiment with exactly the same settings and inputs.</dd></div>
+                        <div><dt>Actions</dt><dd>Each experiment's buttons show their key: <kbd>K</kbd> shut down or cut engines, <kbd>I</kbd> ignite, <kbd>S</kbd> or <kbd>Enter</kbd> stage, <kbd>B</kbd> burn, <kbd>X</kbd> cancel a planned burn, <kbd>M</kbd> map view, <kbd>G</kbd> guidance on and off, <kbd>E</kbd> end the experiment.</dd></div>
+                        <div><dt>Flying the booster</dt><dd>With <b>Who flies</b> set to you: <kbd>W</kbd> <kbd>S</kbd> (or <kbd>↑</kbd> <kbd>↓</kbd>) throttle, <kbd>A</kbd> <kbd>D</kbd> (or <kbd>←</kbd> <kbd>→</kbd>) lean left and right, <kbd>Q</kbd> <kbd>E</kbd> lean forward and back. On a touch screen, hold the buttons in the corner of the view.</dd></div>
+                        <div><dt>Basic and Pro</dt><dd>Basic shows the main settings in plain words. Pro shows every parameter with its symbol and unit, plus extra telemetry. Both use the same experiment: switching never resets it.</dd></div>
+                        <div><dt>Live settings</dt><dd>Settings marked <span class="es-live">live</span> change the experiment while it runs. Others apply when you reset.</dd></div>
+                    </dl>
+                    <div class="es-card-actions"><button type="button" class="btn btn-primary btn-small">Close</button></div>
+                </div>
+            </div>
+            <p class="visually-hidden" id="es-live" role="status" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=14"></script>
+    <script src="navigation.js?v=11"></script>
+    <script src="features.js?v=6"></script>
+    <script src="decorations.js?v=3"></script>
+    <script type="module" src="sandbox/main.js?v=1"></script>
+    <script>
+        // If the module never starts (a very old browser, a failed download), say so instead of a blank view
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var loading = document.getElementById('es-loading'), error = document.getElementById('es-error');
+                if (!loading || loading.hidden || !error.hidden) return;
+                loading.hidden = true;
+                error.hidden = false;
+                error.querySelector('.es-card-title').textContent = 'The sandbox could not start';
+                error.querySelector('.es-card-text').textContent = 'Its scripts did not load or are not supported by this browser. Reload the page, or try an up-to-date browser.';
+            }, 15000);
+        });
+    </script>
+</body>
+</html>

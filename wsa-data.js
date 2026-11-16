@@ -1514,6 +1514,7 @@ window.WSA = {
         { title: 'Docking Simulator',            href: 'docking-simulator.html',             type: 'Game',     keywords: 'game simulator docking dock spacecraft rendezvous approach RCS first person' },
         { title: 'SSTO Landing',                 href: 'ssto-landing.html',                  type: 'Game',     keywords: 'game landing land spaceplane SSTO runway aircraft flight approach touchdown spaceport' },
         { title: 'Orbital Rendezvous Challenge', href: 'orbital-rendezvous.html',            type: 'Game',     keywords: 'game orbit orbital rendezvous transfer Hohmann intercept KGOSS docking delta-v prograde retrograde velocity' },
+        { title: 'WSA Engineering Sandbox',      href: 'engineering-sandbox.html',           type: 'Game',     keywords: 'game sandbox engineering laboratory lab 3D engine test stand thrust specific impulse Isp TWR thrust-to-weight lift-off staging stage rocket equation delta-v orbit orbital mechanics Hohmann transfer landing booster guidance physics experiment' },
         { title: 'FAMMOK Program',               href: 'missions-archive.html#fammok',       type: 'Program',  keywords: 'Mun Minmus Duna lander' },
         { title: 'Project Silver Bridge',        href: 'missions-archive.html#silver-bridge', type: 'Mission', keywords: 'Mun ISRU drilling docking relay' },
         { title: 'Aegis Program',                href: 'vehicles-programs.html#aegis',       type: 'Program',  keywords: 'booster recovery Mark II Mark V Mk1.7 catch hinge chopstick' },

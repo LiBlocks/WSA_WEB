@@ -2,10 +2,10 @@
    always the game's own scene, dark like the games themselves. */
 
 .games-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* Four cards: one row on wide screens, two by two in the middle, then a single column */
+/* Three across on wide screens, two in the middle, then a single column */
 @media (max-width: 1100px) {
     .games-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -37,10 +37,38 @@
     background: linear-gradient(160deg, #0b1220, #111a2e);
 }
 
-.game-card-art svg {
+.game-card-art svg,
+.game-card-art img {
     display: block;
     width: 100%;
     height: auto;
+}
+
+/* Screenshot art: same 320 × 150 shape as the drawn scenes */
+.game-card-art-photo {
+    position: relative;
+}
+
+.game-card-art-photo img {
+    aspect-ratio: 32 / 15;
+    object-fit: cover;
+}
+
+/* "New" tag, laid over the top-right corner of the card art */
+.game-card-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: #f59e0b;
+    color: #1c1917;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .game-card .game-card-meta {
