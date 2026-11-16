@@ -72,7 +72,7 @@ export function createHud(root) {
          * tm: telemetry; o: { assist, throttle, touch, project(p), pos, vel, running, mouse: {on, x, y} | null }
          */
         draw(tm, o) {
-            w.phase(tm.phase, tm.phase === 'FAILED' || tm.stall ? 'alert' : tm.phase === 'FLARE' || tm.phase === 'BOUNCE' ? 'warn' : 'info');
+            w.phase(tm.phase === 'FAILED' ? 'NOT LANDED' : tm.phase, tm.phase === 'FAILED' || tm.stall ? 'alert' : tm.phase === 'FLARE' || tm.phase === 'BOUNCE' ? 'warn' : 'info');
             w.speed(tm.airspeed.toFixed(0), tm.airspeed > 100 || tm.stall ? 'alert' : tm.airspeed < 52 ? 'warn' : 'ok');
             w.gs(`GS ${tm.groundSpeed.toFixed(0)}`);
             speedBox.dataset.level = tm.stall ? 'alert' : 'ok';

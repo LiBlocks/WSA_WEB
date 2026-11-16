@@ -1483,6 +1483,24 @@ window.WSA = {
      */
     NEWS: [
         {
+            id: 'two-new-games',
+            date: '2026-11-17',
+            topic: 'Games',
+            title: 'Two New Games Released: WSA Engineering Sandbox and Aegis Landing Simulator',
+            summary: 'WSA has expanded its Games collection with two new interactive 3D experiences. The Engineering Sandbox lets visitors experiment with propulsion, staging, orbits and landing, while the Aegis Landing Simulator challenges players to bring a reusable booster down onto its recovery pad. Both run in the browser with touch controls for phones.',
+            image: { src: 'images/games/aegis-landing/aegis-landing.jpg', thumb: 'images/games/aegis-landing/aegis-landing.jpg',
+                     alt: 'The Aegis Landing Simulator\'s booster descending on its engines with its landing legs deployed' },
+            body: [
+                'The WSA Engineering Sandbox is a small aerospace laboratory in 3D. Its seven experiments cover an engine test stand with a side-by-side engine comparison, a thrust-to-weight and lift-off lab, multi-stage rockets, orbital burns, Hohmann transfers, a booster landing lab and a free-play rocket sandbox. Basic mode explains each setting in plain words; Pro mode exposes the full set of parameters, from specific impulse to the integrator\'s time step. Every experiment has live telemetry, graphs, an event log, replays and a debrief.',
+                'The Aegis Landing Simulator puts you at the controls of a reusable booster in its final descent. Manage the throttle, propellant and the booster\'s attitude to touch down upright on the pad, at Easy, Normal or Hard difficulty. Each attempt ends with an honest score, an award and a certificate you can download or share.',
+                'The landing game is inspired by WSA\'s reusable booster programme; it is not a recreation of AutoLand\'s real pad landing. Its booster is a temporary model with illustrative values, built so that a finished Aegis model can replace it later.',
+                'Both games run in the browser on computers and phones, with keyboard, mouse and touch controls.'
+            ],
+            links: [{ label: 'Play Aegis Landing Simulator', href: 'aegis-landing.html' },
+                    { label: 'Open the Engineering Sandbox', href: 'engineering-sandbox.html' },
+                    { label: 'All games', href: 'games.html' }]
+        },
+        {
             id: 'autoland-v23-pad-landing',
             date: '2026-11-15',
             topic: 'AutoLand',
@@ -1514,6 +1532,7 @@ window.WSA = {
         { title: 'Docking Simulator',            href: 'docking-simulator.html',             type: 'Game',     keywords: 'game simulator docking dock spacecraft rendezvous approach RCS first person' },
         { title: 'SSTO Landing',                 href: 'ssto-landing.html',                  type: 'Game',     keywords: 'game landing land spaceplane SSTO runway aircraft flight approach touchdown spaceport' },
         { title: 'Orbital Rendezvous Challenge', href: 'orbital-rendezvous.html',            type: 'Game',     keywords: 'game orbit orbital rendezvous transfer Hohmann intercept KGOSS docking delta-v prograde retrograde velocity' },
+        { title: 'Aegis Landing Simulator',      href: 'aegis-landing.html',                 type: 'Game',     keywords: 'game Aegis booster landing land pad recovery reusable vertical landing VTVL difficulty certificate award' },
         { title: 'WSA Engineering Sandbox',      href: 'engineering-sandbox.html',           type: 'Game',     keywords: 'game sandbox engineering laboratory lab 3D engine test stand thrust specific impulse Isp TWR thrust-to-weight lift-off staging stage rocket equation delta-v orbit orbital mechanics Hohmann transfer landing booster guidance physics experiment' },
         { title: 'FAMMOK Program',               href: 'missions-archive.html#fammok',       type: 'Program',  keywords: 'Mun Minmus Duna lander' },
         { title: 'Project Silver Bridge',        href: 'missions-archive.html#silver-bridge', type: 'Mission', keywords: 'Mun ISRU drilling docking relay' },

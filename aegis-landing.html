@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Landing Simulator | Woody Space Agency</title>
+    <meta name="description" content="Bring an Aegis reusable booster home: a 3D vertical-landing game with three difficulty levels, touch controls and a landing certificate.">
+    <script src="page-init.js?v=13"></script>
+    <link rel="stylesheet" href="intro.css?v=8">
+    <script src="intro.js?v=8"></script>
+    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="aegis-landing.css?v=1">
+    <link rel="stylesheet" href="liquid-glass.css?v=18">
+    <script src="liquid-glass.js?v=19"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <!-- three.js r186 and its add-ons are vendored in vendor/three (no CDN); the add-ons import "three" -->
+    <script type="importmap">
+        { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+    </script>
+</head>
+<body>
+    <header>
+        <nav class="navbar" aria-label="Main">
+            <a href="index.html" class="logo" aria-label="Woody Space Agency home"><span class="logo-short">WSA</span><span class="logo-full">Woody Space Agency</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="goals-achievements.html">Goals & Achievements</a></li>
+                <li><a href="vehicles-programs.html">Vehicles & Programs</a></li>
+                <li><a href="missions-archive.html">Missions</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="autoland.html">AutoLand</a></li>
+                <li><a href="flight-dynamics.html">Tools</a></li>
+                <li><a href="games.html">Games</a></li>
+            </ul>
+            <button type="button" class="icon-button search-button" aria-label="Search" title="Search (/ or Ctrl+K)" aria-keyshortcuts="/ Control+K">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button type="button" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <span class="knob" aria-hidden="true"></span>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="page-head ag-head" style="padding: 2.25rem 2rem 1.25rem;">
+        <div class="container">
+            <p class="ag-back"><a href="games.html">&larr; Games</a></p>
+            <h1 style="margin-bottom: 0.4rem;">Aegis Landing Simulator</h1>
+            <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 860px;">
+                Bring an Aegis reusable booster home. Control its descent, manage your remaining propellant and guide it towards a precision touchdown on the designated recovery pad.
+            </p>
+        </div>
+    </section>
+
+    <section class="ag-section">
+        <div class="ag" id="ag" data-mode="loading">
+            <div class="ag-toolbar">
+                <p class="ag-hint"><kbd>W</kbd><kbd>S</kbd> pitch · <kbd>A</kbd><kbd>D</kbd> roll · <kbd>Shift</kbd><kbd>Ctrl</kbd> throttle · <kbd>Z</kbd> full · <kbd>X</kbd> cut · <kbd>Space</kbd> attitude hold · <kbd>C</kbd> camera · <kbd>R</kbd> restart · <kbd>H</kbd> help</p>
+                <div class="ag-actions">
+                    <button type="button" class="btn btn-primary btn-small" id="ag-pause">Start</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ag-restart">Restart</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ag-assist" aria-pressed="true">Attitude hold: On</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ag-help-btn">Help</button>
+                    <button type="button" class="btn btn-secondary btn-small" id="ag-fullscreen">Full screen</button>
+                </div>
+            </div>
+
+            <div class="ag-view" id="ag-view" tabindex="0" role="application" aria-label="Landing view. The controls are listed in Help.">
+                <canvas class="ag-canvas" id="ag-canvas"></canvas>
+                <div class="ag-labels" id="ag-labels" aria-hidden="true"></div>
+
+                <div class="ag-hud" aria-hidden="true">
+                    <div class="ag-top">
+                        <span class="ag-chip" id="ag-phase" data-level="info">APPROACH</span>
+                        <span class="ag-chip" id="ag-diff">NORMAL</span>
+                        <span class="ag-chip" id="ag-hold" data-level="ok">HOLD ON</span>
+                        <span class="ag-chip" id="ag-cam-chip">FOLLOW</span>
+                    </div>
+                    <p class="ag-advice" id="ag-advice" hidden></p>
+                    <div class="ag-readouts">
+                        <div class="ag-tile" data-k="alt"><span>Radar altitude</span><b>—</b></div>
+                        <div class="ag-tile" data-k="vs"><span>Vertical speed</span><b>—</b><i class="ag-gauge"><i></i></i></div>
+                        <div class="ag-tile" data-k="hs"><span>Horizontal speed</span><b>—</b><i class="ag-gauge"><i></i></i></div>
+                        <div class="ag-tile" data-k="speed"><span>Total velocity</span><b>—</b></div>
+                        <div class="ag-tile" data-k="dist"><span>To pad centre</span><b>—</b></div>
+                        <div class="ag-tile" data-k="tilt"><span>Attitude (lean)</span><b>—</b><i class="ag-gauge"><i></i></i></div>
+                    </div>
+                    <div class="ag-instruments">
+                        <svg class="ag-radar" id="ag-radar" viewBox="-60 -60 120 120">
+                            <circle r="56" class="ag-rim"/>
+                            <circle r="28" class="ag-ring"/>
+                            <path d="M-56 0H56M0 -56V56" class="ag-cross"/>
+                            <g id="ag-radar-pad"><circle r="7" class="ag-pad"/><circle r="1.6" class="ag-pad-dot"/></g>
+                            <circle r="3" id="ag-radar-impact" class="ag-impact"/>
+                            <path id="ag-radar-vel" class="ag-vel" d="M0 0L0 0"/>
+                            <circle r="3.2" class="ag-me"/>
+                            <text y="54" class="ag-radar-label">top view</text>
+                        </svg>
+                        <svg class="ag-att" id="ag-att" viewBox="-60 -60 120 120">
+                            <circle r="56" class="ag-rim"/>
+                            <circle r="0" id="ag-att-limit" class="ag-limit"/>
+                            <path d="M-56 0H56M0 -56V56" class="ag-cross"/>
+                            <path id="ag-att-cmd" class="ag-cmd" d="M0 0L0 0"/>
+                            <circle r="6" id="ag-att-dot" class="ag-att-dot"/>
+                            <text y="54" class="ag-radar-label">attitude</text>
+                        </svg>
+                        <div class="ag-bars">
+                            <div class="ag-bar" id="ag-thr-bar"><span>Throttle</span><i><i></i></i><b>0%</b></div>
+                            <div class="ag-bar" id="ag-fuel-bar"><span>Fuel</span><i><i></i></i><b>100%</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ag-camctl" role="group" aria-label="Camera">
+                    <button type="button" class="ag-mbtn" data-cam="follow" aria-pressed="true">Follow</button>
+                    <button type="button" class="ag-mbtn" data-cam="side" aria-pressed="false">Side</button>
+                    <button type="button" class="ag-mbtn" data-cam="pad" aria-pressed="false">Pad</button>
+                    <button type="button" class="ag-mbtn" data-cam="free" aria-pressed="false">Free</button>
+                    <button type="button" class="ag-mbtn" data-zoom="in" aria-label="Zoom in">+</button>
+                    <button type="button" class="ag-mbtn" data-zoom="out" aria-label="Zoom out">−</button>
+                    <button type="button" class="ag-mbtn" data-zoom="reset" title="Back to the default camera (C)">Reset</button>
+                </div>
+
+                <!-- Touch controls -->
+                <div class="ag-touch" aria-label="Touch controls">
+                    <div class="ag-stick" id="ag-stick" role="group" aria-label="Attitude stick: drag to lean the booster"><span class="ag-knob" id="ag-knob"></span></div>
+                    <div class="ag-touch-mid">
+                        <button type="button" class="ag-tbtn" data-action="pause" tabindex="-1">Pause</button>
+                        <button type="button" class="ag-tbtn" data-action="restart" tabindex="-1">Reset</button>
+                        <button type="button" class="ag-tbtn" data-action="assist" tabindex="-1" id="ag-t-assist">Hold</button>
+                        <button type="button" class="ag-tbtn" data-action="camera" tabindex="-1">Cam</button>
+                        <button type="button" class="ag-tbtn" id="ag-tilt" tabindex="-1" aria-pressed="false">Tilt</button>
+                        <button type="button" class="ag-tbtn" id="ag-calibrate" tabindex="-1" hidden>Level</button>
+                    </div>
+                    <div class="ag-throttle">
+                        <button type="button" class="ag-tbtn ag-tbtn-big" id="ag-thr-up" tabindex="-1" aria-label="Throttle up">+</button>
+                        <div class="ag-thr-slider" id="ag-thr-slider" role="slider" aria-label="Throttle" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="ag-thr-fill"></i><b id="ag-thr-text">0%</b></div>
+                        <button type="button" class="ag-tbtn ag-tbtn-big" id="ag-thr-down" tabindex="-1" aria-label="Throttle down">−</button>
+                    </div>
+                </div>
+
+                <div class="ag-overlay" id="ag-loading"><div class="ag-card ag-card-small"><p class="ag-card-text">Preparing the booster…</p></div></div>
+
+                <div class="ag-overlay" id="ag-setup" hidden>
+                    <div class="ag-card" role="dialog" aria-labelledby="ag-setup-title">
+                        <p class="ag-kicker">Recovery briefing</p>
+                        <h2 class="ag-card-title" id="ag-setup-title">Choose your difficulty</h2>
+                        <div class="ag-diffs" id="ag-diffs" role="radiogroup" aria-label="Difficulty">
+                            <label><input type="radio" name="ag-diff" value="easy"><span><b>Easy</b><small></small></span></label>
+                            <label><input type="radio" name="ag-diff" value="normal"><span><b>Normal</b><small></small></span></label>
+                            <label><input type="radio" name="ag-diff" value="hard"><span><b>Hard</b><small></small></span></label>
+                        </div>
+                        <div class="ag-reqs"><h3>To recover the booster at this level</h3><ul id="ag-reqs"></ul></div>
+                        <label class="ag-name">Name for your certificate (optional) <input type="text" id="ag-name" maxlength="32" autocomplete="nickname" placeholder="WSA recovery pilot"></label>
+                        <p class="ag-card-text ag-small">The booster is a temporary model, and its mass, thrust and size are illustrative game values, not real Aegis specifications. This is a game inspired by WSA's reusable booster programme, not a simulation of a real flight.</p>
+                        <div class="ag-card-actions">
+                            <button type="button" class="ag-btn ag-btn-primary" id="ag-start">Start descent</button>
+                            <button type="button" class="ag-btn" data-action="help">Controls and help</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ag-overlay" id="ag-paused" hidden>
+                    <div class="ag-card ag-card-small" role="dialog" aria-labelledby="ag-paused-title">
+                        <h2 class="ag-card-title" id="ag-paused-title">Paused</h2>
+                        <div class="ag-card-actions">
+                            <button type="button" class="ag-btn ag-btn-primary" data-action="resume">Resume</button>
+                            <button type="button" class="ag-btn" data-action="restart">Restart</button>
+                            <button type="button" class="ag-btn" data-action="setup">Change difficulty</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ag-overlay ag-overlay-scroll" id="ag-result" hidden>
+                    <div class="ag-card ag-card-result" role="dialog" aria-labelledby="ag-result-outcome">
+                        <p class="ag-kicker" id="ag-result-outcome">Successful landing</p>
+                        <div class="ag-result-top">
+                            <div class="ag-score"><b id="ag-score">0</b><span>/ 100</span><em id="ag-word"></em></div>
+                            <div>
+                                <h2 class="ag-headline" id="ag-headline"></h2>
+                                <p class="ag-award-kicker">Award</p>
+                                <p class="ag-award-name" id="ag-award-name"></p>
+                                <p class="ag-award-text" id="ag-award-text"></p>
+                                <p class="ag-award-also" id="ag-award-also"></p>
+                            </div>
+                        </div>
+                        <div class="ag-result-grid">
+                            <div>
+                                <h3>Recovery requirements</h3>
+                                <ul class="ag-checks" id="ag-checks"></ul>
+                                <h3>Next time</h3>
+                                <ul class="ag-tips" id="ag-tips"></ul>
+                                <h3>Touchdown statistics</h3>
+                                <dl class="ag-stats" id="ag-stats"></dl>
+                            </div>
+                            <div>
+                                <h3>Your certificate</h3>
+                                <figure class="ag-cert"><img id="ag-cert-img" alt="Landing certificate with the award, score, difficulty and touchdown statistics" width="1200" height="675"></figure>
+                                <label class="ag-name">Name on the certificate <input type="text" id="ag-name2" maxlength="32" autocomplete="nickname" placeholder="WSA recovery pilot"></label>
+                                <div class="ag-card-actions">
+                                    <a class="ag-btn ag-btn-primary" id="ag-save" download="WSA-Aegis-Landing-Certificate.png">Download certificate</a>
+                                    <button type="button" class="ag-btn" id="ag-share">Share</button>
+                                    <button type="button" class="ag-btn" id="ag-copy">Copy result</button>
+                                </div>
+                                <p class="ag-status" id="ag-share-status" role="status"></p>
+                            </div>
+                        </div>
+                        <div class="ag-card-actions ag-card-actions-end">
+                            <button type="button" class="ag-btn ag-btn-primary" data-action="restart">Fly again</button>
+                            <button type="button" class="ag-btn" data-action="replay">Watch replay</button>
+                            <button type="button" class="ag-btn" data-action="setup">Change difficulty</button>
+                            <a class="ag-btn" href="games.html">All games</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ag-overlay ag-overlay-scroll" id="ag-help" hidden>
+                    <div class="ag-card" role="dialog" aria-labelledby="ag-help-title">
+                        <h2 class="ag-card-title" id="ag-help-title">Controls and help</h2>
+                        <dl class="ag-help">
+                            <div><dt>The goal</dt><dd>Land the booster upright on the pad: slow the descent with the engines, lean the booster to move sideways, and stand it up straight for the last few metres. The legs swing down by themselves at 150 m.</dd></div>
+                            <div><dt>Attitude</dt><dd><kbd>W</kbd> <kbd>S</kbd> (or <kbd>↑</kbd> <kbd>↓</kbd>) pitch the booster forward and back; <kbd>A</kbd> <kbd>D</kbd> (or <kbd>←</kbd> <kbd>→</kbd>) roll it left and right. The engine pushes along the booster, so leaning it moves you that way.</dd></div>
+                            <div><dt>Throttle</dt><dd>Hold <kbd>Shift</kbd> to throttle up and <kbd>Ctrl</kbd> to throttle down; <kbd>Z</kbd> full throttle, <kbd>X</kbd> engines off. (Ctrl together with W is a browser shortcut on some systems: use <kbd>X</kbd> or let go of W first.)</dd></div>
+                            <div><dt>Attitude hold</dt><dd><kbd>Space</kbd> switches it on and off. On: the booster holds the lean you ask for and stands itself upright when you let go. Off: the stick fires the thrusters directly, and the booster keeps turning until you stop it.</dd></div>
+                            <div><dt>Camera</dt><dd><kbd>C</kbd> cycles Follow, Side view, Pad view and Free camera (or press <kbd>1</kbd>–<kbd>4</kbd>). In Free camera, drag to orbit and scroll or pinch to zoom. Reset returns to the default view.</dd></div>
+                            <div><dt>Guidance</dt><dd>The top view shows the pad, your velocity and (on Easy and Normal) where you would hit the ground if you stopped burning; the orange ring shows the same point in 3D. The attitude dial shows your lean and the limit for touchdown. On Easy, a cue tells you when to start the landing burn.</dd></div>
+                            <div><dt>Touch screens</dt><dd>Drag the stick on the left to lean; use the throttle slider and + / − on the right. Tilt is optional: switch it on to lean by tilting the device (the browser may ask for permission), and press Level to set how you are holding it. The buttons always work too.</dd></div>
+                            <div><dt>Other keys</dt><dd><kbd>P</kbd> or <kbd>Esc</kbd> pause, <kbd>R</kbd> restart, <kbd>H</kbd> this help.</dd></div>
+                        </dl>
+                        <div class="ag-card-actions"><button type="button" class="ag-btn ag-btn-primary" data-action="closeHelp">Close</button></div>
+                    </div>
+                </div>
+
+                <div class="ag-overlay" id="ag-error" hidden>
+                    <div class="ag-card ag-card-small" role="alert">
+                        <h2 class="ag-card-title">The game could not start</h2>
+                        <p class="ag-card-text"></p>
+                        <div class="ag-card-actions"><a class="ag-btn" href="games.html">Back to Games</a></div>
+                    </div>
+                </div>
+                <noscript>
+                    <div class="ag-overlay"><div class="ag-card ag-card-small"><p class="ag-card-text">Aegis Landing Simulator needs JavaScript to run.</p></div></div>
+                </noscript>
+            </div>
+
+            <div class="ag-dash" aria-label="Flight data">
+                <div class="ag-group">
+                    <h3>Flight</h3>
+                    <div class="ag-row"><span>Flight phase</span><b data-t="phase">—</b></div>
+                    <div class="ag-row"><span>Thrust-to-weight (full)</span><b data-t="twr">—</b></div>
+                    <div class="ag-row"><span>Stopping height at 75% throttle</span><b data-t="stop">—</b></div>
+                    <div class="ag-row"><span>Legs</span><b data-t="legs">—</b></div>
+                </div>
+                <div class="ag-group">
+                    <h3>Attitude</h3>
+                    <div class="ag-row"><span>Pitch</span><b data-t="pitch">—</b></div>
+                    <div class="ag-row"><span>Roll</span><b data-t="roll">—</b></div>
+                    <div class="ag-row"><span>Turn rate</span><b data-t="rates">—</b></div>
+                    <div class="ag-row"><span>Wind</span><b data-t="wind">—</b></div>
+                </div>
+                <div class="ag-group">
+                    <h3>Recovery limits</h3>
+                    <ul class="ag-limits" id="ag-limits"></ul>
+                </div>
+            </div>
+            <p class="ag-note">The booster is a temporary placeholder model and all its values are illustrative: this is a game inspired by WSA's reusable booster programme, not a record of a real Aegis flight.</p>
+            <p class="visually-hidden" id="ag-live" role="status" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2019–2026 Woody Space Agency. All systems nominal.</p>
+            <p class="footer-links"><a href="support.html">Support WSA</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">A fictional aerospace organization developed for Kerbal Space Program.</p>
+        </div>
+    </footer>
+
+    <script src="wsa-data.js?v=15"></script>
+    <script src="navigation.js?v=12"></script>
+    <script src="features.js?v=6"></script>
+    <script src="decorations.js?v=3"></script>
+    <script type="module" src="aegis/main.js?v=1"></script>
+    <script>
+        // If the game's module never starts (a very old browser, a failed download), say so
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var loading = document.getElementById('ag-loading'), error = document.getElementById('ag-error');
+                if (!loading || loading.hidden || !error.hidden) return;
+                loading.hidden = true;
+                error.hidden = false;
+                error.querySelector('.ag-card-text').textContent = 'Its scripts did not load or are not supported by this browser. Reload the page, or try an up-to-date browser.';
+            }, 15000);
+        });
+    </script>
+</body>
+</html>

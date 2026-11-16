@@ -439,7 +439,7 @@ function finishFlight(r) {
     app.camera = r.success && !reduceMotion.matches ? 'orbit' : 'wide';
     input.releaseAll();
     syncControls();
-    announce(r.success ? `Landing successful. Grade ${gr.letter}. ${aw.main.name}.` : `Landing failed: ${r.fail.title.toLowerCase()}. ${r.fail.text}`);
+    announce(r.success ? `Landing successful. Grade ${gr.letter}: ${GRADE_WORDS[gr.letter].toLowerCase()}. ${aw.main.name}.` : `Landing unsuccessful: ${r.fail.title.toLowerCase()}. ${r.fail.text} Give it another try.`);
     setTimeout(() => {
         if (app.mode !== 'finished' || app.outcome === null) return;
         if (r.success) showSuccess(r); else showFailure(r);
@@ -476,8 +476,8 @@ function showSuccess(r) {
         why.appendChild(li);
     }
     card.querySelector('.ld-why-note').textContent = gr.lost.length
-        ? `Most points lost on ${gr.lost.slice(0, 2).map(x => `${x.label.toLowerCase()} (${x.rating.toLowerCase()})`).join(' and ')}.`
-        : 'Excellent in every category.';
+        ? `Most room to improve: ${gr.lost.slice(0, 2).map(x => `${x.label.toLowerCase()} (${x.rating.toLowerCase()})`).join(' and ')}. A little more practice there and the grade will climb.`
+        : 'Excellent in every category. A superb landing.';
     const td = r.touchdown;
     const dl = card.querySelector('.ld-stats');
     dl.replaceChildren();
@@ -506,7 +506,7 @@ function showSuccess(r) {
 function showFailure(r) {
     const card = ui.failed;
     card.querySelector('.ld-fail-title').textContent = r.fail.title;
-    card.querySelector('.ld-card-text').textContent = r.fail.text;
+    card.querySelector('.ld-card-text').textContent = `${r.fail.text} Give it another try: every approach teaches something.`;
     const dl = card.querySelector('.ld-stats');
     dl.replaceChildren();
     const td = r.touchdown;

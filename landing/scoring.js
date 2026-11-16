@@ -2,11 +2,12 @@
 // measured value and fixed thresholds, so the same landing always earns the same grade.
 import { SCENARIOS } from './physics.js';
 
-export const LEVELS = ['Excellent', 'Good', 'Fair', 'Poor'];
+// Category ratings, best first. The words are encouraging; the thresholds and points behind them are unchanged.
+export const LEVELS = ['Excellent', 'Good', 'Fair', 'Room to improve'];
 const POINTS = [100, 82, 62, 38];
 export const VREF = 65;     // m/s: the touchdown speed the spaceplane is designed around
 
-// Lower is better; returns the level index (0 Excellent … 3 Poor)
+// Lower is better; returns the level index (0 Excellent … 3 Room to improve)
 const level = (value, limits) => {
     const i = limits.findIndex(l => value <= l);
     return i < 0 ? 3 : i;
@@ -47,7 +48,9 @@ export function grade(r) {
     return { letter, score, rows, lost };
 }
 
-export const GRADE_WORDS = { S: 'Exceptional', A: 'Excellent', B: 'Good', C: 'Acceptable', D: 'Rough', F: 'Failed' };
+// How each grade is described. F only ever means the landing did not succeed: it is described as such,
+// without judging the pilot.
+export const GRADE_WORDS = { S: 'Outstanding landing', A: 'Excellent landing', B: 'Smooth touchdown', C: 'Nicely controlled', D: 'Successful landing', F: 'Landing unsuccessful' };
 
 export const AWARDS = [
     { id: 'ace', name: 'Ace Pilot', text: 'Excellent in at least five of the six landing categories.', test: (r, g) => g.rows.filter(x => x.level === 0).length >= 5 },
