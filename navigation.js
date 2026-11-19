@@ -33,6 +33,27 @@ window.addEventListener('storage', e => {
     }
 });
 
+// Language switch (last row of the drawer). The language's own name labels it, so it reads the same in
+// either language; i18n.js does the translating and remembers the choice.
+function buildLanguageRow() {
+    const row = document.createElement('div');
+    row.className = 'nav-drawer-footer lang-drawer-row';
+    row.setAttribute('translate', 'no');
+    row.innerHTML = `
+        <span lang="zh-Hant">繁體中文</span>
+        <button type="button" class="lang-toggle" role="switch" aria-checked="false" aria-label="繁體中文 (Traditional Chinese)">
+            <span class="lang-en" aria-hidden="true">EN</span>
+            <span class="knob" aria-hidden="true"></span>
+            <span class="lang-zh" lang="zh-Hant" aria-hidden="true">中</span>
+        </button>`;
+    const toggle = row.querySelector('.lang-toggle');
+    const sync = () => toggle.setAttribute('aria-checked', String(window.WSAi18n.lang === 'zh-Hant'));
+    toggle.addEventListener('click', () => window.WSAi18n.set(window.WSAi18n.lang === 'zh-Hant' ? 'en' : 'zh-Hant'));
+    window.addEventListener('wsa-langchange', sync);
+    sync();
+    return row;
+}
+
 // Mobile drawer + floating menu button. Appended to <body> because the header's
 // backdrop-filter/transform would make fixed-position children position relative to it.
 function buildMobileNav() {
@@ -51,6 +72,7 @@ function buildMobileNav() {
     const footer = drawer.querySelector('.nav-drawer-footer');
     drawer.insertBefore(header.querySelector('.nav-menu').cloneNode(true), footer);
     footer.appendChild(header.querySelector('.theme-toggle').cloneNode(true));
+    if (window.WSAi18n) drawer.appendChild(buildLanguageRow());
 
     const backdrop = document.createElement('div');
     backdrop.className = 'nav-backdrop';

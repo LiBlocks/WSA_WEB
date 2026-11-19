@@ -10,17 +10,21 @@ const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sa
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 export const GRADE_COLORS = { S: '#f5c542', A: '#4dff91', B: '#60a5fa', C: '#a5b4fc', D: '#fbbf24', F: '#ff6b6b' };
 
+// Wraps at spaces, and between characters of Chinese text. With the site in Chinese the text is translated
+// whole first: the language switch translates canvas text line by line, which would miss a wrapped sentence.
+const CJK = '\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef';
+const TOKEN = new RegExp(`(\\s*)([${CJK}][\\u3001\\u3002\\uff0c\\uff1a\\uff1b\\uff01\\uff1f\\uff09\\u300d]*|[^\\s${CJK}]+)`, 'g');
 function wrap(g, text, x, y, maxWidth, lineHeight, maxLines = 3) {
-    const words = text.split(' ');
-    let line = '', lines = 0;
-    for (const word of words) {
-        const test = line ? `${line} ${word}` : word;
-        if (g.measureText(test).width > maxWidth && line) {
+    if (window.WSAi18n && window.WSAi18n.on) text = window.WSAi18n.tr(text);
+    let line = '', n = 0;
+    for (const [, space, word] of text.matchAll(TOKEN)) {
+        const t = line ? line + (space ? ' ' : '') + word : word;
+        if (g.measureText(t).width > maxWidth && line) {
             g.fillText(line, x, y);
             y += lineHeight;
             line = word;
-            if (++lines >= maxLines - 1) break;
-        } else line = test;
+            if (++n >= maxLines - 1) break;
+        } else line = t;
     }
     if (line) g.fillText(line, x, y);
     return y + lineHeight;

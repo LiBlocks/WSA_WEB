@@ -649,7 +649,7 @@
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .menu-fab
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .lang-toggle, .menu-fab
 ) {
     --lg-a: var(--lg-fill);
     --lg-e: var(--lg-edge-hi);
@@ -670,7 +670,7 @@
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .menu-fab
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .lang-toggle, .menu-fab
 )::before {
     content: '';
     position: absolute;
@@ -750,7 +750,7 @@
 :root.lg-scrolling[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .lang-toggle
 ) {
     backdrop-filter: blur(var(--lg-soften));
 }

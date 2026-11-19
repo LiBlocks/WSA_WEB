@@ -22,15 +22,19 @@ function roundRect(g, x, y, w, h, r) {
     g.closePath();
 }
 
+// Wraps at spaces, and between characters of Chinese text. With the site in Chinese the text is translated
+// whole first: the language switch translates canvas text line by line, which would miss a wrapped sentence.
+const CJK = '\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef';
+const TOKEN = new RegExp(`(\\s*)([${CJK}][\\u3001\\u3002\\uff0c\\uff1a\\uff1b\\uff01\\uff1f\\uff09\\u300d]*|[^\\s${CJK}]+)`, 'g');
 function wrap(g, text, x, y, maxWidth, lineHeight, maxLines = 3) {
-    const words = text.split(' ');
+    if (window.WSAi18n && window.WSAi18n.on) text = window.WSAi18n.tr(text);
     let line = '', n = 0;
-    for (const w of words) {
-        const t = line ? `${line} ${w}` : w;
+    for (const [, space, word] of text.matchAll(TOKEN)) {
+        const t = line ? line + (space ? ' ' : '') + word : word;
         if (g.measureText(t).width > maxWidth && line) {
             g.fillText(line, x, y);
             y += lineHeight;
-            line = w;
+            line = word;
             if (++n >= maxLines - 1) break;
         } else line = t;
     }

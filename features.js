@@ -122,12 +122,25 @@
         let results = [];
         let active = 0;
 
+        // With the site in Chinese (i18n.js), the translated title and type can be searched as well
+        const i18n = window.WSAi18n;
+        function zhText(entry) {
+            if (entry.zhName === undefined) {
+                entry.zhName = normalize(i18n.tr(entry.title));
+                entry.zhText = `${entry.text} ${entry.zhName} ${normalize(i18n.tr(entry.type))}`;
+            }
+            return entry;
+        }
+
         function score(entry, tokens) {
-            if (!tokens.every(t => entry.text.includes(t))) return -1;
+            const zh = i18n && i18n.on;
+            const text = zh ? zhText(entry).zhText : entry.text;
+            if (!tokens.every(t => text.includes(t))) return -1;
             const query = tokens.join(' ');
-            if (entry.name === query) return 4;
-            if (entry.name.startsWith(query)) return 3;
-            if (entry.name.includes(query)) return 2;
+            const names = zh ? [entry.name, entry.zhName] : [entry.name];
+            if (names.some(n => n === query)) return 4;
+            if (names.some(n => n.startsWith(query))) return 3;
+            if (names.some(n => n.includes(query))) return 2;
             return 1;
         }
 

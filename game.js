@@ -375,8 +375,11 @@
 
     const STALE_NOTE = 'Build changed. Press Done to export a fresh image.';
 
+    // What the status line says, kept here rather than read back from the page, which may show it translated
+    let said = '';
     function say(message, error = false) {
-        status.textContent = stale && !error ? [message, STALE_NOTE].filter(Boolean).join(' ') : message;
+        said = stale && !error ? [message, STALE_NOTE].filter(Boolean).join(' ') : message;
+        status.textContent = said;
         status.classList.toggle('error', error);
     }
 
@@ -622,7 +625,7 @@
             nextId++;
             selectedId = pose.id;
         });
-        if (status.textContent === (stale ? STALE_NOTE : '')) say(`${PARTS[pose.type].name} added.`);
+        if (said === (stale ? STALE_NOTE : '')) say(`${PARTS[pose.type].name} added.`);
     });
 
     /* ---------- Keyboard and selection tools ---------- */
