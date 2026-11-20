@@ -519,7 +519,7 @@
     const CARDS = '.program-card, .overview-card, .vehicle-card, .album-card, .wallet-card, .status-card';
     // Panes that tilt under the pointer: the cards plus the stat tiles and the wide panels
     const TILT_PANES = CARDS + ', .stat-card, .achievement, .module-card:not(.expandable-section .module-card)';
-    const CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .lg-toggle';
+    const CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .lg-toggle, .lang-button';
     const TILT_VARS = ['--lg-nx', '--lg-ny', '--lg-glow', '--lg-angle'];
     // Resting light comes from above, slightly to the left
     const REST = { nx: -0.4, ny: -1 };

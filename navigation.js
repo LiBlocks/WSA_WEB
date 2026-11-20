@@ -33,25 +33,56 @@ window.addEventListener('storage', e => {
     }
 });
 
-// Language switch (last row of the drawer). The language's own name labels it, so it reads the same in
-// either language; i18n.js does the translating and remembers the choice.
+// Language switches: the last row of the drawer on phones and tablets, and a small button at the left of
+// the top bar on desktop. The language's own name labels them, so they read the same in either language;
+// i18n.js does the translating and remembers the choice.
+const LANG_LABEL = '繁體中文 (Traditional Chinese)';
+const LANG_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>';
+
+function isChinese() {
+    return window.WSAi18n.lang === 'zh-Hant';
+}
+
+function toggleLanguage() {
+    window.WSAi18n.set(isChinese() ? 'en' : 'zh-Hant');
+}
+
+function syncLanguageSwitches() {
+    const on = isChinese();
+    document.querySelectorAll('.lang-toggle, .lang-button').forEach(control => {
+        control.setAttribute('aria-checked', String(on));
+    });
+    document.querySelectorAll('.lang-button').forEach(button => {
+        button.dataset.tip = on ? 'English' : LANG_LABEL;
+    });
+}
+
 function buildLanguageRow() {
     const row = document.createElement('div');
     row.className = 'nav-drawer-footer lang-drawer-row';
     row.setAttribute('translate', 'no');
     row.innerHTML = `
         <span lang="zh-Hant">繁體中文</span>
-        <button type="button" class="lang-toggle" role="switch" aria-checked="false" aria-label="繁體中文 (Traditional Chinese)">
+        <button type="button" class="lang-toggle" role="switch" aria-checked="false" aria-label="${LANG_LABEL}">
             <span class="lang-en" aria-hidden="true">EN</span>
             <span class="knob" aria-hidden="true"></span>
             <span class="lang-zh" lang="zh-Hant" aria-hidden="true">中</span>
         </button>`;
-    const toggle = row.querySelector('.lang-toggle');
-    const sync = () => toggle.setAttribute('aria-checked', String(window.WSAi18n.lang === 'zh-Hant'));
-    toggle.addEventListener('click', () => window.WSAi18n.set(window.WSAi18n.lang === 'zh-Hant' ? 'en' : 'zh-Hant'));
-    window.addEventListener('wsa-langchange', sync);
-    sync();
+    row.querySelector('.lang-toggle').addEventListener('click', toggleLanguage);
     return row;
+}
+
+function buildLanguageButton() {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'lang-button';
+    button.setAttribute('role', 'switch');
+    button.setAttribute('aria-checked', 'false');
+    button.setAttribute('aria-label', LANG_LABEL);
+    button.setAttribute('translate', 'no');
+    button.innerHTML = LANG_ICON;
+    button.addEventListener('click', toggleLanguage);
+    return button;
 }
 
 // Mobile drawer + floating menu button. Appended to <body> because the header's
@@ -157,6 +188,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     mobileNav = buildMobileNav();
+
+    if (window.WSAi18n) {
+        header.querySelector('.navbar').prepend(buildLanguageButton());
+        window.addEventListener('wsa-langchange', syncLanguageSwitches);
+        syncLanguageSwitches();
+    }
 
     document.querySelectorAll('.theme-toggle').forEach(toggle => {
         toggle.addEventListener('click', toggleTheme);

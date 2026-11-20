@@ -123,13 +123,6 @@
     }
 }
 
-/* The wide top bar has 32px to spare; use the link spacing the site already uses at 1081–1199px */
-@media (min-width: 1200px) {
-    .navbar:has(> .lg-toggle) > .nav-menu {
-        gap: 1.25rem;
-    }
-}
-
 /* ---------- Confirmation dialog ---------- */
 
 .lg-confirm {
@@ -649,7 +642,7 @@
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .lang-toggle, .menu-fab
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .menu-fab
 ) {
     --lg-a: var(--lg-fill);
     --lg-e: var(--lg-edge-hi);
@@ -670,7 +663,7 @@
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .lang-toggle, .menu-fab
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .menu-fab
 )::before {
     content: '';
     position: absolute;
@@ -727,7 +720,7 @@
     border-radius: 50%;
 }
 
-:root[data-liquid-glass] :where(.btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle):hover {
+:root[data-liquid-glass] :where(.btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button):hover {
     --lg-a: calc(var(--lg-fill) + 0.04);
 }
 
@@ -738,7 +731,7 @@
     color: var(--accent);
 }
 
-:root[data-liquid-glass] :is(.chip[aria-pressed="true"], .lg-toggle[aria-pressed="true"]) {
+:root[data-liquid-glass] :is(.chip[aria-pressed="true"], .lg-toggle[aria-pressed="true"], .lang-button[aria-checked="true"]) {
     --lg-tint: var(--lg-accent-rgb);
     --lg-a: 0.08;
     box-shadow: inset 0 0 0 1px rgb(var(--lg-accent-rgb) / 0.5);
@@ -750,7 +743,7 @@
 :root.lg-scrolling[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .theme-toggle, .lang-toggle
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle
 ) {
     backdrop-filter: blur(var(--lg-soften));
 }
@@ -950,7 +943,7 @@
     --lg-persp: 2400px;
 }
 
-:root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button, .lg-toggle) {
+:root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button, .lg-toggle, .lang-button) {
     --lg-tilt-max: 4deg;
     --lg-persp: 320px;
 }
@@ -982,7 +975,7 @@
 
 /* Touch screens: no tilt, just a restrained press on controls */
 @media (hover: none) {
-    :root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .lg-toggle):active {
+    :root[data-liquid-glass] :is(.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .lg-toggle, .lang-button):active {
         transform: scale(0.97);
     }
 }
