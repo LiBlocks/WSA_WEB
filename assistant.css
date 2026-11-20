@@ -1,0 +1,627 @@
+/* WSA Assistant: floating launcher and conversation panel (assistant.js builds the markup).
+   Uses the site's colour tokens, so light, dark and Liquid Glass modes follow automatically.
+   Everything is scoped under .wsa-ai so nothing else on the page is affected. */
+
+.wsa-ai {
+    --wsa-ai-radius: 10px;
+    --wsa-ai-shadow: 0 10px 32px rgba(28, 25, 23, 0.16), 0 2px 6px rgba(28, 25, 23, 0.08);
+    --wsa-ai-bottom: calc(1rem + env(safe-area-inset-bottom));
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .wsa-ai {
+    --wsa-ai-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.wsa-ai[hidden],
+.wsa-ai [hidden] {
+    display: none !important;
+}
+
+/* ---------- Launcher ---------- */
+
+.wsa-ai-launcher {
+    position: fixed;
+    right: 1rem;
+    bottom: var(--wsa-ai-bottom);
+    z-index: 140;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 48px;
+    padding: 0 1.1rem 0 0.85rem;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: var(--wsa-ai-shadow);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, opacity 0.2s, transform 0.2s, visibility 0.2s;
+}
+
+.wsa-ai-launcher:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.wsa-ai-launcher svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.wsa-ai-launcher .wsa-ai-orbit {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.6;
+}
+
+.wsa-ai-launcher .wsa-ai-planet {
+    fill: currentColor;
+}
+
+.wsa-ai-launcher .wsa-ai-moon {
+    fill: var(--accent);
+}
+
+/* Over a game view: compact and quieter; hidden entirely while a real-time game is being played */
+.wsa-ai-launcher.is-compact {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+    opacity: 0.85;
+}
+
+.wsa-ai-launcher.is-compact:hover,
+.wsa-ai-launcher.is-compact:focus-visible {
+    opacity: 1;
+}
+
+.wsa-ai-launcher.is-compact .wsa-ai-launcher-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+/* Steps aside while a real-time game is being played, and while the panel is open */
+.wsa-ai-launcher.is-tucked,
+.wsa-ai.is-open .wsa-ai-launcher {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    pointer-events: none;
+}
+
+/* ---------- Panel ---------- */
+
+.wsa-ai-panel {
+    position: fixed;
+    right: 1rem;
+    bottom: var(--wsa-ai-bottom);
+    z-index: 160;
+    display: flex;
+    flex-direction: column;
+    width: 390px;
+    height: min(640px, calc(100vh - 7rem));
+    height: min(640px, calc(100dvh - 7rem));
+    overflow: hidden;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--wsa-ai-radius);
+    box-shadow: var(--wsa-ai-shadow);
+}
+
+.wsa-ai.is-open .wsa-ai-panel {
+    animation: wsa-ai-rise 0.18s ease-out;
+}
+
+@keyframes wsa-ai-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+.wsa-ai-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 0.75rem 0.8rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--bg-secondary);
+}
+
+.wsa-ai-head-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.wsa-ai-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.wsa-ai-tag {
+    padding: 0.05rem 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+}
+
+.wsa-ai-sub {
+    margin: 0.1rem 0 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.wsa-ai-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.wsa-ai-icon-btn:hover {
+    color: var(--accent);
+    border-color: var(--border);
+}
+
+.wsa-ai-icon-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- Messages ---------- */
+
+.wsa-ai-log {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.wsa-ai-msg {
+    max-width: 92%;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.wsa-ai-msg p {
+    margin: 0 0 0.5rem;
+}
+
+.wsa-ai-msg p:last-child,
+.wsa-ai-msg ul:last-child {
+    margin-bottom: 0;
+}
+
+.wsa-ai-msg ul {
+    margin: 0 0 0.5rem;
+    padding-left: 1.2rem;
+}
+
+.wsa-ai-msg li {
+    margin: 0.15rem 0;
+}
+
+.wsa-ai-user {
+    align-self: flex-end;
+    padding: 0.55rem 0.8rem;
+    color: var(--text-primary);
+    background-color: color-mix(in srgb, var(--accent) 12%, var(--bg-primary));
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+    border-radius: 10px 10px 2px 10px;
+    white-space: pre-wrap;
+}
+
+.wsa-ai-bot {
+    align-self: flex-start;
+    padding: 0.6rem 0.85rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px 10px 10px 2px;
+}
+
+.wsa-ai-cite {
+    display: inline-block;
+    min-width: 1.15rem;
+    margin: 0 0.1rem;
+    padding: 0 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: 0.15em;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: 4px;
+}
+
+.wsa-ai-cite:hover {
+    color: var(--bg-primary);
+    background-color: var(--accent);
+}
+
+.wsa-ai-sources {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.8rem;
+}
+
+.wsa-ai-sources-label {
+    margin: 0 0 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.wsa-ai-sources ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wsa-ai-sources li {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0.2rem 0;
+}
+
+.wsa-ai-sources li > span:first-child {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.wsa-ai-sources li > span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.wsa-ai-sources a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.wsa-ai-sources a:hover {
+    text-decoration: underline;
+}
+
+.wsa-ai-sources small {
+    color: var(--text-secondary);
+}
+
+/* Welcome and suggestions */
+.wsa-ai-welcome {
+    padding: 0.2rem 0.1rem;
+}
+
+.wsa-ai-welcome h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+}
+
+.wsa-ai-welcome p {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.wsa-ai-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.wsa-ai-chip {
+    padding: 0.4rem 0.75rem;
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1.3;
+    text-align: left;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.wsa-ai-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.wsa-ai-chip:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* Loading */
+.wsa-ai-thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.wsa-ai-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.wsa-ai-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    animation: wsa-ai-blink 1.2s infinite ease-in-out;
+}
+
+.wsa-ai-dots i:nth-child(2) { animation-delay: 0.15s; }
+.wsa-ai-dots i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes wsa-ai-blink {
+    0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+    40% { opacity: 1; transform: none; }
+}
+
+/* Status cards: offline, busy, rate-limited, errors */
+.wsa-ai-status {
+    align-self: stretch;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warning);
+    border-radius: 6px;
+    background-color: var(--bg-secondary);
+}
+
+.wsa-ai-status.is-offline {
+    border-left-color: var(--text-secondary);
+}
+
+.wsa-ai-status.is-error {
+    border-left-color: var(--danger);
+}
+
+.wsa-ai-status strong {
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.wsa-ai-status button {
+    margin-top: 0.5rem;
+}
+
+/* ---------- Composer ---------- */
+
+.wsa-ai-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.7rem 0.75rem 0.4rem;
+    border-top: 1px solid var(--border);
+}
+
+.wsa-ai-input {
+    flex: 1;
+    min-height: 40px;
+    max-height: 140px;
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    resize: none;
+}
+
+.wsa-ai-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.wsa-ai-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.wsa-ai-send {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    padding: 0;
+    color: #fff;
+    background-color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.wsa-ai-send:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.wsa-ai-send svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.wsa-ai-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0 0.85rem 0.6rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.wsa-ai-meta button {
+    padding: 0;
+    font: inherit;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.wsa-ai-count.is-over {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.wsa-ai-privacy {
+    margin: 0 0.75rem 0.6rem;
+    padding: 0.6rem 0.75rem;
+    max-height: 40%;
+    overflow-y: auto;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.wsa-ai-privacy p {
+    margin: 0 0 0.4rem;
+}
+
+.wsa-ai-privacy p:last-child {
+    margin: 0;
+}
+
+.wsa-ai :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.wsa-ai-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------- Small screens: bottom sheet; launcher sits above the site's floating menu button ---------- */
+
+@media (max-width: 1080px) {
+    .wsa-ai {
+        --wsa-ai-bottom: calc(1rem + 48px + 0.75rem + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 640px) {
+    .wsa-ai-launcher {
+        width: 48px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .wsa-ai-launcher-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .wsa-ai-panel {
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: auto;
+        height: 88vh;
+        height: 88dvh;
+        border-right: none;
+        border-left: none;
+        border-bottom: none;
+        border-radius: var(--wsa-ai-radius) var(--wsa-ai-radius) 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .wsa-ai-input {
+        font-size: 16px;          /* stops iOS zooming into the field */
+    }
+}
+
+/* ---------- Liquid Glass: a frosted, still very readable surface ---------- */
+
+:root[data-liquid-glass] .wsa-ai-panel,
+:root[data-liquid-glass] .wsa-ai-launcher {
+    background-color: color-mix(in srgb, var(--bg-primary) 86%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+}
+
+:root[data-liquid-glass] .wsa-ai-head,
+:root[data-liquid-glass] .wsa-ai-bot,
+:root[data-liquid-glass] .wsa-ai-status {
+    background-color: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wsa-ai-launcher,
+    .wsa-ai.is-open .wsa-ai-panel,
+    .wsa-ai-dots i {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+@media print {
+    .wsa-ai {
+        display: none !important;
+    }
+}
