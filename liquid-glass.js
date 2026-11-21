@@ -674,6 +674,15 @@
         navigator.userAgentData.brands.some(b => b.brand === 'Chromium')) &&
         window.CSS && CSS.supports('backdrop-filter', 'blur(1px)');
     const copyLens = !backdropLens && !!(window.CSS && CSS.supports('background-image', '-moz-element(#a)'));
+    // The WSA Assistant's launcher and panel float over the page itself rather than the sky, so they only
+    // get a lens that bends the real backdrop (Chromium). Firefox's lens is a copy of the sky, which would
+    // hide the page behind them; there they keep their plain blur (assistant.css).
+    const AI_CONTROLS = '.wsa-ai-launcher';
+    const AI_PANES = '.wsa-ai-panel';
+    // The panel is a thicker lens than the cards: a wider rim that bends further, nearly as much on every
+    // side, and splits colour more strongly. Where it can't bend the page (Firefox, phones and small
+    // windows) it still gets the split rim light, all the way round (assistant.css).
+    const AI_LENS = { bezel: 48, shift: 25, floor: 0.82, dispersion: 0.27 };
     const LENS_VAR = copyLens ? '--lg-refract-copy' : '--lg-refract';
     const reduceTransparency = window.matchMedia('(prefers-reduced-transparency: reduce)');
     // Phones, tablets and small windows (the stylesheet's lite mode) refract the controls only
@@ -818,9 +827,9 @@
     // bottom (green) edges, values above the left and top. The last two give the squared per-side
     // bend, 0 (none) to 1 (full), for the rim light: summed, they are the square of how hard it bends.
     const SQUARE_STEPS = 16;
-    function slabTables(v) {
+    function slabTables(v, floor = EDGE_FLOOR) {
         const k = EDGE_SHIFT / PANE_SCALE;
-        const weight = t => EDGE_FLOOR + (1 - EDGE_FLOOR) * Math.max(t, 0);
+        const weight = t => floor + (1 - floor) * Math.max(t, 0);
         const squared = t => {
             const lo = weight(t), hi = weight(-t), out = [];
             for (let i = 0; i <= SQUARE_STEPS; i++) {
@@ -889,12 +898,12 @@
         '<feOffset dx="0" dy="0" result="soft"/>';
 
     // Two passes of the same bend: a weaker one gives the red channel, a stronger one green and blue
-    function dispersed(map, scale, result = '', source = 'soft') {
+    function dispersed(map, scale, result = '', source = 'soft', dispersion = DISPERSION) {
         const pass = (factor, values, result) =>
             `<feDisplacementMap in="${source}" in2="${map}" scale="${(scale * factor).toFixed(2)}" xChannelSelector="R" yChannelSelector="G"/>` +
             `<feColorMatrix type="matrix" values="${values}" result="${result}"/>`;
-        return pass(1 - DISPERSION, '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0', 'warm') +
-            pass(1 + DISPERSION, '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0', 'cool') +
+        return pass(1 - dispersion, '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0', 'warm') +
+            pass(1 + dispersion, '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0', 'cool') +
             `<feComposite in="warm" in2="cool" operator="arithmetic" k2="1" k3="1"${result && ` result="${result}"`}/>`;
     }
 
@@ -911,14 +920,16 @@
             key = `c-${w}-${h}`;
             if (!refract.filters.has(key)) body = image(mapURL(w, h, r, bezel, 3, 1)) + soften + dispersed('map-raw', bezel * BEND * 2);
         } else {
-            const bezel = Math.max(4, Math.round(Math.min(BEZEL_PANE, Math.min(w, h) / 4)));
-            key = `p-${w}-${h}-${kind.radius}`;
+            const ai = !!kind.ai;
+            const bezel = Math.max(4, Math.round(Math.min(ai ? AI_LENS.bezel : BEZEL_PANE, Math.min(w, h) / 4)));
+            key = `${ai ? 'ai' : 'p'}-${w}-${h}-${kind.radius}`;
             if (!refract.filters.has(key)) {
-                const [tr, tg, bx, by] = slabTables(SLAB_REST);
+                const [tr, tg, bx, by] = slabTables(SLAB_REST, ai ? AI_LENS.floor : EDGE_FLOOR);
                 body = image(mapURL(w, h, kind.radius, bezel, PANE_THICKNESS, 1, bezel)) + softenTilted +
                     `<feComponentTransfer in="map-raw" result="map"><feFuncR type="table" tableValues="${tr}"/>` +
                     `<feFuncG type="table" tableValues="${tg}"/></feComponentTransfer>` +
-                    (copyLens ? dispersed('map', PANE_SCALE, 'view') + rimLight(bx, by) : dispersed('map', PANE_SCALE));
+                    (copyLens ? dispersed('map', PANE_SCALE, 'view') + rimLight(bx, by) :
+                        ai ? dispersed('map', 2 * AI_LENS.shift, '', 'soft', AI_LENS.dispersion) : dispersed('map', PANE_SCALE));
             }
         }
         if (body) {
@@ -949,9 +960,9 @@
 
     // Chromium's rim light: drawn once per pane size, inside the border like the pane's own corners
     const rimImages = new Map();
-    function rimImage(el, w, h, radius) {
+    function rimImage(el, w, h, radius, bezelMax = BEZEL_PANE) {
         const cw = el.clientWidth, ch = el.clientHeight, border = el.clientLeft;
-        const bezel = Math.max(4, Math.round(Math.min(BEZEL_PANE, Math.min(w, h) / 4)));
+        const bezel = Math.max(4, Math.round(Math.min(bezelMax, Math.min(w, h) / 4)));
         const key = `${cw}-${ch}-${radius}`;
         if (!rimImages.has(key)) {
             if (rimImages.size > 200) rimImages.clear();
@@ -971,6 +982,19 @@
     }
 
     function sizeLens(el, width, height) {
+        // The assistant's panel bends the page only where Chromium filters the backdrop in a desktop-sized
+        // window; elsewhere it gets the rim light alone, a still image that costs nothing per frame
+        if (el.matches(AI_PANES) && (!backdropLens || lite.matches)) {
+            const w = Math.round(width), h = Math.round(height);
+            if (w < 8 || h < 8 || !el.isConnected) {
+                refract.lens.delete(el);
+                clearLens(el);
+                return;
+            }
+            refract.lens.set(el, 'rim-only');
+            rimImage(el, w, h, Math.round(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0), AI_LENS.bezel);
+            return;
+        }
         // Firefox's sky copy fills the padding box, inside the pane's border
         if (copyLens) {
             width = el.clientWidth;
@@ -984,8 +1008,9 @@
         }
         // The computed radius of a control can't be used: the site's own `transition: all` on buttons is
         // still animating it from the regular corners when the mode is switched on
-        const kind = el.matches(LENS_CONTROLS) ? { control: true } :
-            { radius: Math.max(0, Math.round((parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0) - (copyLens ? el.clientLeft : 0))) };
+        const kind = el.matches(LENS_CONTROLS) || el.matches(AI_CONTROLS) ? { control: true } :
+            { radius: Math.max(0, Math.round((parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0) - (copyLens ? el.clientLeft : 0))),
+                ai: el.matches(AI_PANES) };
         const key = filterFor(w, h, kind);
         if (refract.lens.get(el) !== key) {
             dropLive(el);
@@ -995,7 +1020,7 @@
             el.style.setProperty(LENS_VAR, `url(#${refract.filters.get(key).id})`);
             if (copyLens) el.classList.add('lg-lens-copy');
         }
-        if (backdropLens && !kind.control) rimImage(el, w, h, kind.radius);
+        if (backdropLens && !kind.control) rimImage(el, w, h, kind.radius, kind.ai ? AI_LENS.bezel : BEZEL_PANE);
         // Firefox doesn't clip a filtered copy to the pane's corners, so the copy is clipped by hand
         if (copyLens) el.style.setProperty('--lg-copy-clip', `inset(0 round ${kind.control ? Math.round(Math.min(w, h) / 2) : kind.radius}px)`);
     }
@@ -1078,9 +1103,11 @@
     }
 
     function lensTargets() {
-        const selector = lite.matches ? LENS_CONTROLS : LENS_CONTROLS + ', ' + LENS_PANES;
+        let selector = lite.matches ? LENS_CONTROLS : LENS_CONTROLS + ', ' + LENS_PANES;
+        // The assistant's panel everywhere (sizeLens decides between a lens and the rim light alone)
+        selector += ', ' + AI_PANES + (backdropLens ? ', ' + AI_CONTROLS : '');
         return [...document.querySelectorAll(selector)].filter(el =>
-            !el.closest(LENS_SKIP) && !(el.parentElement && el.parentElement.closest(LENS_PANES)));
+            !el.closest(LENS_SKIP) && !(el.parentElement && el.parentElement.closest(LENS_PANES + ', ' + AI_PANES)));
     }
 
     function scanLenses() {
@@ -1135,8 +1162,10 @@
         document.body.appendChild(svg);
         refract.resize = new ResizeObserver(onResize);
         // Chips, dialogs and search results are added later by features.js
-        refract.mutate = new MutationObserver(() => {
-            if (!refract.frame) refract.frame = requestAnimationFrame(scanLenses);
+        // The assistant's answers type themselves in, changing its log every frame; nothing in there is lensed
+        refract.mutate = new MutationObserver(records => {
+            if (refract.frame || records.every(r => r.target.closest && r.target.closest('.wsa-ai-log'))) return;
+            refract.frame = requestAnimationFrame(scanLenses);
         });
         refract.mutate.observe(document.body, { childList: true, subtree: true });
         refract.theme = new MutationObserver(() => {

@@ -68,6 +68,42 @@
         }
     };
 
+    // Lines shown while the answer is being written: a fresh one every couple of seconds. After 5 s the
+    // tone admits it is taking a while, and after 18 s it gets cheekier, so waiting stays worth watching.
+    // Each phase opens with its `lead` line, then the rest come in a shuffled order without repeats.
+    var QUIPS = {
+        en: [
+            { lead: 'Checking the WSA records…', lines: [
+                'Flipping through the mission logs…', 'Asking mission control…', 'Searching the Hangar…',
+                'Dusting off the archives…', 'Plotting a course to your answer…', 'Aiming the antenna at the archive…'] },
+            { lead: 'Thinking a little longer…', lines: [
+                'Adding more struts to this answer…', 'Waiting for the transfer window…', 'Burning prograde toward an answer…',
+                'Recalculating the delta-v…', 'Lining up the docking ports…', 'Double-checking the landing site…',
+                "Correcting for Kerbin's rotation…", 'Running the numbers twice…'] },
+            { lead: 'Still thinking. Worth the wait!', lines: [
+                'Coasting to apoapsis…', 'Spinning up the centrifuge…', 'Rerouting through KGOSS-1…',
+                'Deep-space signal delay…', "Mission control's PC is sweating…", 'Fetching the big antenna…',
+                'Not giving up. AutoLand never did.', 'Almost there. Final approach…'] }
+        ],
+        zh: [
+            { lead: '正在查詢 WSA 紀錄…', lines: [
+                '翻閱任務日誌中…', '正在呼叫任務控制中心…', '在機庫裡翻找資料…',
+                '替檔案庫撣撣灰塵…', '規劃前往答案的航線…', '把天線對準檔案庫…'] },
+            { lead: '再多想一下下…', lines: [
+                '幫這個回答多加幾根支架…', '等待轉移窗口開啟…', '順行點火，朝答案前進…',
+                '重新計算 Δv…', '對準對接埠中…', '再確認一次著陸點…',
+                '修正 Kerbin 自轉造成的偏差…', '保險起見，數字再算一遍…'] },
+            { lead: '還在想，保證值得等！', lines: [
+                '滑行到遠拱點中…', '啟動離心機艙段…', '改經 KGOSS-1 轉送中…',
+                '深空訊號有點延遲…', '任務控制中心的電腦在冒汗了…', '去搬大天線來…',
+                '不放棄！AutoLand 也沒放棄過。', '快到了，進入最後進場…'] }
+        ]
+    };
+    var QUIP_AT = [0, 5000, 18000];          // ms after asking when each phase starts
+    var QUIP_EVERY = [1900, 2600, 3000];     // ms each line stays up in that phase
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
     function lang() { return window.WSAi18n && window.WSAi18n.lang === 'zh-Hant' ? 'zh' : 'en'; }
     function t(key) { return T[lang()][key]; }
 
@@ -189,11 +225,32 @@
     privacy.id = 'wsa-ai-privacy';
     privacyBtn.setAttribute('aria-controls', privacy.id);
 
+    // The composer, disclaimer and privacy note share one surface (frosted in Liquid Glass mode)
+    var dock = el('div', 'wsa-ai-dock');
+    dock.appendChild(form);
+    dock.appendChild(meta);
+    dock.appendChild(privacy);
+
+    // Screen readers hear each answer once, whole, from here (the log itself is quiet while it types out)
+    var announcer = el('div', 'wsa-ai-visually-hidden');
+    announcer.setAttribute('role', 'status');
+    announcer.setAttribute('aria-live', 'polite');
+
+    // The "goo" filter that makes the thinking dots read as liquid: blurred together, then cut back to
+    // a sharp edge, so a drop leaving the pool stretches a neck instead of separating cleanly
+    var gooDefs = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    gooDefs.setAttribute('class', 'wsa-ai-defs');
+    gooDefs.setAttribute('aria-hidden', 'true');
+    gooDefs.setAttribute('focusable', 'false');
+    gooDefs.innerHTML = '<filter id="wsa-ai-goo" x="-50%" y="-60%" width="200%" height="220%" color-interpolation-filters="sRGB">' +
+        '<feGaussianBlur in="SourceGraphic" stdDeviation="2.3" result="soft"/>' +
+        '<feColorMatrix in="soft" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -8"/></filter>';
+
     panel.appendChild(head);
     panel.appendChild(log);
-    panel.appendChild(form);
-    panel.appendChild(meta);
-    panel.appendChild(privacy);
+    panel.appendChild(dock);
+    panel.appendChild(announcer);
+    root.appendChild(gooDefs);
     root.appendChild(launcher);
     root.appendChild(panel);
     document.body.appendChild(root);
@@ -321,6 +378,8 @@
     }
 
     function render() {
+        stopFlow();
+        stopThinking();
         log.textContent = '';
         if (!state.msgs.length) {
             var w = el('div', 'wsa-ai-welcome');
@@ -361,23 +420,343 @@
     }
 
     function clearTransient() {
+        stopThinking();
         Array.prototype.forEach.call(log.querySelectorAll('.wsa-ai-transient'), function (n) { n.remove(); });
     }
 
+    // ---------- thinking: a liquid bubble whose drops jump out of a pool, with a changing line ----------
+    var think = null;
+
     function thinking() {
         clearTransient();
-        var box = el('div', 'wsa-ai-msg wsa-ai-bot wsa-ai-transient');
-        var row = el('span', 'wsa-ai-thinking');
-        var dots = el('span', 'wsa-ai-dots');
-        dots.setAttribute('aria-hidden', 'true');
-        dots.appendChild(el('i'));
-        dots.appendChild(el('i'));
-        dots.appendChild(el('i'));
-        row.appendChild(dots);
-        row.appendChild(el('span', null, t('thinking')));
-        box.appendChild(row);
+        var box = el('div', 'wsa-ai-msg wsa-ai-bot wsa-ai-transient wsa-ai-think');
+        var goo = el('span', 'wsa-ai-goo');
+        goo.setAttribute('aria-hidden', 'true');
+        goo.appendChild(el('i', 'wsa-ai-pool'));
+        for (var i = 0; i < 3; i++) goo.appendChild(el('i', 'wsa-ai-drop'));
+        var quip = el('span', 'wsa-ai-quip');
+        quip.setAttribute('aria-hidden', 'true');           // the changing lines are decoration; readers hear one status
+        box.appendChild(goo);
+        box.appendChild(quip);
+        box.appendChild(el('span', 'wsa-ai-visually-hidden', t('thinking')));
         log.appendChild(box);
+        think = { box: box, quip: quip, start: Date.now(), phase: -1, bag: [], timer: 0 };
+        nextQuip(think);
         scrollDown();
+    }
+
+    function stopThinking() {
+        if (think) clearTimeout(think.timer);
+        think = null;
+    }
+
+    function nextQuip(s) {
+        if (think !== s || !s.box.isConnected) return;
+        var elapsed = Date.now() - s.start;
+        var phase = elapsed >= QUIP_AT[2] ? 2 : elapsed >= QUIP_AT[1] ? 1 : 0;
+        var set = QUIPS[lang()][phase];
+        var text;
+        if (phase !== s.phase) {
+            s.phase = phase;
+            s.bag = [];
+            text = set.lead;
+        } else {
+            if (!s.bag.length) {
+                s.bag = set.lines.slice();
+                for (var i = s.bag.length - 1; i > 0; i--) {        // shuffle once per pass: no line repeats until all were shown
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var x = s.bag[i]; s.bag[i] = s.bag[j]; s.bag[j] = x;
+                }
+            }
+            text = s.bag.pop();
+        }
+        setQuip(s, text);
+        // Switch phase on time, but never flash a line for less than ~1 s
+        var wait = QUIP_EVERY[phase];
+        var untilNext = phase < 2 ? QUIP_AT[phase + 1] - elapsed : Infinity;
+        if (untilNext < wait) wait = Math.max(untilNext, 1100);
+        s.timer = setTimeout(function () { nextQuip(s); }, wait);
+    }
+
+    function setQuip(s, text) {
+        var wrap = s.quip;
+        var old = wrap.querySelector('.wsa-ai-quip-line:not(.is-leaving)');
+        var line = el('span', 'wsa-ai-quip-line', text);
+        // Room left in the bubble beside the drops (the bubble is at most 92% of the log)
+        var logStyle = getComputedStyle(log), boxStyle = getComputedStyle(s.box);
+        var room = (log.clientWidth - parseFloat(logStyle.paddingLeft) - parseFloat(logStyle.paddingRight)) * 0.92 -
+            parseFloat(boxStyle.paddingLeft) - parseFloat(boxStyle.paddingRight) - 2 -
+            s.box.querySelector('.wsa-ai-goo').offsetWidth - (parseFloat(boxStyle.columnGap) || 10);
+        line.style.maxWidth = Math.max(80, Math.floor(room)) + 'px';
+        wrap.appendChild(line);
+        // The bubble stretches or shrinks to the new line like a drop finding its shape (see .wsa-ai-quip).
+        // Layout width, not the on-screen box: the bubble is still scaled down while it drops in.
+        wrap.style.width = (line.offsetWidth + 1) + 'px';
+        if (old) {
+            old.classList.add('is-leaving');
+            setTimeout(function () { old.remove(); }, reduceMotion.matches ? 0 : 420);
+        }
+    }
+
+    // ---------- answers flow out of the thinking bubble and type themselves in ----------
+    var flow = null;
+    var announceTimer = 0;
+
+    function plain(text) {
+        return String(text || '').replace(/\*\*/g, '').replace(/\s*\[\d{1,2}\]/g, '').replace(/^\s*[-*•]\s+/gm, '');
+    }
+
+    function nearBottom() {
+        return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+    }
+
+    // Ends an answer that is still typing: everything shows at once and the bubble returns to its own size
+    function stopFlow() {
+        if (!flow) return;
+        var job = flow;
+        flow = null;
+        job.cancelled = true;
+        finishTyping(job);
+        if (job.cleanup) job.cleanup();
+        if (job.done) job.done();
+    }
+
+    // Empties every text node in `box` (remembering its text) and hides each element until the typing
+    // reaches it, so list bullets, bold runs and citation chips appear at the moment their text does
+    function prepareTyping(box, skip) {
+        var steps = [], total = 0;
+        (function walk(parent) {
+            Array.prototype.slice.call(parent.childNodes).forEach(function (n) {
+                if (n === skip) return;
+                if (n.nodeType === 3) {
+                    if (!n.data) return;
+                    var host = document.createTextNode('');
+                    parent.replaceChild(host, n);
+                    var chars = Array.from ? Array.from(n.data) : n.data.split('');
+                    steps.push({ host: host, full: n.data, chars: chars, i: 0, fresh: [] });
+                    total += chars.length;
+                } else if (n.nodeType === 1) {
+                    n.classList.add('wsa-ai-wait');
+                    if (n.classList.contains('wsa-ai-cite')) { steps.push({ atom: n }); total += 2; return; }
+                    walk(n);
+                }
+            });
+        })(box);
+        return { box: box, steps: steps, total: total, k: 0, caret: el('span', 'wsa-ai-caret') };
+    }
+
+    function unveil(job, node) {
+        for (var e = node; e && e !== job.box; e = e.parentNode) if (e.classList) e.classList.remove('wsa-ai-wait');
+    }
+
+    var STOP = /[.!?。！？]/, BREATH = /[,;:，、；：]/;
+
+    // Reveals up to n characters; returns a pause (ms) when it stopped at punctuation or a new paragraph
+    function revealChars(job, n) {
+        while (n > 0 && job.k < job.steps.length) {
+            var s = job.steps[job.k];
+            if (s.atom) {
+                unveil(job, s.atom);
+                s.atom.classList.add('wsa-ai-pop');
+                s.atom.parentNode.insertBefore(job.caret, s.atom.nextSibling);
+                job.k++;
+                n--;
+                continue;
+            }
+            var parent = s.host.parentNode;
+            if (s.i === 0) {
+                var block = parent.closest('p, li');
+                var fresh = block && block.classList.contains('wsa-ai-wait') && job.k > 0;
+                unveil(job, parent);
+                if (fresh) return 70;                  // a short breath before a new paragraph or list item
+            }
+            var chunk = '', pause = 0;
+            while (n > 0 && s.i < s.chars.length) {
+                var c = s.chars[s.i++];
+                chunk += c;
+                n--;
+                if (s.i < s.chars.length || job.k < job.steps.length - 1) {
+                    if (STOP.test(c)) { pause = 60 + Math.random() * 60; break; }
+                    if (BREATH.test(c)) { pause = 20 + Math.random() * 30; break; }
+                }
+            }
+            if (chunk) {
+                var span = el('span', 'wsa-ai-fresh', chunk);     // fades in, ChatGPT-style
+                parent.insertBefore(span, s.host);
+                s.fresh.push(span);
+                parent.insertBefore(job.caret, s.host);
+            }
+            if (s.i >= s.chars.length) job.k++;
+            if (pause) return pause;
+        }
+        return 0;
+    }
+
+    // Puts the plain text back (the faded-in pieces were only for show) and drops the caret
+    function finishTyping(job) {
+        job.steps.forEach(function (s) {
+            if (s.atom) { s.atom.classList.remove('wsa-ai-pop'); return; }
+            s.fresh.forEach(function (n) { n.remove(); });
+            s.fresh = [];
+            s.host.data = s.full;
+        });
+        job.caret.remove();
+        Array.prototype.forEach.call(job.box.querySelectorAll('.wsa-ai-wait'), function (n) { n.classList.remove('wsa-ai-wait'); });
+        job.box.classList.remove('wsa-ai-wait');
+    }
+
+    function showAnswer(m, done) {
+        var node = answerNode(m);
+        var follow = m.suggestions && m.suggestions.length ? chips(m.suggestions) : null;
+        var from = think && think.box.isConnected ? think.box : null;
+        stopThinking();
+        if (!from || reduceMotion.matches) {
+            clearTransient();
+            log.appendChild(node);
+            if (follow) log.appendChild(follow);
+            scrollDown();
+            done();
+            return;
+        }
+        flowOut(from, node, follow, m, done);
+    }
+
+    function flowOut(from, node, follow, m, done) {
+        stopFlow();
+        var stick = nearBottom();
+        var start = from.getBoundingClientRect();
+        var fromStyle = getComputedStyle(from);
+        var startRadius = fromStyle.borderRadius;
+
+        // The answer's content goes in an inner layer so the bubble's own size can be animated around it
+        var inner = el('div', 'wsa-ai-flow');
+        while (node.firstChild) inner.appendChild(node.firstChild);
+        node.appendChild(inner);
+        var sources = inner.querySelector('.wsa-ai-sources');
+
+        // Swap the thinking bubble for the answer and measure the answer's final size, all in one frame
+        log.replaceChild(node, from);
+        var end = node.getBoundingClientRect();
+        var endRadius = getComputedStyle(node).borderRadius;
+        var cs = getComputedStyle(node);
+        var padV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+
+        // What the thinking bubble showed melts away inside the growing bubble
+        var melt = el('div', 'wsa-ai-melt');
+        melt.setAttribute('aria-hidden', 'true');
+        Array.prototype.slice.call(from.childNodes).forEach(function (n) {
+            if (!n.classList || !n.classList.contains('wsa-ai-visually-hidden')) melt.appendChild(n);
+        });
+        melt.style.left = fromStyle.paddingLeft;
+        melt.style.top = fromStyle.paddingTop;
+        node.appendChild(melt);
+        setTimeout(function () { melt.remove(); }, 320);
+
+        var job = prepareTyping(inner, sources);
+        if (sources) sources.classList.add('wsa-ai-wait');
+        job.cancelled = false;
+        job.done = done;
+        flow = job;
+
+        // Screen readers get the whole answer at once; the log stays quiet while it types itself in
+        log.setAttribute('aria-live', 'off');
+        clearTimeout(announceTimer);
+        announcer.textContent = plain(m.text);
+        announceTimer = setTimeout(function () { announcer.textContent = ''; }, 15000);
+
+        // Start at the thinking bubble's size and shape, then flow out to the answer's width
+        node.classList.add('is-flowing');
+        node.style.width = start.width + 'px';
+        node.style.height = start.height + 'px';
+        node.style.borderRadius = startRadius;
+        void node.offsetWidth;                         // commit the start size before animating from it
+        node.style.width = end.width + 'px';
+        node.style.borderRadius = endRadius;
+        var minH = start.height;
+
+        // Follow the bottom while the answer grows, unless the reader scrolls away
+        function letGo() { stick = false; }
+        log.addEventListener('wheel', letGo, { passive: true });
+        log.addEventListener('touchstart', letGo, { passive: true });
+        job.cleanup = function () {
+            node.classList.remove('is-flowing');
+            node.style.width = '';
+            node.style.height = '';
+            node.style.borderRadius = '';
+            melt.remove();
+            log.removeEventListener('wheel', letGo);
+            log.removeEventListener('touchstart', letGo);
+            log.setAttribute('aria-live', 'polite');
+        };
+
+        function fit() {
+            var h = Math.max(minH, Math.ceil(inner.offsetHeight + padV));
+            if (node.style.height !== h + 'px') node.style.height = h + 'px';
+        }
+        function keepDown() { if (stick) log.scrollTop = log.scrollHeight; }
+
+        // Typing speed: quick but uneven, like text arriving from a fast stream. Long answers speed up so
+        // nothing takes much over 3 s; Chinese runs fewer characters per second (each carries more).
+        var base = lang() === 'zh' ? 95 : 250;
+        var duration = Math.min(3.2, Math.max(0.6, job.total / base));
+        var rate = job.total / duration;
+        var last = 0, budget = 0, resumeAt = 0, startedAt = 0;
+
+        function frame(now) {
+            if (job.cancelled) return;
+            if (!startedAt) { startedAt = now; last = now; }
+            var dt = Math.min(now - last, 64);
+            last = now;
+            if (now - startedAt > 180 && now >= resumeAt) {         // let the bubble start flowing out first
+                var ramp = Math.min(1, (now - startedAt) / 500);   // eases in rather than starting at full speed
+                budget += rate * (dt / 1000) * (0.45 + Math.random() * 1.1) * (0.5 + 0.5 * ramp);
+                var n = Math.floor(budget);
+                if (n > 0) {
+                    budget -= n;
+                    var pause = revealChars(job, n);
+                    if (pause) { resumeAt = now + pause; budget = 0; }
+                }
+            }
+            fit();
+            keepDown();
+            if (job.k < job.steps.length) { requestAnimationFrame(frame); return; }
+            typed();
+        }
+
+        function typed() {
+            minH = 0;
+            if (sources) {
+                sources.classList.remove('wsa-ai-wait');
+                sources.classList.add('wsa-ai-rise');
+            }
+            fit();
+            var t0 = performance.now();
+            (function settle(now) {                           // keep following while the height catches up
+                if (job.cancelled) return;
+                keepDown();
+                if (now - t0 < 420) { requestAnimationFrame(settle); return; }
+                finishTyping(job);
+                job.cleanup();
+                job.done = null;
+                if (flow === job) flow = null;
+                node.classList.add('is-settling');
+                setTimeout(function () { node.classList.remove('is-settling'); }, 700);
+                if (sources) setTimeout(function () { sources.classList.remove('wsa-ai-rise'); }, 500);
+                // Follow-up questions only belong under the latest answer
+                if (follow && node.isConnected && node === log.lastElementChild) {
+                    follow.classList.add('wsa-ai-rise');
+                    Array.prototype.forEach.call(follow.children, function (c, i) {
+                        c.classList.add('wsa-ai-rise');
+                        c.style.animationDelay = (i * 70) + 'ms';
+                    });
+                    log.appendChild(follow);
+                }
+                keepDown();
+                done();
+            })(t0);
+        }
+
+        requestAnimationFrame(frame);
     }
 
     // ---------- network ----------
@@ -428,7 +807,9 @@
             var welcome = log.querySelector('.wsa-ai-welcome');
             if (welcome) welcome.remove();
             Array.prototype.forEach.call(log.querySelectorAll('.wsa-ai-chips'), function (n) { n.remove(); });
-            log.appendChild(el('div', 'wsa-ai-msg wsa-ai-user', text));      // append only: the live region announces just the new parts
+            var mine = el('div', 'wsa-ai-msg wsa-ai-user is-new', text);    // append only: the live region announces just the new parts
+            setTimeout(function () { mine.classList.remove('is-new'); }, 600);
+            log.appendChild(mine);
         }
         input.value = '';
         autosize();
@@ -440,7 +821,6 @@
                 return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j }; });
             })
             .then(function (res) {
-                setBusy(false);
                 var j = res.j || {};
                 if (res.code === 200 && j.status === 'ok') {
                     state.sid = j.session_id || state.sid;
@@ -448,12 +828,11 @@
                     state.msgs.push(m);
                     health = { at: Date.now(), ok: true };
                     persist();
-                    clearTransient();
-                    log.appendChild(answerNode(m));
-                    if (m.suggestions.length) log.appendChild(chips(m.suggestions));
-                    scrollDown();
+                    // Sending stays off until the answer has finished typing itself in
+                    showAnswer(m, function () { setBusy(false); });
                     return;
                 }
+                setBusy(false);
                 if (res.code === 503 && j.status === 'busy' && !isRetry) {
                     statusCard('warning', null, t('busy'));
                     setBusy(true);
@@ -484,7 +863,8 @@
         if (!panel.hidden) return;
         lastFocus = document.activeElement;
         panel.hidden = false;
-        root.classList.add('is-open');
+        root.classList.add('is-open', 'is-opening');
+        setTimeout(function () { root.classList.remove('is-opening'); }, 360);
         launcher.setAttribute('aria-expanded', 'true');
         panel.setAttribute('aria-modal', mobile.matches ? 'true' : 'false');
         render();

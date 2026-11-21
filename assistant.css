@@ -6,8 +6,20 @@
     --wsa-ai-radius: 10px;
     --wsa-ai-shadow: 0 10px 32px rgba(28, 25, 23, 0.16), 0 2px 6px rgba(28, 25, 23, 0.08);
     --wsa-ai-bottom: calc(1rem + env(safe-area-inset-bottom));
+    /* Motion: overshoots a touch and settles back, like liquid finding its level */
+    --wsa-ai-spring: cubic-bezier(0.22, 1.3, 0.36, 1);
+    --wsa-ai-glide: cubic-bezier(0.25, 0.9, 0.3, 1);
     font-family: inherit;
     color: var(--text-primary);
+}
+
+/* Holds the goo filter; kept rendered (not display: none) so browsers apply it */
+.wsa-ai-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 :root[data-theme="dark"] .wsa-ai {
@@ -118,13 +130,25 @@
     box-shadow: var(--wsa-ai-shadow);
 }
 
+/* Opens by swelling out of the launcher's corner. Only the contents fade, each piece on its own: an
+   opacity change on the panel or the log would cut the glass inside it off from the page behind
+   (Liquid Glass mode). assistant.js sets .is-opening for the first moments after opening. */
 .wsa-ai.is-open .wsa-ai-panel {
-    animation: wsa-ai-rise 0.18s ease-out;
+    transform-origin: 100% 100%;
+    animation: wsa-ai-open 0.46s var(--wsa-ai-spring);
 }
 
-@keyframes wsa-ai-rise {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: none; }
+.wsa-ai.is-opening :is(.wsa-ai-head, .wsa-ai-dock, .wsa-ai-log > *) {
+    animation: wsa-ai-fade-in 0.28s ease-out;
+}
+
+@keyframes wsa-ai-open {
+    from { transform: translateY(14px) scale(0.92); }
+    to { transform: none; }
+}
+
+@keyframes wsa-ai-fade-in {
+    from { opacity: 0; }
 }
 
 .wsa-ai-head {
@@ -370,34 +394,226 @@
     cursor: default;
 }
 
-/* Loading */
-.wsa-ai-thinking {
-    display: inline-flex;
+/* ---------- Thinking: a liquid bubble ---------- */
+
+/* Drops in like a bead of liquid, then keeps wobbling gently while it waits */
+.wsa-ai-think {
+    display: flex;
     align-items: center;
-    gap: 0.55rem;
-    color: var(--text-secondary);
+    column-gap: 0.6rem;
+    min-height: 2.6rem;
+    border-radius: 18px 18px 18px 6px;
+    transform-origin: 0 100%;
+    animation:
+        wsa-ai-bead 0.5s var(--wsa-ai-spring) both,
+        wsa-ai-wobble 3.6s ease-in-out 0.5s infinite;
+}
+
+@keyframes wsa-ai-bead {
+    from { opacity: 0; transform: scale(0.35); }
+    45% { opacity: 1; }
+    to { transform: none; }
+}
+
+@keyframes wsa-ai-wobble {
+    0%, 100% { border-radius: 18px 18px 18px 6px; }
+    33% { border-radius: 22px 15px 20px 6px; }
+    66% { border-radius: 15px 21px 16px 6px; }
+}
+
+/* Three drops jump out of a little pool and splash back in. The goo filter (assistant.js) melts them
+   into the pool, so each one stretches a neck as it leaves and merges again as it lands. */
+.wsa-ai-goo {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 26px;
+    filter: url(#wsa-ai-goo);
+}
+
+.wsa-ai-goo i {
+    position: absolute;
+    display: block;
+    background-color: var(--accent);
+}
+
+.wsa-ai-pool {
+    left: 4px;
+    right: 4px;
+    bottom: 2px;
+    height: 5px;
+    border-radius: 3px;
+    animation: wsa-ai-ripple 1.5s ease-in-out infinite;
+}
+
+.wsa-ai-drop {
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transform-origin: 50% 100%;
+    animation: wsa-ai-jump 1.5s infinite;
+}
+
+.wsa-ai-drop:nth-child(2) { left: 7px; }
+.wsa-ai-drop:nth-child(3) { left: 16px; animation-delay: 0.17s; }
+.wsa-ai-drop:nth-child(4) { left: 25px; animation-delay: 0.34s; }
+
+@keyframes wsa-ai-jump {
+    0%, 62%, 100% { transform: translateY(0) scale(1.2, 0.75); animation-timing-function: ease-out; }
+    10% { transform: translateY(-2px) scale(0.85, 1.25); animation-timing-function: ease-out; }
+    27% { transform: translateY(-13px) scale(1, 1); animation-timing-function: ease-in; }
+    44% { transform: translateY(-1px) scale(0.88, 1.15); animation-timing-function: ease-out; }
+    52% { transform: translateY(0) scale(1.3, 0.7); animation-timing-function: ease-in-out; }
+}
+
+@keyframes wsa-ai-ripple {
+    0%, 100% { transform: scaleY(1); }
+    30% { transform: scaleY(1.35); }
+    60% { transform: scaleY(0.85); }
+}
+
+/* The line under way: a new one rises in as the old one floats off, the bubble resizing to fit it,
+   with a light sheen running across the words */
+.wsa-ai-quip {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    height: 1.4em;
     font-size: 0.85rem;
+    line-height: 1.4;
+    transition: width 0.55s var(--wsa-ai-spring);
 }
 
-.wsa-ai-dots {
-    display: inline-flex;
-    gap: 4px;
+.wsa-ai-quip-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+    background: linear-gradient(100deg, var(--text-secondary) 38%, var(--text-primary) 50%, var(--text-secondary) 62%) 0 0 / 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation:
+        wsa-ai-quip-in 0.5s var(--wsa-ai-spring) both,
+        wsa-ai-sheen 2.4s linear infinite;
 }
 
-.wsa-ai-dots i {
-    width: 6px;
-    height: 6px;
+.wsa-ai-quip-line.is-leaving {
+    animation:
+        wsa-ai-quip-out 0.36s ease-in both,
+        wsa-ai-sheen 2.4s linear infinite;
+}
+
+@keyframes wsa-ai-quip-in {
+    from { opacity: 0; transform: translateY(70%); filter: blur(4px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@keyframes wsa-ai-quip-out {
+    to { opacity: 0; transform: translateY(-70%); filter: blur(4px); }
+}
+
+@keyframes wsa-ai-sheen {
+    from { background-position: 100% 0; }
+    to { background-position: 0 0; }
+}
+
+/* ---------- The answer flowing out of the thinking bubble ---------- */
+
+.wsa-ai-bot.is-flowing {
+    position: relative;
+    overflow: hidden;
+    transition:
+        width 0.62s var(--wsa-ai-spring),
+        height 0.3s var(--wsa-ai-glide),
+        border-radius 0.5s var(--wsa-ai-glide);
+}
+
+/* What the thinking bubble showed, dissolving as the answer takes over */
+.wsa-ai-melt {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    column-gap: 0.6rem;
+    pointer-events: none;
+    animation: wsa-ai-melt 0.3s ease-in both;
+}
+
+@keyframes wsa-ai-melt {
+    to { opacity: 0; transform: translateY(-4px) scale(0.94); filter: blur(5px); }
+}
+
+/* Not reached by the typing yet */
+.wsa-ai-wait {
+    display: none !important;
+}
+
+/* Each newly typed piece fades in */
+.wsa-ai-fresh {
+    animation: wsa-ai-fresh 0.3s ease-out both;
+}
+
+@keyframes wsa-ai-fresh {
+    from { opacity: 0; }
+}
+
+/* A small drop riding the end of the text while it types */
+.wsa-ai-caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.55em;
+    margin-left: 0.2em;
+    vertical-align: 0;
     border-radius: 50%;
     background-color: var(--accent);
-    animation: wsa-ai-blink 1.2s infinite ease-in-out;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent);
+    animation: wsa-ai-caret 0.9s ease-in-out infinite alternate;
 }
 
-.wsa-ai-dots i:nth-child(2) { animation-delay: 0.15s; }
-.wsa-ai-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes wsa-ai-caret {
+    from { opacity: 0.55; }
+}
 
-@keyframes wsa-ai-blink {
-    0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
-    40% { opacity: 1; transform: none; }
+.wsa-ai-cite.wsa-ai-pop {
+    animation: wsa-ai-pop 0.4s var(--wsa-ai-spring) both;
+}
+
+@keyframes wsa-ai-pop {
+    from { opacity: 0; transform: translateY(3px) scale(0.4); }
+}
+
+/* Sources and follow-up questions rise in once the text is done */
+.wsa-ai-rise {
+    animation: wsa-ai-rise-in 0.45s var(--wsa-ai-spring) both;
+}
+
+@keyframes wsa-ai-rise-in {
+    from { opacity: 0; transform: translateY(8px); }
+}
+
+/* A last jelly-like settle when the bubble reaches its full size */
+.wsa-ai-bot.is-settling {
+    transform-origin: 0 100%;
+    animation: wsa-ai-settle 0.6s ease-out;
+}
+
+@keyframes wsa-ai-settle {
+    30% { transform: scale(1.012, 0.99); }
+    65% { transform: scale(0.997, 1.004); }
+}
+
+/* Your own message pops out of the composer */
+.wsa-ai-user.is-new {
+    transform-origin: 100% 100%;
+    animation: wsa-ai-sent 0.45s var(--wsa-ai-spring) both;
+}
+
+@keyframes wsa-ai-sent {
+    from { opacity: 0; transform: translateY(12px) scale(0.85); }
 }
 
 /* Status cards: offline, busy, rate-limited, errors */
@@ -596,27 +812,285 @@
     }
 }
 
-/* ---------- Liquid Glass: a frosted, still very readable surface ---------- */
+/* ---------- Liquid Glass ----------
+   The panel is a clear pane: the page itself shows through it, softened a touch and, in Chromium, bent
+   along the rim by the same lens as the site's cards (liquid-glass.js sizes it to the panel). Everything
+   you read sits on frosted glass that is much less transparent than the pane: message bubbles, the
+   header strip, the composer dock, chips and cards. The pane's glass lives on ::before rather than on the
+   panel, so the panel never becomes a backdrop root and the bubbles' own blur still reaches the page. */
 
-:root[data-liquid-glass] .wsa-ai-panel,
-:root[data-liquid-glass] .wsa-ai-launcher {
-    background-color: color-mix(in srgb, var(--bg-primary) 86%, transparent);
-    -webkit-backdrop-filter: blur(18px) saturate(1.2);
-    backdrop-filter: blur(18px) saturate(1.2);
+:root[data-liquid-glass] .wsa-ai {
+    --wsa-ai-clear: 0.1;            /* tint of the clear pane */
+    --wsa-ai-frost-a: 0.74;         /* tint of the frosted surfaces you read on */
+    --wsa-ai-frost: blur(16px) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    --wsa-ai-sheen: inset 0 1px 0 rgb(var(--lg-hi) / calc(var(--lg-bevel) * 0.6)),
+        inset 0 0 0 1px rgb(var(--lg-hi) / calc(var(--lg-edge-hi) * 0.24));
+    --wsa-ai-lift: 0 10px 24px -16px rgb(var(--lg-lo) / calc(var(--lg-shadow) + 0.05));
 }
 
-:root[data-liquid-glass] .wsa-ai-head,
-:root[data-liquid-glass] .wsa-ai-bot,
+:root[data-liquid-glass][data-theme="dark"] .wsa-ai {
+    --wsa-ai-clear: 0.045;
+    --wsa-ai-frost-a: 0.7;
+}
+
+/* Launcher: a frosted capsule like the floating menu button, with a lens in Chromium */
+:root[data-liquid-glass] .wsa-ai-launcher {
+    background: rgb(var(--lg-bar-tint) / var(--lg-fill-bar));
+    border-color: transparent;
+    box-shadow:
+        inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline)),
+        var(--wsa-ai-sheen),
+        0 10px 26px -10px rgb(var(--lg-lo) / var(--lg-shadow));
+    -webkit-backdrop-filter: blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: var(--lg-refract,) blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+:root.lg-scrolling[data-liquid-glass] .wsa-ai-launcher {
+    backdrop-filter: blur(var(--lg-blur-bar)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+/* The pane */
+:root[data-liquid-glass] .wsa-ai-panel {
+    border: 0;
+    border-radius: 24px;
+    background: none;
+    box-shadow:
+        0 0 0 1px rgb(var(--lg-lo) / var(--lg-outline)),
+        0 30px 70px -28px rgb(var(--lg-lo) / calc(var(--lg-shadow) + 0.12));
+}
+
+:root[data-liquid-glass] .wsa-ai-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: rgb(var(--lg-tint) / var(--wsa-ai-clear));
+    box-shadow:
+        var(--wsa-ai-sheen),
+        inset 0 0 40px -18px rgb(var(--lg-tint) / var(--lg-rim-a));
+    -webkit-backdrop-filter: blur(2.5px) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    /* Softened first, then bent: the colour fringes the lens splits along the rim stay crisp.
+       Without a lens (phones) the fallback makes up the lens's own slight softening. */
+    backdrop-filter: blur(1.5px) var(--lg-refract, blur(1px)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    pointer-events: none;
+}
+
+/* The rim light (liquid-glass.js draws it): a red and cyan split hairline, brighter than on the cards
+   and running all the way round rather than only on the side away from the light */
+:root[data-liquid-glass] .wsa-ai-panel.lg-rim::after {
+    opacity: min(1, calc(var(--lg-rim-light) * 1.8));
+    -webkit-mask: none;
+    mask: none;
+}
+
+/* While the page scrolls the lens rests, as the site's cards do */
+:root.lg-scrolling[data-liquid-glass] .wsa-ai-panel::before {
+    backdrop-filter: blur(2.5px) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+/* Header and composer: frosted capsules floating just inside the pane, so a band of clear, bending
+   glass runs all the way round the rim */
+:root[data-liquid-glass] :is(.wsa-ai-head, .wsa-ai-dock) {
+    background: rgb(var(--lg-bar-tint) / calc(var(--wsa-ai-frost-a) - 0.3));
+    border-radius: 16px;
+    box-shadow: var(--wsa-ai-sheen), 0 6px 18px -12px rgb(var(--lg-lo) / var(--lg-shadow));
+    -webkit-backdrop-filter: blur(14px) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: blur(14px) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+:root[data-liquid-glass] .wsa-ai-head {
+    margin: 10px 10px 0;
+    padding: 0.6rem 0.5rem 0.6rem 0.85rem;
+    border-bottom: 0;
+}
+
+:root[data-liquid-glass] .wsa-ai-dock {
+    margin: 0 10px 10px;
+}
+
+:root[data-liquid-glass] .wsa-ai-meta {
+    padding-bottom: 0.5rem;
+}
+
+:root[data-liquid-glass] .wsa-ai-form {
+    border-top: 0;
+}
+
+:root[data-liquid-glass] .wsa-ai-icon-btn:hover {
+    background: rgb(var(--lg-tint) / 0.12);
+    border-color: rgb(var(--lg-hi) / calc(var(--lg-edge-hi) * 0.3));
+}
+
+/* What you read: frosted glass bubbles and cards, clearly more solid than the pane around them */
+:root[data-liquid-glass] :is(.wsa-ai-bot, .wsa-ai-user, .wsa-ai-status, .wsa-ai-welcome) {
+    background: rgb(var(--lg-bar-tint) / var(--wsa-ai-frost-a));
+    border-color: transparent;
+    box-shadow: var(--wsa-ai-sheen), var(--wsa-ai-lift);
+    -webkit-backdrop-filter: var(--wsa-ai-frost);
+    backdrop-filter: var(--wsa-ai-frost);
+}
+
+:root[data-liquid-glass] .wsa-ai-bot {
+    border-radius: 18px 18px 18px 6px;
+}
+
+/* Your messages carry the accent, tinted into the frost */
+:root[data-liquid-glass] .wsa-ai-user {
+    background:
+        linear-gradient(rgb(var(--lg-accent-rgb) / 0.18), rgb(var(--lg-accent-rgb) / 0.18)),
+        rgb(var(--lg-bar-tint) / var(--wsa-ai-frost-a));
+    box-shadow:
+        inset 0 0 0 1px rgb(var(--lg-accent-rgb) / 0.38),
+        inset 0 1px 0 rgb(var(--lg-hi) / calc(var(--lg-bevel) * 0.5)),
+        var(--wsa-ai-lift);
+    border-radius: 18px 18px 6px 18px;
+}
+
+/* Status cards keep their coloured left edge */
 :root[data-liquid-glass] .wsa-ai-status {
-    background-color: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+    border-color: transparent;
+    border-left-color: var(--warning);
+    border-radius: 14px;
+}
+
+:root[data-liquid-glass] .wsa-ai-status.is-offline {
+    border-left-color: var(--text-secondary);
+}
+
+:root[data-liquid-glass] .wsa-ai-status.is-error {
+    border-left-color: var(--danger);
+}
+
+:root[data-liquid-glass] .wsa-ai-welcome {
+    padding: 0.9rem 0.95rem;
+    border-radius: 18px;
+}
+
+:root[data-liquid-glass] .wsa-ai-welcome p {
+    color: var(--text-primary);
+    opacity: 0.86;
+}
+
+/* Chips: small glass capsules */
+:root[data-liquid-glass] .wsa-ai-chip {
+    background: rgb(var(--lg-bar-tint) / calc(var(--wsa-ai-frost-a) - 0.14));
+    border-color: transparent;
+    box-shadow: var(--wsa-ai-sheen), 0 4px 12px -8px rgb(var(--lg-lo) / var(--lg-shadow));
+    -webkit-backdrop-filter: blur(12px) saturate(var(--lg-sat));
+    backdrop-filter: blur(12px) saturate(var(--lg-sat));
+}
+
+:root[data-liquid-glass] .wsa-ai-chip:hover {
+    box-shadow: inset 0 0 0 1px rgb(var(--lg-accent-rgb) / 0.6), 0 4px 12px -8px rgb(var(--lg-lo) / var(--lg-shadow));
+}
+
+:root[data-liquid-glass] .wsa-ai-input {
+    background: rgb(var(--lg-bar-tint) / calc(var(--wsa-ai-frost-a) - 0.1));
+    border-color: rgb(var(--lg-hi) / calc(var(--lg-edge-hi) * 0.32));
+    border-radius: 14px;
+    box-shadow: inset 0 1px 2px rgb(var(--lg-lo) / calc(var(--lg-hairline) + 0.04));
+}
+
+:root[data-liquid-glass] .wsa-ai-send {
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 6px 16px -8px rgb(var(--lg-accent-rgb) / 0.9);
+}
+
+:root[data-liquid-glass] .wsa-ai-privacy {
+    background: rgb(var(--lg-bar-tint) / var(--wsa-ai-frost-a));
+    border-color: rgb(var(--lg-hi) / calc(var(--lg-edge-hi) * 0.25));
+    border-radius: 12px;
+}
+
+:root[data-liquid-glass] .wsa-ai-sources {
+    border-top-color: rgb(var(--lg-lo) / 0.16);
+}
+
+@media (max-width: 640px) {
+    :root[data-liquid-glass] .wsa-ai-panel {
+        border-radius: 24px 24px 0 0;
+    }
+
+    /* The sheet runs off the bottom of the screen: its rim fades out before the (square) bottom corners */
+    :root[data-liquid-glass] .wsa-ai-panel.lg-rim::after {
+        -webkit-mask: linear-gradient(#000 calc(100% - 48px), transparent);
+        mask: linear-gradient(#000 calc(100% - 48px), transparent);
+    }
+}
+
+/* Firefox (and Zen) only lets an element blur what is drawn inside the panel's own layer, not the page behind
+   it, so glass placed inside the fixed panel would show the page through sharp. There the pane's glass
+   goes on the panel itself, and the surfaces inside, which can then only see the pane, carry a stronger
+   tint of their own. Same Firefox test as liquid-glass.css. */
+@supports (background-image: -moz-element(#a)) {
+    :root[data-liquid-glass] .wsa-ai {
+        --wsa-ai-frost-a: 0.84;
+    }
+
+    :root[data-liquid-glass][data-theme="dark"] .wsa-ai {
+        --wsa-ai-frost-a: 0.8;
+    }
+
+    :root[data-liquid-glass] .wsa-ai-panel {
+        background: rgb(var(--lg-tint) / var(--wsa-ai-clear));
+        box-shadow:
+            var(--wsa-ai-sheen),
+            inset 0 0 40px -18px rgb(var(--lg-tint) / var(--lg-rim-a)),
+            0 0 0 1px rgb(var(--lg-lo) / var(--lg-outline)),
+            0 30px 70px -28px rgb(var(--lg-lo) / calc(var(--lg-shadow) + 0.12));
+        backdrop-filter: blur(3px) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    }
+
+    :root[data-liquid-glass] .wsa-ai-panel::before {
+        content: none;
+    }
+
+    :root[data-liquid-glass] :is(.wsa-ai-head, .wsa-ai-dock) {
+        background: rgb(var(--lg-bar-tint) / calc(var(--wsa-ai-frost-a) - 0.2));
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+        :root[data-liquid-glass] .wsa-ai-panel {
+            background: rgb(var(--lg-bar-tint) / 0.92);
+        }
+    }
+}
+
+/* Asked for less transparency: the pane turns nearly solid */
+@media (prefers-reduced-transparency: reduce) {
+    :root[data-liquid-glass] .wsa-ai {
+        --wsa-ai-clear: 0.92;
+        --wsa-ai-frost-a: 0.95;
+    }
+
+    :root[data-liquid-glass] .wsa-ai-panel::before {
+        background: rgb(var(--lg-bar-tint) / var(--wsa-ai-clear));
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .wsa-ai-launcher,
     .wsa-ai.is-open .wsa-ai-panel,
-    .wsa-ai-dots i {
+    .wsa-ai.is-opening :is(.wsa-ai-head, .wsa-ai-dock, .wsa-ai-log > *),
+    .wsa-ai-think,
+    .wsa-ai-goo i,
+    .wsa-ai-quip,
+    .wsa-ai-quip-line,
+    .wsa-ai-bot.is-flowing,
+    .wsa-ai-melt,
+    .wsa-ai-fresh,
+    .wsa-ai-caret,
+    .wsa-ai-cite.wsa-ai-pop,
+    .wsa-ai-rise,
+    .wsa-ai-bot.is-settling,
+    .wsa-ai-user.is-new {
         animation: none !important;
         transition: none !important;
+    }
+
+    .wsa-ai-quip-line.is-leaving {
+        display: none;
     }
 }
 
