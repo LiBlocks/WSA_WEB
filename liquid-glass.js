@@ -1,6 +1,7 @@
-// Experimental "Liquid Glass" appearance. Deliberately separate from the light/dark theme:
-// it only adds data-liquid-glass to <html> plus its own elements, and never reads or writes
-// data-theme or localStorage.theme. Loaded in <head> after liquid-glass.css so a saved choice
+// "Liquid Glass" appearance (experimental, and the site's default look). Deliberately separate from the
+// light/dark theme: it only adds data-liquid-glass to <html> plus its own elements, and never reads or
+// writes data-theme or localStorage.theme. On unless the visitor turned it off in Settings (or asks their
+// system for less transparency and hasn't turned it on). Loaded in <head> after liquid-glass.css so it
 // applies before first paint. Removing the attribute restores the regular site.
 (function () {
     if (window.WSALiquidGlass) return;
@@ -10,15 +11,17 @@
     const KEY = 'wsa-liquid-glass';
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+    const reduceTransparency = window.matchMedia('(prefers-reduced-transparency: reduce)');
+
     function savedOn() {
-        try { return localStorage.getItem(KEY) === 'on'; } catch (e) { return false; }
+        let v = null;
+        try { v = localStorage.getItem(KEY); } catch (e) {}
+        if (v === 'on' || v === 'off') return v === 'on';
+        return !reduceTransparency.matches;
     }
 
     function save(on) {
-        try {
-            if (on) localStorage.setItem(KEY, 'on');
-            else localStorage.removeItem(KEY);
-        } catch (e) {}
+        try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) {}
     }
 
     // Escape hatch: opening any page with ?glass=off switches the mode off before anything is drawn
@@ -38,76 +41,37 @@
         return root.hasAttribute('data-liquid-glass');
     }
 
-    /* ---------- Toggle buttons and confirmation ---------- */
+    /* ---------- Switches (the settings panel and the menu drawer) ---------- */
 
-    let dialog = null;
-    let returnFocus = null;
     let status = null;
 
+    // Off on the left, the lens on the right; the knob sits under the active one (like the theme switch)
     function makeToggle() {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'lg-toggle';
+        button.className = 'lg-switch';
+        button.setAttribute('role', 'switch');
+        button.setAttribute('aria-checked', 'false');
         button.setAttribute('aria-label', 'Liquid Glass (experimental)');
-        button.innerHTML = LENS_ICON;
+        button.innerHTML = '<svg class="lg-switch-off" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">' +
+            '<rect x="5" y="5" width="14" height="14" rx="3"/></svg><span class="knob" aria-hidden="true"></span>' +
+            LENS_ICON.replace('<svg ', '<svg class="lg-switch-on" ');
         button.addEventListener('click', () => {
             if (isOn()) disable(true);
-            else confirmEnable(button);
+            else enable(true);
         });
         return button;
     }
 
     function syncToggles() {
         const on = isOn();
-        document.querySelectorAll('.lg-toggle').forEach(button => {
-            button.setAttribute('aria-pressed', String(on));
-            button.dataset.tip = on ? 'Turn off Liquid Glass' : 'Liquid Glass (experimental)';
-            if (on) button.removeAttribute('aria-haspopup');
-            else button.setAttribute('aria-haspopup', 'dialog');
+        document.querySelectorAll('.lg-switch').forEach(button => {
+            button.setAttribute('aria-checked', String(on));
         });
     }
 
     function announce(text) {
         if (status) status.textContent = text;
-    }
-
-    function buildDialog() {
-        const d = document.createElement('dialog');
-        d.className = 'wsa-dialog lg-confirm';
-        d.setAttribute('aria-labelledby', 'lg-confirm-title');
-        d.setAttribute('aria-describedby', 'lg-confirm-text');
-        d.innerHTML = `
-            <form method="dialog">
-                <div class="lg-confirm-body">
-                    <span class="lg-confirm-icon">${LENS_ICON}</span>
-                    <h2 id="lg-confirm-title">Liquid Glass is experimental</h2>
-                    <p id="lg-confirm-text">This appearance mode uses experimental visual effects and animations. It may cause visual glitches, performance problems, or unexpected behavior on some pages and devices. Your regular light and dark modes will remain available.</p>
-                    <p class="lg-confirm-note">You can turn it off at any time with the same button.</p>
-                </div>
-                <div class="lg-confirm-actions">
-                    <button type="submit" value="cancel" class="btn btn-secondary" autofocus>Cancel</button>
-                    <button type="submit" value="enable" class="btn btn-primary">Enable Liquid Glass</button>
-                </div>
-            </form>`;
-        // A click on the backdrop lands on the dialog element itself
-        d.addEventListener('click', e => {
-            if (e.target === d) d.close('cancel');
-        });
-        d.addEventListener('close', () => {
-            if (!document.querySelector('dialog[open]')) document.body.classList.remove('dialog-open');
-            if (d.returnValue === 'enable') enable(true);
-            if (returnFocus && returnFocus.isConnected) returnFocus.focus({ preventScroll: true });
-        });
-        document.body.appendChild(d);
-        return d;
-    }
-
-    function confirmEnable(trigger) {
-        if (!dialog) dialog = buildDialog();
-        returnFocus = trigger;
-        dialog.returnValue = '';
-        dialog.showModal();
-        document.body.classList.add('dialog-open');
     }
 
     function enable(byUser) {
@@ -669,7 +633,7 @@
     const LENS_CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .menu-fab';
     const LENS_PANES = CARDS + ', .stat-card, .expandable-section, .achievement, .tl-toggle, .search-field, ' +
         '.module-card:not(.expandable-section .module-card)';
-    const LENS_SKIP = 'header, .nav-drawer, dialog, footer';
+    const LENS_SKIP = 'header, .nav-drawer, .settings-panel, dialog, footer';
     const backdropLens = !!(navigator.userAgentData && navigator.userAgentData.brands &&
         navigator.userAgentData.brands.some(b => b.brand === 'Chromium')) &&
         window.CSS && CSS.supports('backdrop-filter', 'blur(1px)');
@@ -684,7 +648,6 @@
     // windows) it still gets the split rim light, all the way round (assistant.css).
     const AI_LENS = { bezel: 48, shift: 25, floor: 0.82, dispersion: 0.27 };
     const LENS_VAR = copyLens ? '--lg-refract-copy' : '--lg-refract';
-    const reduceTransparency = window.matchMedia('(prefers-reduced-transparency: reduce)');
     // Phones, tablets and small windows (the stylesheet's lite mode) refract the controls only
     const lite = window.matchMedia('(pointer: coarse), (max-width: 768px)');
     const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -1211,8 +1174,12 @@
     // Listening on window, not document: window listeners run after navigation.js's
     // document-level DOMContentLoaded handler, so the mobile drawer exists by then.
     window.addEventListener('DOMContentLoaded', () => {
-        const themeToggle = document.querySelector('.navbar > .theme-toggle');
-        if (themeToggle) themeToggle.after(makeToggle());
+        // The settings panel (navigation.js) has a row waiting for the switch; it shows once filled
+        const slot = document.querySelector('.settings-glass');
+        if (slot) {
+            slot.appendChild(makeToggle());
+            slot.hidden = false;
+        }
 
         const drawerFooter = document.querySelector('.nav-drawer-footer');
         if (drawerFooter) {

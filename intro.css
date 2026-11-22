@@ -1,107 +1,354 @@
-/* WSA intro: the page opens behind a monochrome curtain, the insignia glides in, the agency name is
-   traced in outline and filled, then the curtain pulls down to reveal the page. Played by intro.js; without that script nothing here
-   applies. The whole sequence is CSS animations, timed from the moment the curtain is added (all
-   delays below are measured from then). */
+/* WSA intro: a cinematic opening on the homepage (intro.js runs it, and decides when).
+
+   1. Opening: on near-black, the insignia fades in, a planet rises out of the dark behind it, an orbit is
+      traced around it, then the agency's name and motto.
+   2. The opening dissolves into the film (media/intro/: an orbital sunrise rendered in Blender).
+   3. The film pulls back from the planet, which shrinks into a disc on which the insignia builds itself;
+      the WSA wordmark swipes in beneath it, the black clears to the homepage and the two drop hard onto
+      it, then fly to their places (the header logo and the hero's insignia) while the page's buttons and
+      panels fade in outwards from the impact.
+
+   Everything here is scoped to .wsa-intro and to classes intro.js puts on <html> for the length of the
+   intro; with neither present nothing in this file applies. Timings live in intro.js. */
 
 :root {
-    --wsa-intro-bg: #fff;
-    --wsa-intro-fg: #0a0a0a;
+    --wsa-intro-ink: #f4f6fb;
+    --wsa-intro-night: #020308;
+    --wsa-intro-accent: #9cb7f2;
 }
 
-:root[data-theme="dark"] {
-    --wsa-intro-bg: #000;
-    --wsa-intro-fg: #f5f5f5;
-}
-
-/* Covers the page from the first paint, before <body> exists; the curtain takes over once it does */
+/* Covers the page from the first paint until the intro itself exists */
 :root.wsa-intro-pending::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 2147483000;
-    background: var(--wsa-intro-bg);
+    background: var(--wsa-intro-night);
+}
+
+/* While the intro runs, the two logos it is going to deliver are kept in place but invisible */
+:root.wsa-intro-running .navbar .logo,
+:root.wsa-intro-running .hero-logo {
+    visibility: hidden;
+}
+
+:root.wsa-intro-running.wsa-intro-logo-home .navbar .logo,
+:root.wsa-intro-running.wsa-intro-badge-home .hero-logo {
+    visibility: visible;
 }
 
 .wsa-intro {
     position: fixed;
     inset: 0;
     z-index: 2147483000;
+    overflow: hidden;
+    color: var(--wsa-intro-ink);
+    background: var(--wsa-intro-night);
+    font-family: inherit;
+    -webkit-user-select: none;
+    user-select: none;
+    contain: layout style;
+}
+
+.wsa-intro[hidden] {
+    display: none;
+}
+
+/* ---------- The film's frame (poster, video and the orbit drawn over them share one box) ---------- */
+
+.wsa-intro-media {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 50%;
+}
+
+/* Phones held upright: a widescreen band across the middle, its edges melting into the dark */
+@media (max-aspect-ratio: 6/5) {
+    .wsa-intro-media {
+        inset: auto;
+        left: -16vw;
+        width: 132vw;
+        height: calc(132vw * 9 / 16);
+        top: calc(50% - 132vw * 9 / 32);
+        -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+        mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+    }
+}
+
+.wsa-intro-media > img,
+.wsa-intro-media > video,
+.wsa-intro-media > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.wsa-intro-still,
+.wsa-intro-film,
+.wsa-intro-end {
+    opacity: 0;
+}
+
+.wsa-intro-orbit {
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;            /* shown when intro.js starts tracing it */
+}
+
+.wsa-intro-orbit path {
+    fill: none;
+    stroke: rgba(196, 214, 255, 0.55);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.wsa-intro-orbit circle {
+    fill: #fff;
+    filter: drop-shadow(0 0 6px rgba(170, 200, 255, 0.95));
+}
+
+/* ---------- The opening's lockup: insignia, name, motto ---------- */
+
+.wsa-intro-lockup {
+    position: absolute;
+    left: 50%;
+    top: 41%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    overflow: hidden;
-    background: var(--wsa-intro-bg);
-    color: var(--wsa-intro-fg);
-    animation: wsa-intro-leave 0.8s cubic-bezier(0.76, 0, 0.24, 1) 2.7s forwards;
+    width: min(92vw, 760px);
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
 }
 
-/* Rises from below the viewport and settles at the centre, decelerating */
-.wsa-intro-logo {
-    display: block;
-    width: clamp(96px, 22vmin, 148px);
-    height: auto;
+.wsa-intro-emblem {
+    position: relative;
+    width: clamp(96px, 20vmin, 168px);
     aspect-ratio: 1;
-    transform: translateY(calc(50vh + 100%));
-    animation: wsa-intro-logo 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+    filter: drop-shadow(0 0 28px rgba(120, 160, 255, 0.22));
+}
+
+/* The real insignia, and the SVG that builds it up from its layers (intro.js), in the same place */
+.wsa-intro-insignia,
+.wsa-intro-badge-img,
+.wsa-intro-build {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.wsa-intro-insignia,
+.wsa-intro-badge-img {
+    opacity: 0;
+}
+
+.wsa-intro-build {
+    overflow: visible;
 }
 
 .wsa-intro-title {
-    /* SVG text in the site font, sized like the old <p> title; it never moves */
     display: block;
-    flex-shrink: 0;
     width: 100%;
-    height: 1.4em;
+    height: 1.6em;
+    margin-top: clamp(1rem, 3.2vmin, 1.8rem);
     overflow: visible;
-    font-size: clamp(1.4rem, 4.2vw, 2.1rem);
+    font-size: clamp(1.05rem, 3.3vw, 1.85rem);
     font-weight: 700;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.24em;
 }
 
-/* Every letter runs the same sequence on its own: its outline is drawn by sliding a dash along its
-   contours at a steady pace, the fill comes in quickly, then the outline fades. Each letter starts
-   a moment after the one before (--i is its position among the letters) without waiting for it to
-   finish, so the word ripples in from left to right. The resting style is plain filled text, so the
-   title stays readable if these animations never run. */
+/* Each letter's outline is traced, then filled, left to right (the original intro's effect) */
 .wsa-intro-title tspan {
-    --wsa-start: calc(0.95s + var(--i) * 0.03s);
     fill: currentColor;
-    fill-opacity: 1;
+    fill-opacity: 0;
     stroke: currentColor;
     stroke-opacity: 0;
     stroke-width: 1px;
     stroke-linejoin: round;
-    /* One dash, longer than any letter's outline at the largest title size (33.6px), then a gap far
-       longer than the whole word, so no stray piece of outline can show before or after the dash
-       on any engine. Plain numbers (user units = px here): no em or custom properties, which some
-       mobile engines resolve differently inside dash patterns and keyframes. */
     stroke-dasharray: 260 4000;
+}
+
+.wsa-intro.is-titled .wsa-intro-title tspan {
+    --wsa-start: calc(var(--i) * 0.035s);
     animation:
-        wsa-intro-trace 0.5s linear var(--wsa-start) both,
-        wsa-intro-fill 0.15s ease-out calc(var(--wsa-start) + 0.5s) both,
-        wsa-intro-edge 0.12s ease-out calc(var(--wsa-start) + 0.65s) both;
+        wsa-intro-trace 0.55s linear var(--wsa-start) both,
+        wsa-intro-fill 0.2s ease-out calc(var(--wsa-start) + 0.5s) both,
+        wsa-intro-edge 0.15s ease-out calc(var(--wsa-start) + 0.68s) both;
 }
 
-@keyframes wsa-intro-leave {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
+.wsa-intro-motto {
+    margin: clamp(0.5rem, 1.6vmin, 0.85rem) 0 0;
+    font-size: clamp(0.66rem, 1.5vw, 0.9rem);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--wsa-intro-accent);
+    opacity: 0;
 }
 
-@keyframes wsa-intro-logo {
-    to { transform: translateY(0); }
+/* ---------- The wordmark in the corner and the badge that the planet becomes (the insignia builds
+   itself in it: the same img + SVG pair as the opening's emblem) ---------- */
+
+.wsa-intro-wordmark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    white-space: nowrap;
+    line-height: normal;
+    transform-origin: 0 0;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+/* The ring of light that spreads out when the insignia lands (over the page, light or dark) */
+.wsa-intro-shock {
+    position: absolute;
+    border: 2px solid rgba(120, 155, 240, 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 22px rgba(110, 150, 255, 0.45), inset 0 0 14px rgba(110, 150, 255, 0.3);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.wsa-intro-badge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+    transform-origin: 0 0;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+/* ---------- Controls: sound (from the start) and skip (once the film begins) ---------- */
+
+.wsa-intro-control {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 38px;
+    padding: 0 0.95rem;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(244, 246, 251, 0.82);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s, color 0.2s, border-color 0.2s, background-color 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.wsa-intro-control.is-shown {
+    opacity: 1;
+    visibility: visible;
+}
+
+.wsa-intro-control:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.wsa-intro-control:focus-visible {
+    outline: 2px solid var(--wsa-intro-accent);
+    outline-offset: 3px;
+}
+
+.wsa-intro-control svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.wsa-intro-skip {
+    right: max(1.25rem, env(safe-area-inset-right));
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.wsa-intro-sound {
+    top: 1rem;
+    right: max(1.25rem, env(safe-area-inset-right));
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+}
+
+.wsa-intro-sound .is-on,
+.wsa-intro-sound[aria-pressed="true"] .is-off {
+    display: none;
+}
+
+.wsa-intro-sound[aria-pressed="true"] .is-on {
+    display: block;
+}
+
+/* Once the page starts to appear, the intro no longer takes clicks */
+.wsa-intro.is-releasing {
+    pointer-events: none;
+}
+
+.wsa-intro.is-releasing .wsa-intro-control {
+    pointer-events: auto;
+}
+
+.wsa-intro-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .wsa-intro-control {
+        height: 36px;
+        font-size: 0.75rem;
+    }
+
+    .wsa-intro-sound {
+        width: 36px;
+    }
+}
+
+/* ---------- The homepage appearing behind the logo's flight ----------
+   intro.js marks the header's links and buttons, the hero's text and stat cards, the assistant's button and
+   each panel in view as .wsa-intro-piece while the screen is still dark, then adds .is-in to them one after
+   another. Once the last is in, both classes come off again (the end state is the page's ordinary state). */
+
+.wsa-intro-piece {
+    transition: opacity 0.8s ease, transform 1s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.wsa-intro-piece:not(.is-in) {
+    opacity: 0 !important;
+    transform: translateY(12px) !important;
 }
 
 @keyframes wsa-intro-trace {
-    from {
-        stroke-dashoffset: 260;
-        stroke-opacity: 1;
-    }
-    to {
-        stroke-dashoffset: 0;
-        stroke-opacity: 1;
-    }
+    from { stroke-dashoffset: 260; stroke-opacity: 1; }
+    to { stroke-dashoffset: 0; stroke-opacity: 1; }
 }
 
 @keyframes wsa-intro-fill {
@@ -112,4 +359,29 @@
 @keyframes wsa-intro-edge {
     from { stroke-opacity: 1; }
     to { stroke-opacity: 0; }
+}
+
+/* Reduced motion: intro.js plays a short, still version (no film, no movement); nothing here moves */
+@media (prefers-reduced-motion: reduce) {
+    .wsa-intro.is-titled .wsa-intro-title tspan {
+        animation: none;
+        fill-opacity: 1;
+    }
+
+    .wsa-intro-piece:not(.is-in) {
+        transform: none !important;
+    }
+}
+
+@media print {
+    .wsa-intro {
+        display: none !important;
+    }
+}
+
+/* A first visit's language question (i18n.js) comes before the intro, on the intro's own black */
+:root.wsa-intro-pending .wsa-dialog.lang-picker::backdrop {
+    background-color: #020308;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }

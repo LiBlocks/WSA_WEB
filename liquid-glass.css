@@ -16,6 +16,72 @@
 @property --lg-glow { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --lg-angle { syntax: '<angle>'; inherits: true; initial-value: 158deg; }
 
+/* ---------- The switch in the settings panel and the menu drawer (liquid-glass.js) ----------
+   Shaped like the light/dark switch beside it: a plain pane on the left, the lens on the right, and the
+   knob under the active one. */
+
+.lg-switch {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 54px;
+    height: 28px;
+    padding: 0 6px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.3s;
+}
+
+.lg-switch:hover {
+    border-color: var(--accent);
+}
+
+.lg-switch svg {
+    position: relative;
+    z-index: 1;
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: color 0.3s;
+}
+
+.lg-switch .lg-switch-off,
+.lg-switch[aria-checked="true"] .lg-switch-on {
+    color: var(--bg-primary);
+}
+
+.lg-switch .lg-switch-on,
+.lg-switch[aria-checked="true"] .lg-switch-off {
+    color: var(--text-secondary);
+}
+
+.lg-switch .lg-lens {
+    stroke: currentColor;        /* not the background diagrams' faint .lg-lens stroke */
+}
+
+.lg-switch .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: var(--text-primary);
+    transition: transform 0.3s ease;
+}
+
+.lg-switch[aria-checked="true"] .knob {
+    transform: translateX(26px);
+}
+
 /* ---------- Toggle button (always present, next to the light/dark switch) ---------- */
 
 .lg-toggle {
@@ -121,63 +187,6 @@
     .js .navbar > .lg-toggle {
         display: none;
     }
-}
-
-/* ---------- Confirmation dialog ---------- */
-
-.lg-confirm {
-    width: min(440px, calc(100% - 2rem));
-}
-
-.lg-confirm-body {
-    padding: 1.6rem 1.6rem 0.4rem;
-}
-
-.lg-confirm-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin-bottom: 0.9rem;
-    color: var(--accent);
-    background-color: color-mix(in srgb, var(--accent) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    border-radius: 50%;
-}
-
-.lg-confirm-icon svg {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-}
-
-.lg-confirm h2 {
-    margin: 0 0 0.6rem;
-    font-size: 1.25rem;
-    letter-spacing: -0.01em;
-}
-
-.lg-confirm p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: var(--text-secondary);
-}
-
-.lg-confirm .lg-confirm-note {
-    margin-top: 0.6rem;
-    font-size: 0.85rem;
-}
-
-.lg-confirm-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 0.6rem;
-    padding: 1.1rem 1.6rem 1.4rem;
 }
 
 /* ---------- Liquid Glass tokens ---------- */
@@ -642,7 +651,7 @@
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .menu-fab
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .lg-switch, .menu-fab
 ) {
     --lg-a: var(--lg-fill);
     --lg-e: var(--lg-edge-hi);
@@ -663,7 +672,7 @@
 :root[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .menu-fab
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .lg-switch, .menu-fab
 )::before {
     content: '';
     position: absolute;
@@ -743,7 +752,7 @@
 :root.lg-scrolling[data-liquid-glass] :where(
     .stat-card, .overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
     .expandable-section, .achievement, .tl-toggle, .search-field, .module-card:not(.expandable-section .module-card),
-    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle
+    .btn, .chip, .icon-button:not(.lightbox-nav), .related-chip, .lg-toggle, .lang-button, .theme-toggle, .lang-toggle, .lg-switch
 ) {
     backdrop-filter: blur(var(--lg-soften));
 }
@@ -868,7 +877,7 @@
     background-color: rgb(var(--lg-lo) / 0.3);
 }
 
-:root[data-liquid-glass] .wsa-dialog {
+:root[data-liquid-glass] :is(.wsa-dialog, .settings-panel) {
     background: rgb(var(--lg-bar-tint) / var(--lg-fill-dialog));
     border-color: rgb(var(--lg-hi) / calc(var(--lg-edge-hi) * 0.3));
     box-shadow:
@@ -878,6 +887,17 @@
         0 30px 80px -24px rgb(var(--lg-lo) / calc(var(--lg-shadow) + 0.1));
     -webkit-backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
     backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+}
+
+:root[data-liquid-glass] .settings-choice,
+:root[data-liquid-glass] .lang-picker-option {
+    background-color: rgb(var(--lg-ink) / 0.06);
+    border-color: transparent;
+    box-shadow: inset 0 0 0 1px rgb(var(--lg-lo) / var(--lg-hairline));
+}
+
+:root[data-liquid-glass] .lang-picker-option:is(:hover, :focus-visible) {
+    box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 /* ::backdrop does not inherit custom properties in every browser, so plain colours here */

@@ -1,7 +1,8 @@
 // Site language: English (the source) or Traditional Chinese. Loaded in <head> right after page-init.js.
 //
-// The pages and games are written in English. When Traditional Chinese is chosen (the switch in the menu
-// drawer, saved in localStorage), this file loads the dictionary (i18n-zh-Hant.js) and translates the page
+// The pages and games are written in English. The first page a visitor opens asks which language they want
+// (askLanguage below); the answer is kept in localStorage until they change it in Settings (the gear in the
+// top bar) or the menu drawer. When Traditional Chinese is chosen, this file loads the dictionary (i18n-zh-Hant.js) and translates the page
 // in place as it is parsed and whenever scripts change it: text, the attributes people read or hear
 // (title, aria-label, alt, placeholder…), text drawn on canvases (game HUDs, certificates, graphs), page
 // titles, dialogs and shared or copied text. Switching back restores the original English.
@@ -18,7 +19,7 @@
     'use strict';
     var KEY = 'wsa-lang';
     var ZH = 'zh-Hant';
-    var DICT_SRC = 'i18n-zh-Hant.js?v=1';
+    var DICT_SRC = 'i18n-zh-Hant.js?v=3';
     var root = document.documentElement;
 
     var ATTRS = ['title', 'aria-label', 'alt', 'placeholder', 'data-tip', 'aria-description', 'aria-roledescription', 'aria-valuetext', 'label'];
@@ -472,19 +473,97 @@
 
     function setLang(lang) {
         wanted = lang === ZH ? ZH : 'en';
-        try {
-            if (wanted === ZH) localStorage.setItem(KEY, ZH);
-            else localStorage.removeItem(KEY);
-        } catch (e) {}
+        try { localStorage.setItem(KEY, wanted); } catch (e) {}
+        if (asking) chosen(wanted);
         if (wanted === ZH) loadDictionary(start);
         else stop();
     }
 
-    // Other open tabs of the site follow along
+    /* ---------- First visit: which language? ---------- */
+
+    // Asked once, on the first page a visitor opens, before anything else happens on it (the homepage's
+    // intro waits for it: see afterChoice). The answer is remembered; changing it later in Settings replaces
+    // it. Without working storage nothing is asked, since the answer couldn't be kept. Pages shown inside a
+    // frame never ask.
+    var asking = false, waiting = [], picker = null;
+    try {
+        var saved = localStorage.getItem(KEY);
+        asking = saved !== ZH && saved !== 'en' && window.self === window.top;
+    } catch (e) {}
+
+    I.choosing = function () { return asking; };
+    I.afterChoice = function (fn) { if (asking) waiting.push(fn); else fn(); };
+
+    function suggested() {
+        var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+        for (var i = 0; i < langs.length; i++) {
+            var l = String(langs[i]).toLowerCase();
+            if (l.indexOf('zh') === 0) return ZH;
+            if (l.indexOf('en') === 0) return 'en';
+        }
+        return 'en';
+    }
+
+    function chosen() {
+        if (!asking) return;
+        asking = false;
+        if (picker && picker.open) picker.close('chosen');
+        var run = waiting;
+        waiting = [];
+        run.forEach(function (fn) { try { fn(); } catch (e) { setTimeout(function () { throw e; }); } });
+    }
+
+    var GLOBE = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/>' +
+        '<path d="M3 12h18M12 3c2.6 2.5 3.9 5.5 3.9 9s-1.3 6.5-3.9 9c-2.6-2.5-3.9-5.5-3.9-9S9.4 5.5 12 3z"/></svg>';
+
+    function askLanguage() {
+        if (!asking || picker || !document.body) return;
+        var d = picker = document.createElement('dialog');
+        if (!d.showModal) { setLang(suggested()); return; }
+        d.className = 'wsa-dialog lang-picker';
+        d.setAttribute('translate', 'no');
+        d.setAttribute('aria-labelledby', 'lang-picker-title');
+        d.innerHTML =
+            '<div class="lang-picker-body">' +
+                '<span class="lang-picker-icon">' + GLOBE + '</span>' +
+                '<h2 class="lang-picker-title" id="lang-picker-title"><span lang="en">Choose your language</span>' +
+                    '<span lang="zh-Hant">選擇語言</span></h2>' +
+                '<div class="lang-picker-options">' +
+                    '<button type="button" class="lang-picker-option" data-lang="en" lang="en">English</button>' +
+                    '<button type="button" class="lang-picker-option" data-lang="zh-Hant" lang="zh-Hant">繁體中文' +
+                        '<small lang="en">Traditional Chinese</small></button>' +
+                '</div>' +
+                '<p class="lang-picker-hint"><span lang="en">You can change this any time in Settings.</span>' +
+                    '<span lang="zh-Hant">之後可隨時在「設定」中更改。</span></p>' +
+            '</div>';
+        var first = suggested();
+        Array.prototype.forEach.call(d.querySelectorAll('.lang-picker-option'), function (b) {
+            if (b.getAttribute('data-lang') === first) b.autofocus = true;
+            b.addEventListener('click', function () { setLang(b.getAttribute('data-lang')); });
+        });
+        // Escape doesn't dismiss it unanswered; if the browser closes it anyway, the suggestion is kept
+        d.addEventListener('cancel', function (e) { e.preventDefault(); });
+        d.addEventListener('close', function () {
+            if (asking) setLang(first);
+            if (!document.querySelector('dialog[open]')) document.body.classList.remove('dialog-open');
+            if (d.parentNode) d.parentNode.removeChild(d);
+        });
+        document.body.appendChild(d);
+        d.showModal();
+        document.body.classList.add('dialog-open');
+    }
+
+    if (asking) {
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', askLanguage);
+        else askLanguage();
+    }
+
+    // Other open tabs of the site follow along (and stop asking, if one of them was answered)
     window.addEventListener('storage', function (e) {
         if (e.key !== KEY && e.key !== null) return;
         var v = null;
         try { v = localStorage.getItem(KEY); } catch (err) {}
+        if (asking && (v === ZH || v === 'en')) chosen();
         if ((v === ZH) !== I.on) setLang(v === ZH ? ZH : 'en');
     });
 

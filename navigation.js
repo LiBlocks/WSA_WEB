@@ -6,6 +6,7 @@ const CLOSE_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden=
 let lastScrollTop = 0;
 let scrollTicking = false;
 let mobileNav = null;
+let settings = null;
 
 // Theme (the inline script in each page's <head> applies the initial theme before paint)
 function isDark() {
@@ -33,11 +34,10 @@ window.addEventListener('storage', e => {
     }
 });
 
-// Language switches: the last row of the drawer on phones and tablets, and a small button at the left of
-// the top bar on desktop. The language's own name labels them, so they read the same in either language;
-// i18n.js does the translating and remembers the choice.
+// Language: a choice in the settings panel (below) and the last row of the drawer on phones and tablets.
+// The languages' own names label them, so they read the same in either language; i18n.js does the
+// translating and remembers the choice.
 const LANG_LABEL = '繁體中文 (Traditional Chinese)';
-const LANG_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>';
 
 function isChinese() {
     return window.WSAi18n.lang === 'zh-Hant';
@@ -49,11 +49,11 @@ function toggleLanguage() {
 
 function syncLanguageSwitches() {
     const on = isChinese();
-    document.querySelectorAll('.lang-toggle, .lang-button').forEach(control => {
+    document.querySelectorAll('.lang-toggle').forEach(control => {
         control.setAttribute('aria-checked', String(on));
     });
-    document.querySelectorAll('.lang-button').forEach(button => {
-        button.dataset.tip = on ? 'English' : LANG_LABEL;
+    document.querySelectorAll('.settings-lang [data-lang]').forEach(button => {
+        button.setAttribute('aria-pressed', String((button.dataset.lang === 'zh-Hant') === on));
     });
 }
 
@@ -72,17 +72,109 @@ function buildLanguageRow() {
     return row;
 }
 
-function buildLanguageButton() {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'lang-button';
-    button.setAttribute('role', 'switch');
-    button.setAttribute('aria-checked', 'false');
-    button.setAttribute('aria-label', LANG_LABEL);
-    button.setAttribute('translate', 'no');
-    button.innerHTML = LANG_ICON;
-    button.addEventListener('click', toggleLanguage);
-    return button;
+// Settings: a gear at the right end of the top bar opens a small panel with the language, light or dark,
+// and Liquid Glass (liquid-glass.js puts its switch in that row and shows it). The panel lives on <body>,
+// placed under the gear, for the same reason as the drawer below.
+const GEAR_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/>' +
+    '<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+
+function buildSettings() {
+    const navbar = header.querySelector('.navbar');
+    const gear = document.createElement('button');
+    gear.type = 'button';
+    gear.className = 'icon-button settings-button';
+    gear.setAttribute('aria-label', 'Settings');
+    gear.setAttribute('aria-expanded', 'false');
+    gear.setAttribute('aria-controls', 'settings-panel');
+    gear.title = 'Settings';
+    gear.innerHTML = GEAR_ICON;
+    const menuButton = navbar.querySelector('.menu-button');
+    if (menuButton) menuButton.before(gear);
+    else navbar.appendChild(gear);
+
+    const panel = document.createElement('div');
+    panel.className = 'settings-panel';
+    panel.id = 'settings-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-labelledby', 'settings-title');
+    panel.hidden = true;
+    panel.innerHTML = `
+        <h2 class="settings-title" id="settings-title">Settings</h2>
+        <div class="settings-row settings-lang" hidden>
+            <span class="settings-label" id="settings-lang-label">Language</span>
+            <div class="settings-choice" role="group" aria-labelledby="settings-lang-label" translate="no">
+                <button type="button" data-lang="en" lang="en" aria-pressed="true">English</button>
+                <button type="button" data-lang="zh-Hant" lang="zh-Hant" aria-pressed="false">繁體中文</button>
+            </div>
+        </div>
+        <div class="settings-row settings-theme"><span class="settings-label">Dark mode</span></div>
+        <div class="settings-row settings-glass" hidden><span class="settings-label">Liquid Glass <small>Experimental</small></span></div>`;
+    const themeToggle = navbar.querySelector('.theme-toggle');
+    if (themeToggle) panel.querySelector('.settings-theme').appendChild(themeToggle);
+    if (window.WSAi18n) {
+        panel.querySelector('.settings-lang').hidden = false;
+        panel.querySelectorAll('.settings-lang [data-lang]').forEach(button => {
+            button.addEventListener('click', () => window.WSAi18n.set(button.dataset.lang));
+        });
+    }
+    document.body.appendChild(panel);
+
+    // Right-aligned with the gear, but never past either edge of the screen
+    function place() {
+        const r = gear.getBoundingClientRect();
+        const vw = document.documentElement.clientWidth;
+        const right = Math.min(Math.max(12, vw - r.right), Math.max(12, vw - panel.offsetWidth - 12));
+        panel.style.top = Math.round(r.bottom + 10) + 'px';
+        panel.style.right = Math.round(right) + 'px';
+        return r.bottom > 0 && r.top < window.innerHeight;
+    }
+
+    function isOpen() {
+        return !panel.hidden;
+    }
+
+    function open() {
+        panel.hidden = false;
+        place();
+        gear.setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(() => panel.classList.add('is-open'));
+        const first = panel.querySelector('.settings-row:not([hidden]) button');
+        if (first) first.focus({ preventScroll: true });
+    }
+
+    function close(refocus) {
+        if (!isOpen()) return;
+        panel.classList.remove('is-open');
+        panel.hidden = true;
+        gear.setAttribute('aria-expanded', 'false');
+        if (refocus) gear.focus({ preventScroll: true });
+    }
+
+    gear.addEventListener('click', () => (isOpen() ? close(true) : open()));
+    document.addEventListener('pointerdown', e => {
+        if (isOpen() && !panel.contains(e.target) && !gear.contains(e.target)) close(false);
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && isOpen()) {
+            e.preventDefault();
+            close(true);
+        }
+    });
+    // Tabbing out of the panel closes it
+    panel.addEventListener('focusout', e => {
+        if (e.relatedTarget && !panel.contains(e.relatedTarget) && e.relatedTarget !== gear) close(false);
+    });
+    // It follows the gear; once the gear has scrolled or slid away (the bar hides on desktop), it closes
+    const follow = () => {
+        if (isOpen() && !place()) close(false);
+    };
+    window.addEventListener('scroll', follow, { passive: true });
+    window.addEventListener('resize', follow);
+    header.addEventListener('transitionend', () => {
+        if (header.classList.contains('hide')) close(false);
+    });
+
+    return { close };
 }
 
 // Mobile drawer + floating menu button. Appended to <body> because the header's
@@ -187,10 +279,11 @@ document.addEventListener('DOMContentLoaded', function() {
         link.classList.toggle('active', link.getAttribute('href') === currentPage);
     });
 
+    // The drawer copies the bar's theme switch first; then the settings panel takes the original
     mobileNav = buildMobileNav();
+    settings = buildSettings();
 
     if (window.WSAi18n) {
-        header.querySelector('.navbar').prepend(buildLanguageButton());
         window.addEventListener('wsa-langchange', syncLanguageSwitches);
         syncLanguageSwitches();
     }
@@ -206,6 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', onScroll, { passive: true });
 
     desktopQuery.addEventListener('change', () => {
+        settings.close(false);
         header.classList.remove('hide');
         header.classList.add('show');
         mobileNav.close();
