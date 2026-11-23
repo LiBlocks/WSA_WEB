@@ -34,17 +34,11 @@ window.addEventListener('storage', e => {
     }
 });
 
-// Language: a choice in the settings panel (below) and the last row of the drawer on phones and tablets.
-// The languages' own names label them, so they read the same in either language; i18n.js does the
-// translating and remembers the choice.
-const LANG_LABEL = '繁體中文 (Traditional Chinese)';
+// Language: a choice in the settings panel (below). The languages' own names label it, so it reads the same
+// in either language; i18n.js does the translating and remembers the choice.
 
 function isChinese() {
     return window.WSAi18n.lang === 'zh-Hant';
-}
-
-function toggleLanguage() {
-    window.WSAi18n.set(isChinese() ? 'en' : 'zh-Hant');
 }
 
 function syncLanguageSwitches() {
@@ -57,40 +51,35 @@ function syncLanguageSwitches() {
     });
 }
 
-function buildLanguageRow() {
-    const row = document.createElement('div');
-    row.className = 'nav-drawer-footer lang-drawer-row';
-    row.setAttribute('translate', 'no');
-    row.innerHTML = `
-        <span lang="zh-Hant">繁體中文</span>
-        <button type="button" class="lang-toggle" role="switch" aria-checked="false" aria-label="${LANG_LABEL}">
-            <span class="lang-en" aria-hidden="true">EN</span>
-            <span class="knob" aria-hidden="true"></span>
-            <span class="lang-zh" lang="zh-Hant" aria-hidden="true">中</span>
-        </button>`;
-    row.querySelector('.lang-toggle').addEventListener('click', toggleLanguage);
-    return row;
-}
-
-// Settings: a gear at the right end of the top bar opens a small panel with the language, light or dark,
-// and Liquid Glass (liquid-glass.js puts its switch in that row and shows it). The panel lives on <body>,
-// placed under the gear, for the same reason as the drawer below.
+// Settings: a gear opens a small panel with the language, light or dark, and Liquid Glass (liquid-glass.js
+// puts its switch in that row and shows it). On wide screens the gear is at the right end of the top bar
+// and the panel opens under it; on phones and tablets it sits in the bottom-right corner of the menu drawer
+// and the panel opens above it, over the drawer. The panel lives on <body>, for the same reason as the
+// drawer below.
 const GEAR_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/>' +
     '<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
 
-function buildSettings() {
-    const navbar = header.querySelector('.navbar');
+function makeGear(className) {
     const gear = document.createElement('button');
     gear.type = 'button';
-    gear.className = 'icon-button settings-button';
+    gear.className = 'icon-button ' + className;
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
     gear.setAttribute('aria-controls', 'settings-panel');
     gear.title = 'Settings';
     gear.innerHTML = GEAR_ICON;
+    return gear;
+}
+
+function buildSettings() {
+    const navbar = header.querySelector('.navbar');
+    const gear = makeGear('settings-button');
     const menuButton = navbar.querySelector('.menu-button');
     if (menuButton) menuButton.before(gear);
     else navbar.appendChild(gear);
+    const drawerGear = document.querySelector('.nav-drawer .drawer-settings-button');
+    const gears = drawerGear ? [gear, drawerGear] : [gear];
+    let trigger = gear;
 
     const panel = document.createElement('div');
     panel.className = 'settings-panel';
@@ -119,12 +108,16 @@ function buildSettings() {
     }
     document.body.appendChild(panel);
 
-    // Right-aligned with the gear, but never past either edge of the screen
+    // Right-aligned with its gear, never past either edge of the screen: under the bar's gear, above the
+    // drawer's
     function place() {
-        const r = gear.getBoundingClientRect();
+        const r = trigger.getBoundingClientRect();
         const vw = document.documentElement.clientWidth;
         const right = Math.min(Math.max(12, vw - r.right), Math.max(12, vw - panel.offsetWidth - 12));
-        panel.style.top = Math.round(r.bottom + 10) + 'px';
+        const above = trigger !== gear;
+        panel.classList.toggle('is-above', above);
+        panel.style.top = above ? '' : Math.round(r.bottom + 10) + 'px';
+        panel.style.bottom = above ? Math.round(window.innerHeight - r.top + 10) + 'px' : '';
         panel.style.right = Math.round(right) + 'px';
         return r.bottom > 0 && r.top < window.innerHeight;
     }
@@ -133,10 +126,11 @@ function buildSettings() {
         return !panel.hidden;
     }
 
-    function open() {
+    function open(from) {
+        trigger = from || gear;
         panel.hidden = false;
         place();
-        gear.setAttribute('aria-expanded', 'true');
+        trigger.setAttribute('aria-expanded', 'true');
         requestAnimationFrame(() => panel.classList.add('is-open'));
         const first = panel.querySelector('.settings-row:not([hidden]) button');
         if (first) first.focus({ preventScroll: true });
@@ -146,13 +140,13 @@ function buildSettings() {
         if (!isOpen()) return;
         panel.classList.remove('is-open');
         panel.hidden = true;
-        gear.setAttribute('aria-expanded', 'false');
-        if (refocus) gear.focus({ preventScroll: true });
+        gears.forEach(g => g.setAttribute('aria-expanded', 'false'));
+        if (refocus) trigger.focus({ preventScroll: true });
     }
 
-    gear.addEventListener('click', () => (isOpen() ? close(true) : open()));
+    gears.forEach(g => g.addEventListener('click', () => (isOpen() && trigger === g ? close(true) : (close(false), open(g)))));
     document.addEventListener('pointerdown', e => {
-        if (isOpen() && !panel.contains(e.target) && !gear.contains(e.target)) close(false);
+        if (isOpen() && !panel.contains(e.target) && !gears.some(g => g.contains(e.target))) close(false);
     });
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && isOpen()) {
@@ -162,7 +156,7 @@ function buildSettings() {
     });
     // Tabbing out of the panel closes it
     panel.addEventListener('focusout', e => {
-        if (e.relatedTarget && !panel.contains(e.relatedTarget) && e.relatedTarget !== gear) close(false);
+        if (e.relatedTarget && !panel.contains(e.relatedTarget) && !gears.includes(e.relatedTarget)) close(false);
     });
     // It follows the gear; once the gear has scrolled or slid away (the bar hides on desktop), it closes
     const follow = () => {
@@ -170,12 +164,45 @@ function buildSettings() {
     };
     window.addEventListener('scroll', follow, { passive: true });
     window.addEventListener('resize', follow);
-    header.addEventListener('transitionend', () => {
-        if (header.classList.contains('hide')) close(false);
-    });
+    // ...and as soon as the bar is told to hide (with or without a transition: Liquid Glass has none)
+    new MutationObserver(() => {
+        if (header.classList.contains('hide') && trigger === gear) close(false);
+    }).observe(header, { attributes: true, attributeFilter: ['class'] });
+    // Closing the drawer closes a panel opened from it
+    new MutationObserver(() => {
+        if (trigger !== gear && !document.body.classList.contains('nav-open')) close(false);
+    }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
     return { close };
 }
+
+// The logo: the agency's full name whenever the bar has room for it, WSA only when it really doesn't fit
+// (narrow phones, and desktop windows where all the links need the space). Measured, so it adapts to the
+// language and the window. Runs straight away as well, so the intro (which copies the logo) sees the result.
+function fitLogo() {
+    const nav = header.querySelector('.navbar');
+    const logo = nav && nav.querySelector('.logo');
+    if (!logo || !logo.querySelector('.logo-full')) return;
+    nav.dataset.logo = 'full';
+    const cs = getComputedStyle(nav);
+    const avail = nav.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const gap = parseFloat(cs.columnGap) || 0;
+    // what will share the row (the theme switch moves into the settings panel; the gear may not exist yet)
+    const kids = [...nav.children].filter(el => !el.classList.contains('theme-toggle') && el.getClientRects().length);
+    let need = kids.reduce((w, el) => w + Math.max(el.scrollWidth, el.getBoundingClientRect().width), 0) + gap * (kids.length - 1);
+    if (desktopQuery.matches && !nav.querySelector('.settings-button')) need += 36 + gap;
+    nav.dataset.logo = need <= avail + 0.5 ? 'full' : 'short';
+}
+
+let fitFrame = 0;
+function refitLogo() {
+    cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(fitLogo);
+}
+
+fitLogo();
+window.addEventListener('resize', refitLogo);
+window.addEventListener('wsa-langchange', fitLogo);
 
 // Mobile drawer + floating menu button. Appended to <body> because the header's
 // backdrop-filter/transform would make fixed-position children position relative to it.
@@ -191,11 +218,11 @@ function buildMobileNav() {
             <a href="index.html" class="logo">WSA</a>
             <button type="button" class="icon-button nav-close" aria-label="Close menu">${CLOSE_ICON}</button>
         </div>
-        <div class="nav-drawer-footer"><span>Dark mode</span></div>`;
-    const footer = drawer.querySelector('.nav-drawer-footer');
-    drawer.insertBefore(header.querySelector('.nav-menu').cloneNode(true), footer);
-    footer.appendChild(header.querySelector('.theme-toggle').cloneNode(true));
-    if (window.WSAi18n) drawer.appendChild(buildLanguageRow());
+        <div class="nav-drawer-foot"></div>`;
+    const foot = drawer.querySelector('.nav-drawer-foot');
+    drawer.insertBefore(header.querySelector('.nav-menu').cloneNode(true), foot);
+    // Settings (language, light or dark, Liquid Glass) are behind this gear, in the drawer's corner
+    foot.appendChild(makeGear('drawer-settings-button'));
 
     const backdrop = document.createElement('div');
     backdrop.className = 'nav-backdrop';
@@ -236,7 +263,9 @@ function buildMobileNav() {
     backdrop.addEventListener('click', close);
     drawer.querySelectorAll('.nav-menu a').forEach(link => link.addEventListener('click', close));
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') close();
+        // Escape closes the settings panel first, when it is open over the drawer
+        const panel = document.getElementById('settings-panel');
+        if (e.key === 'Escape' && !(panel && !panel.hidden)) close();
     });
 
     return { fab, close };
@@ -282,6 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // The drawer copies the bar's theme switch first; then the settings panel takes the original
     mobileNav = buildMobileNav();
     settings = buildSettings();
+    fitLogo();
 
     if (window.WSAi18n) {
         window.addEventListener('wsa-langchange', syncLanguageSwitches);

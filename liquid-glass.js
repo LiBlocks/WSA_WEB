@@ -633,7 +633,9 @@
     const LENS_CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .menu-fab';
     const LENS_PANES = CARDS + ', .stat-card, .expandable-section, .achievement, .tl-toggle, .search-field, ' +
         '.module-card:not(.expandable-section .module-card)';
-    const LENS_SKIP = 'header, .nav-drawer, .settings-panel, dialog, footer';
+    // On the 2.0 homepage the panels sit over a live 3D canvas: they keep their glass, but a lens that would be
+    // redrawn on every frame of the canvas is not worth its cost there (home/home.css)
+    const LENS_SKIP = 'header, .nav-drawer, .settings-panel, dialog, footer, :root.home-v2 .home-pane';
     const backdropLens = !!(navigator.userAgentData && navigator.userAgentData.brands &&
         navigator.userAgentData.brands.some(b => b.brand === 'Chromium')) &&
         window.CSS && CSS.supports('backdrop-filter', 'blur(1px)');
@@ -1181,14 +1183,6 @@
             slot.hidden = false;
         }
 
-        const drawerFooter = document.querySelector('.nav-drawer-footer');
-        if (drawerFooter) {
-            const row = document.createElement('div');
-            row.className = 'nav-drawer-footer lg-drawer-row';
-            row.innerHTML = '<span>Liquid Glass <small>Experimental</small></span>';
-            row.appendChild(makeToggle());
-            drawerFooter.after(row);
-        }
 
         status = document.createElement('p');
         status.className = 'visually-hidden';

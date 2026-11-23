@@ -14,15 +14,17 @@
  *                     flies in drawing its trail, then the spaceplane; the blue and red arcs sweep in from
  *                     either side; the stars and the horizon; the outer ring. (Layers: media/intro/logo/,
  *                     cut from images/wsa-logo.png.) The wordmark fades and swipes in beneath it, the black
- *                     clears to the homepage, and the lockup drops hard onto the page: the impact sends the
- *                     page's buttons and panels fading in outwards while the two fly to their places on it
- *                     (the header logo and the hero's insignia, measured live).
+ *                     clears to the homepage, and the insignia jumps: an arc from the middle of the screen
+ *                     that lands hard on its own place on the page (the hero's insignia, measured live), the
+ *                     wordmark landing on the header logo. The page's buttons and panels fade in outwards
+ *                     from the landing.
  *
  * Three versions: 'full'; 'lite' (data saver, a slow connection or very little memory: the same intro
  * with two stills of the film instead of the video, nothing large downloaded); 'calm'
  * (prefers-reduced-motion: the opening's lockup fades in and out, nothing moves). If the video fails
- * or can't buffer in time, 'full' falls back to the stills. Sound is off until the browser allows it or
- * the visitor turns it on with the sound button. Escape or "Skip intro" goes straight to the page.
+ * or can't buffer in time, 'full' falls back to the stills. Sound is on: where the browser holds it back
+ * until the visitor interacts, their first click, tap or key press turns it on (or the sound button does).
+ * Escape or "Skip intro" goes straight to the page.
  */
 (function () {
     'use strict';
@@ -49,16 +51,17 @@
     //   badge     the build starts on the shrinking planet (B below), which is gone at L.shrink
     //   swipe     the built insignia rises and the wordmark swipes in beneath it
     //   release   the black clears to the homepage (still blurred at first)
-    //   hop       the lockup hops and drops hard onto the page; the impact is IMPACT_AT of the way through
-    //   home      the two fly to their places on the page
+    //   jump      the insignia leaps from the middle of the screen and lands hard on its own place on the
+    //             homepage (the hero's insignia), the wordmark on the header logo; the landing is LAND_AT of
+    //             the way through, then a squash and a small rebound
     var L = { badge: 500, shrink: 1100, pieces: 600, swipe: 4500, release: 5300, releaseDur: 900,
-              hop: 5700, hopDur: 840, home: 6650, homeDur: 1000, interactive: 6500 };
-    var IMPACT_AT = 0.62;
+              jump: 5700, jumpDur: 1150, interactive: 6500 };
+    var LAND_AT = 0.84;
     // The insignia's build, ms from L.badge
     var B = { disc: [0, 600], wsa: [250, 600], rocket: [750, 750], plane: [1300, 850], blue: [1950, 750], red: [2050, 850],
               stars: [2700, 800], horizon: [2750, 650], ring: [3250, 650], done: 3950 };
     var RIPPLE = 0.9;          // ms per pixel from the impact: the page's parts fade in outwards from it
-    var PIECE_GAP = 30;        // ...but never two at quite the same moment
+    var PIECE_GAP = 45;        // ...but never two at quite the same moment
     // The film's last frame: the planet sits dead centre, its disc (with the thin air glowing round it)
     // 0.702 of the frame's height across (build_scene.py: D_END)
     var PLANET_R = 0.351;
@@ -74,6 +77,14 @@
     };
 
     var running = null;
+
+    // The page can follow along: 'wsa-intro-film' once the film (or its stills) is on screen, 'wsa-intro-release'
+    // as the black clears to the page, 'wsa-intro-end' when the intro is over (naturally or skipped). The 2.0
+    // homepage builds its universe during the film, where a busy moment can't be seen, and starts drawing it
+    // on the release.
+    function announce(name) {
+        try { window.dispatchEvent(new CustomEvent(name)); } catch (e) {}
+    }
 
     function store(get, key, value) {
         try {
@@ -518,6 +529,7 @@
             if (self.done) return;
             v.style.opacity = '1';
             self.still.style.visibility = 'hidden';
+            announce('wsa-intro-film');
         }, { once: true });
         // The film's own clock drives the landing, so it stays in step if playback stutters
         var stalledAt = 0;
@@ -539,6 +551,7 @@
         if (this.contracting || this.usingStills) return;
         this.usingStills = true;
         var self = this;
+        announce('wsa-intro-film');
         if (this.film) { this.film.pause(); this.film.style.opacity = '0'; }
         this.still.style.visibility = '';
         var end = document.createElement('img');
@@ -634,13 +647,12 @@
             this.animate(this.media, [{ opacity: 1 }, { opacity: 0 }], { duration: 90, fill: 'forwards' });
             if (this.film) this.film.pause();
         });
-        var impact = L.hop + Math.round(L.hopDur * IMPACT_AT);
+        var landing = L.jump + Math.round(L.jumpDur * LAND_AT);
         this.at(L.pieces, this.holdPieces);
         this.at(L.swipe, this.swipe);
         this.at(L.release, this.release);
-        this.at(L.hop, this.hop);
-        this.at(impact, this.impact);
-        this.at(L.home, this.flyHome);
+        this.at(L.jump, this.jump);
+        this.at(landing, this.impact);
         this.at(L.interactive, this.restoreInert);
     };
 
@@ -675,45 +687,77 @@
         sw.onfinish = function () { w.style.webkitMaskImage = w.style.maskImage = 'none'; };
     };
 
-    // A hop, then a hard landing: it falls fast, squashes on impact, rebounds a little and settles
-    Intro.prototype.hop = function () {
-        var frames = function (place) {
-            return [
-                { transform: place(0, 1, 1), easing: 'cubic-bezier(0.2, 0.65, 0.35, 1)' },
-                { transform: place(-38, 0.98, 1.03), offset: 0.36, easing: 'cubic-bezier(0.6, 0, 1, 0.5)' },
-                { transform: place(5, 1.07, 0.9), offset: 0.62, easing: 'cubic-bezier(0.2, 0.8, 0.3, 1)' },
-                { transform: place(-8, 0.985, 1.02), offset: 0.78, easing: 'ease-in-out' },
-                { transform: place(1.5, 1.01, 0.99), offset: 0.9, easing: 'ease-out' },
-                { transform: place(0, 1, 1) }
-            ];
-        };
-        var self = this, D = this.D, c = this.center;
-        this.animate(this.badge, frames(function (dy, sx, sy) { return self.squash(c.x - D / 2, self.lockupTop + dy, 1, D, D, sx, sy); }),
-            { duration: L.hopDur, fill: 'forwards' });
-        if (!this.word.hidden) {
-            var a = this.wordAt, ww = this.word.offsetWidth, wh = this.word.offsetHeight;
-            this.animate(this.word, frames(function (dy, sx, sy) { return self.squash(a.x, a.y + dy, a.s, ww, wh, 1 + (sx - 1) * 0.5, 1 + (sy - 1) * 0.5); }),
-                { duration: L.hopDur, fill: 'forwards' });
+    // The jump home: once the insignia has built itself and the black has cleared, it leaps from the middle
+    // of the screen in an arc and lands hard on its own place on the homepage (the hero's insignia), squashing
+    // on impact and rebounding a little; the wordmark arcs into the header logo at the same moment. Both are
+    // sampled along a parabola, falling faster as they come down, so the landing has weight.
+    Intro.prototype.jump = function () {
+        var self = this;
+        window.scrollTo(0, 0);
+        var D = this.D, c = this.center;
+        var hero = document.querySelector('.hero-logo');
+        var lift = Math.min(170, window.innerHeight * 0.2);
+        // n samples of the flight, then the squash at the landing (LAND_AT), a rebound and the rest pose
+        function flight(from, to, height, squashOf) {
+            var frames = [], n = 28;
+            for (var i = 0; i <= n; i++) {
+                var u = i / n;
+                var k = u * u * (3 - 2 * u) * 0.35 + u * u * 0.65;          // slow off the mark, fast coming down
+                var x = from.x + (to.x - from.x) * k;
+                var y = from.y + (to.y - from.y) * k - height * 4 * k * (1 - k);
+                var sc = from.s + (to.s - from.s) * k;
+                frames.push({ transform: self.place(x, y, sc), offset: u * LAND_AT });
+            }
+            frames.push({ transform: squashOf(to, 1.12, 0.86), offset: LAND_AT + 0.05, easing: 'cubic-bezier(0.2, 0.8, 0.3, 1)' });
+            frames.push({ transform: squashOf(to, 0.97, 1.04), offset: LAND_AT + 0.1, easing: 'ease-in-out' });
+            frames.push({ transform: self.place(to.x, to.y, to.s), offset: 1 });
+            return frames;
         }
+        if (hero && this.heroHome) {
+            var h = this.heroHome;
+            var shadow = getComputedStyle(hero).filter;
+            var to = { x: h.left, y: h.top, s: h.width / D };
+            var frames = flight({ x: c.x - D / 2, y: this.lockupTop, s: 1 }, to, lift, function (p, sx, sy) {
+                return self.squash(p.x, p.y, p.s, D, D, sx, sy);
+            });
+            frames[0].filter = 'drop-shadow(0 0 30px rgba(120,160,255,0.35))';
+            frames[frames.length - 1].filter = shadow && shadow !== 'none' ? shadow : 'drop-shadow(0 0 0 rgba(0,0,0,0))';
+            var fly = this.animate(this.badge, frames, { duration: L.jumpDur, easing: 'linear', fill: 'forwards' });
+            fly.onfinish = function () { root.classList.add('wsa-intro-badge-home'); self.badge.style.visibility = 'hidden'; };
+        } else {
+            this.animate(this.badge, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' });
+        }
+        if (this.word.hidden) return;
+        var r = this.logoHome || this.logoSpan.getBoundingClientRect();
+        var a = this.wordAt, ww = this.word.offsetWidth, wh = this.word.offsetHeight;
+        var wf = flight({ x: a.x, y: a.y, s: a.s }, { x: r.left, y: r.top, s: 1 / this.K }, lift * 0.45, function (p, sx, sy) {
+            return self.squash(p.x, p.y, p.s, ww, wh, 1 + (sx - 1) * 0.5, 1 + (sy - 1) * 0.5);
+        });
+        var f = this.animate(this.word, wf, { duration: L.jumpDur, easing: 'linear', fill: 'forwards' });
+        f.onfinish = function () { root.classList.add('wsa-intro-logo-home'); self.word.style.visibility = 'hidden'; };
     };
 
-    // The landing's impact, on the page itself: a ring of light spreads out from the insignia, the page gives
-    // a little under the blow, and its buttons and panels start fading in outwards from where it landed
+    // The landing, on the page itself: a ring of light spreads out from the insignia's place on the homepage,
+    // the page gives a little under the blow, and its buttons and panels start fading in outwards from there
     Intro.prototype.impact = function () {
-        var D = this.D, c = this.center;
+        var h = this.heroHome;
+        var size = h ? h.width : this.D;
+        var cx = h ? h.left + h.width / 2 : this.center.x, cy = h ? h.top + h.height / 2 : this.lockupTop + this.D / 2;
+        this.landing = { x: cx, y: cy };
         var ring = document.createElement('div');
         ring.className = 'wsa-intro-shock';
-        ring.style.width = ring.style.height = D + 'px';
-        ring.style.left = (c.x - D / 2) + 'px';
-        ring.style.top = this.lockupTop + 'px';
+        ring.style.width = ring.style.height = size + 'px';
+        ring.style.left = (cx - size / 2) + 'px';
+        ring.style.top = (cy - size / 2) + 'px';
         this.el.insertBefore(ring, this.badge);
-        this.animate(ring, [{ opacity: 0.85, transform: 'scale(0.96)' }, { opacity: 0, transform: 'scale(2.1)' }],
+        this.animate(ring, [{ opacity: 0.9, transform: 'scale(0.96)' }, { opacity: 0, transform: 'scale(2.6)' }],
             { duration: 900, easing: 'cubic-bezier(0.2, 0.7, 0.3, 1)', fill: 'forwards' });
-        var hero = document.querySelector('.hero');
-        if (hero) {
-            this.animate(hero, [{ transform: 'none' }, { transform: 'translateY(6px)', offset: 0.25 },
-                { transform: 'translateY(-2px)', offset: 0.6 }, { transform: 'none' }],
-                { duration: 380, easing: 'ease-out' });
+        var heroSec = document.querySelector('.hero');
+        if (heroSec) {
+            // a short, sharp give, over before the flying insignia hands over to the real one
+            this.animate(heroSec, [{ transform: 'none' }, { transform: 'translateY(5px)', offset: 0.35 },
+                { transform: 'translateY(-1px)', offset: 0.7 }, { transform: 'none' }],
+                { duration: 170, easing: 'ease-out' });
         }
         this.revealPieces();
     };
@@ -725,40 +769,6 @@
         var hero = document.querySelector('.hero-logo');
         this.heroHome = hero ? hero.getBoundingClientRect() : null;
         this.logoHome = this.logoSpan ? this.logoSpan.getBoundingClientRect() : null;
-    };
-
-    // The two fly to their places on the page: the wordmark into the header, the insignia into the hero
-    Intro.prototype.flyHome = function () {
-        var self = this;
-        window.scrollTo(0, 0);
-        var easing = 'cubic-bezier(0.6, 0, 0.2, 1)';
-        var D = this.D, c = this.center;
-        var hero = document.querySelector('.hero-logo');
-        if (hero && this.heroHome) {
-            var h = this.heroHome;
-            var shadow = getComputedStyle(hero).filter;
-            var fly = this.animate(this.badge, [
-                { transform: this.place(c.x - D / 2, this.lockupTop, 1), filter: 'drop-shadow(0 0 30px rgba(120,160,255,0.35))' },
-                { transform: this.place(h.left, h.top, h.width / D), filter: shadow && shadow !== 'none' ? shadow : 'drop-shadow(0 0 0 rgba(0,0,0,0))' }
-            ], { duration: L.homeDur, easing: easing, fill: 'forwards' });
-            fly.onfinish = function () { root.classList.add('wsa-intro-badge-home'); self.badge.style.visibility = 'hidden'; };
-        } else {
-            this.animate(this.badge, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' });
-        }
-        if (this.word.hidden) return;
-        var r = this.logoHome || this.logoSpan.getBoundingClientRect();
-        var a = this.wordAt;
-        // A curved flight: the wordmark shrinks and slides out from under the insignia first, then rises into
-        // the header, so it never passes behind the insignia climbing to the hero
-        var frames = [];
-        for (var i = 0; i <= 40; i++) {
-            var u = i / 40;
-            var ex = 1 - Math.pow(1 - u, 3);                                  // across and smaller: early
-            var ey = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; // up: later
-            frames.push({ transform: this.place(a.x + (r.left - a.x) * ex, a.y + (r.top - a.y) * ey, a.s + (1 / this.K - a.s) * ex) });
-        }
-        var f = this.animate(this.word, frames, { duration: L.homeDur, easing: 'cubic-bezier(0.45, 0, 0.35, 1)', fill: 'forwards' });
-        f.onfinish = function () { root.classList.add('wsa-intro-logo-home'); self.word.style.visibility = 'hidden'; };
     };
 
     // The parts of the page that fade in one by one: the header's links and buttons, the hero's text and
@@ -794,6 +804,7 @@
     // The wordmark takes the header logo's colour on the way, so it reads on a light page too.
     Intro.prototype.release = function () {
         this.el.classList.add('is-releasing');
+        announce('wsa-intro-release');
         this.animate(this.el, [
             { backgroundColor: 'rgba(2, 3, 8, 1)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' },
             { backgroundColor: 'rgba(2, 3, 8, 0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', offset: 0.35 },
@@ -808,22 +819,14 @@
         this.animate(this.skipBtn, [{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' });
     };
 
-    // From the impact, outwards: each part's delay grows with its distance from where the lockup landed.
-    // Anything the lockup is still sitting on waits until it has flown off.
+    // From the landing, outwards: each part's delay grows with its distance from where the insignia came down
     Intro.prototype.revealPieces = function () {
         var self = this, list = this.pieces || [];
-        var D = this.D, c = this.center;
-        var ox = c.x, oy = this.lockupTop + D;
-        var wordW = this.word.hidden ? 0 : this.word.offsetWidth * (this.wordAt ? this.wordAt.s : 1);
-        var half = Math.max(D, wordW) / 2 + 12;
-        var box = { l: c.x - half, r: c.x + half, t: this.lockupTop - 12, b: this.lockupTop + D + Math.round(D * 0.1) + (this.word.hidden ? 0 : this.word.offsetHeight * (this.wordAt ? this.wordAt.s : 1)) + 12 };
-        var leaves = L.home - (L.hop + Math.round(L.hopDur * IMPACT_AT)) + 150;
+        var ox = this.landing.x, oy = this.landing.y;
         var order = list.map(function (el) {
             var r = el.getBoundingClientRect();
             var x = Math.max(r.left, Math.min(ox, r.right)), y = Math.max(r.top, Math.min(oy, r.bottom));
-            var wait = Math.hypot(x - ox, y - oy) * RIPPLE;
-            if (r.left < box.r && r.right > box.l && r.top < box.b && r.bottom > box.t) wait = Math.max(wait, leaves);
-            return { el: el, wait: wait };
+            return { el: el, wait: Math.hypot(x - ox, y - oy) * RIPPLE };
         }).sort(function (a, b) { return a.wait - b.wait; });
         var last = -PIECE_GAP;
         order.forEach(function (p) {
@@ -831,10 +834,9 @@
             last = at;
             self.timers.push(setTimeout(function () { if (!self.done) p.el.classList.add('is-in'); }, at));
         });
-        // Over once the last piece is in and both logos are home
-        var since = L.hop + Math.round(L.hopDur * IMPACT_AT);
-        var end = Math.max(last + 1000, L.home + L.homeDur + 400 - since);
-        this.at(end, function () { this.finish(false); });
+        // Over once the last piece is in and both logos have settled
+        var settle = Math.round(L.jumpDur * (1 - LAND_AT)) + 400;
+        this.at(Math.max(last + 1000, settle), function () { this.finish(false); });
     };
 
     Intro.prototype.restoreInert = function () {
@@ -866,13 +868,23 @@
                 })
                 .catch(function () { /* a missing cue is just silence */ });
         });
-        // Sound plays if the browser allows it without a click (and the visitor didn't turn it off)
+        // Sound is on unless the visitor turned it off. Browsers hold sound back until the visitor's first
+        // click, tap or key press on the page; if that happens here, that first interaction switches it on
+        // (the sound button itself excepted: it is a choice of its own)
         var wanted = store(true, SOUND) !== 'off';
         if (ctx.state === 'running') { if (wanted) this.setSound(true); }
         else if (wanted) {
             var p = ctx.resume();
             setTimeout(function () { if (!self.done && ctx.state === 'running') self.setSound(true); }, 250);
             if (p && p.catch) p.catch(function () {});
+            this.onFirstGesture = function (e) {
+                ['pointerdown', 'keydown'].forEach(function (t) { window.removeEventListener(t, self.onFirstGesture, true); });
+                if (self.done || self.soundOn) return;
+                if (e.target && e.target.closest && e.target.closest('.wsa-intro-sound')) return;
+                if (e.type === 'keydown' && e.key === 'Escape') return;
+                self.setSound(true);
+            };
+            ['pointerdown', 'keydown'].forEach(function (t) { window.addEventListener(t, self.onFirstGesture, true); });
         }
     };
 
@@ -949,6 +961,10 @@
             setTimeout(function () { try { a.ctx.close(); } catch (e) {} }, 450);
         }
         window.removeEventListener('keydown', this.onKey, true);
+        if (this.onFirstGesture) {
+            window.removeEventListener('pointerdown', this.onFirstGesture, true);
+            window.removeEventListener('keydown', this.onFirstGesture, true);
+        }
         window.removeEventListener('pageshow', this.onShow);
         document.removeEventListener('visibilitychange', this.onHide);
         this.restoreInert();
@@ -958,6 +974,7 @@
             el.classList.remove('wsa-intro-piece', 'is-in');
         });
         var el = this.el;
+        announce('wsa-intro-end');
         function remove() {
             self.anims.forEach(function (x) { try { x.cancel(); } catch (e) {} });
             if (el && el.parentNode) el.parentNode.removeChild(el);

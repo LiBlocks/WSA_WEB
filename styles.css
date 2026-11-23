@@ -389,6 +389,18 @@ a:focus-visible {
     }
 }
 
+/* The logo: navigation.js measures the bar and chooses the full name or WSA (these win over the
+   width-based defaults above, which apply until it has) */
+.navbar[data-logo="full"] .logo-short,
+.navbar[data-logo="short"] .logo-full {
+    display: none;
+}
+
+.navbar[data-logo="full"] .logo-full,
+.navbar[data-logo="short"] .logo-short {
+    display: inline;
+}
+
 /* Settings: the gear at the right end of the top bar (navigation.js) and the panel it opens */
 .settings-button {
     width: 36px;
@@ -429,6 +441,32 @@ a:focus-visible {
 .settings-panel.is-open {
     opacity: 1;
     transform: none;
+}
+
+/* Opened from the drawer's gear (phones and tablets): above the gear, over the drawer */
+.settings-panel.is-above {
+    z-index: 210;
+    transform: translateY(6px) scale(0.98);
+    transform-origin: bottom right;
+}
+
+.settings-panel.is-above.is-open {
+    transform: none;
+}
+
+/* The drawer's foot: the settings gear in its bottom-right corner */
+.nav-drawer-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 1.25rem;
+}
+
+/* Phones and tablets reach Settings through the drawer, so the bar keeps its room for the name */
+@media (max-width: 1080px) {
+    .js .navbar > .settings-button {
+        display: none;
+    }
 }
 
 .settings-panel[hidden],

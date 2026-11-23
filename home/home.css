@@ -1,0 +1,1214 @@
+/* WSA 2.0 homepage: the page lives inside a live Kerbol system (home/universe/, drawn on a fixed canvas
+   behind everything). Every rule here is scoped to :root.home-v2, which home/boot.js sets before the first
+   paint; the original homepage (WSA 1.0) never sees any of it.
+
+   Layout: a left-aligned hero with the lit world framed to its right, a telemetry strip for the numbers,
+   then section panels that alternate sides so the camera always has a world to show in the free space. */
+
+:root.home-v2 {
+    --home-void: #03050c;
+    --home-ink: #eef1fa;
+    --home-ink-2: rgba(222, 229, 247, 0.74);
+    --home-ink-3: rgba(222, 229, 247, 0.52);
+    --home-blue: #8fb3ff;
+    --home-cream: #efe6d2;
+    --home-gold: #ffcf86;
+    --home-pane: rgba(9, 13, 28, 0.5);
+    --home-pane-edge: rgba(205, 218, 255, 0.13);
+    --home-pane-hi: rgba(255, 255, 255, 0.07);
+    --home-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.7);
+    --home-radius: 22px;
+    color-scheme: dark;
+}
+
+:root.home-v2[data-theme="light"] {
+    --home-void: #eef2f8;
+    --home-ink: #18202f;
+    --home-ink-2: rgba(24, 32, 47, 0.76);
+    --home-ink-3: rgba(24, 32, 47, 0.56);
+    --home-blue: #2b62cf;
+    --home-cream: #6b5528;
+    --home-gold: #b26a12;
+    --home-pane: rgba(250, 251, 254, 0.62);
+    --home-pane-edge: rgba(24, 32, 47, 0.1);
+    --home-pane-hi: rgba(255, 255, 255, 0.7);
+    --home-shadow: 0 30px 70px -44px rgba(30, 41, 70, 0.45);
+    color-scheme: light;
+}
+
+/* Things only the 2.0 homepage has */
+:root:not(.home-v2) .v2-only {
+    display: none !important;
+}
+
+/* ---------- The sky: the canvas, and the still sky underneath it (also the fallback without WebGL) ---------- */
+
+:root.home-v2 body {
+    background: var(--home-void);
+}
+
+:root.home-v2 .lg-cosmos,
+:root.home-v2 .hero > svg.deco {
+    display: none !important;
+}
+
+.home-sky {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.85), transparent 60%),
+        radial-gradient(1px 1px at 28% 64%, rgba(255, 255, 255, 0.6), transparent 60%),
+        radial-gradient(1.5px 1.5px at 47% 31%, rgba(255, 244, 228, 0.9), transparent 60%),
+        radial-gradient(1px 1px at 63% 82%, rgba(220, 230, 255, 0.7), transparent 60%),
+        radial-gradient(1px 1px at 81% 12%, rgba(255, 255, 255, 0.75), transparent 60%),
+        radial-gradient(1px 1px at 92% 47%, rgba(255, 255, 255, 0.55), transparent 60%),
+        radial-gradient(1.2px 1.2px at 7% 79%, rgba(220, 230, 255, 0.7), transparent 60%),
+        radial-gradient(1px 1px at 38% 9%, rgba(255, 255, 255, 0.5), transparent 60%);
+    background-size: 340px 340px, 520px 520px, 610px 610px, 430px 430px, 290px 290px, 470px 470px, 380px 380px, 560px 560px;
+    background-color: var(--home-void);
+}
+
+/* The still sky: the intro film's last frame (Kerbin's twilight ring) on the right, the galaxy's glow */
+.home-sky::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 60% 45% at 78% 46%, rgba(120, 150, 230, 0.16), transparent 70%),
+        radial-gradient(ellipse 50% 35% at 86% 78%, rgba(170, 60, 110, 0.12), transparent 70%),
+        url("../media/intro/wsa-intro-end.webp") 78% 48% / auto 115% no-repeat;
+    opacity: 0.85;
+    -webkit-mask-image: linear-gradient(90deg, transparent 32%, #000 62%);
+    mask-image: linear-gradient(90deg, transparent 32%, #000 62%);
+    transition: opacity 1.2s ease;
+}
+
+:root[data-theme="light"] .home-sky {
+    background-color: var(--home-void);
+    background-image:
+        radial-gradient(1px 1px at 12% 18%, rgba(24, 32, 47, 0.55), transparent 60%),
+        radial-gradient(1px 1px at 28% 64%, rgba(24, 32, 47, 0.4), transparent 60%),
+        radial-gradient(1.4px 1.4px at 47% 31%, rgba(24, 32, 47, 0.55), transparent 60%),
+        radial-gradient(1px 1px at 63% 82%, rgba(24, 32, 47, 0.35), transparent 60%),
+        radial-gradient(1px 1px at 81% 12%, rgba(24, 32, 47, 0.45), transparent 60%),
+        radial-gradient(1px 1px at 92% 47%, rgba(24, 32, 47, 0.35), transparent 60%),
+        radial-gradient(1.2px 1.2px at 7% 79%, rgba(24, 32, 47, 0.4), transparent 60%),
+        radial-gradient(1px 1px at 38% 9%, rgba(24, 32, 47, 0.35), transparent 60%);
+    background-size: 340px 340px, 520px 520px, 610px 610px, 430px 430px, 290px 290px, 470px 470px, 380px 380px, 560px 560px;
+}
+
+/* The light still sky: an orbit and a planet drawn in ink, like a plate from an observatory */
+:root[data-theme="light"] .home-sky::after {
+    content: "";
+    position: absolute;
+    right: -12vmin;
+    top: 50%;
+    width: 78vmin;
+    height: 78vmin;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 40%, rgba(70, 100, 170, 0.16), rgba(24, 32, 47, 0.1) 62%, transparent 63%);
+    box-shadow: 0 0 0 1px rgba(24, 32, 47, 0.12), 0 0 0 9vmin rgba(24, 32, 47, 0), 0 0 0 calc(9vmin + 1px) rgba(24, 32, 47, 0.08);
+    transition: opacity 1.2s ease;
+}
+
+.home-sky.is-live::after {
+    opacity: 0;
+}
+
+:root[data-theme="light"] .home-sky::before {
+    background:
+        radial-gradient(ellipse 55% 40% at 78% 46%, rgba(70, 100, 170, 0.1), transparent 70%),
+        radial-gradient(ellipse 50% 35% at 86% 78%, rgba(170, 80, 120, 0.07), transparent 70%);
+}
+
+.home-sky canvas.home-universe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+}
+
+.home-sky.is-live canvas.home-universe {
+    opacity: 1;
+}
+
+.home-sky.is-live::before {
+    opacity: 0;
+}
+
+/* Everything else floats above the sky */
+:root.home-v2 body > section,
+:root.home-v2 body > footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* ---------- Hero ---------- */
+
+:root.home-v2 .hero {
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 72px);
+    min-height: calc(100svh - 72px);
+    padding: clamp(3rem, 8vh, 6rem) 0 clamp(2rem, 6vh, 3.5rem);
+    text-align: left;
+    border: 0;
+    background: none;
+}
+
+:root.home-v2 .hero > .container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 35rem) 1fr;
+    align-content: center;
+}
+
+:root.home-v2 .hero > .container > * {
+    grid-column: 1;
+}
+
+:root.home-v2 .hero-logo {
+    width: 72px;
+    height: 72px;
+    margin: 0 0 1.5rem;
+    filter: drop-shadow(0 6px 22px rgba(80, 120, 230, 0.35));
+}
+
+:root.home-v2 .hero h1 {
+    margin: 0 0 0.9rem;
+    font-size: clamp(2.6rem, 1.6rem + 3.6vw, 4.6rem);
+    font-weight: 750;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--home-ink);
+    text-wrap: balance;
+}
+
+:root.home-v2 .hero .hero-motto {
+    margin: 0 0 1.25rem !important;
+    color: var(--home-cream) !important;
+    font-size: 1.02rem !important;
+    font-weight: 550 !important;
+    letter-spacing: 0.01em !important;
+    text-transform: none !important;
+}
+
+:root.home-v2 .hero-subtitle {
+    max-width: 34ch;
+    margin: 0 0 2rem;
+    font-size: 1.16rem;
+    line-height: 1.55;
+    color: var(--home-ink-2);
+}
+
+:root.home-v2 .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+:root.home-v2 .hero-actions .btn {
+    min-height: 44px;
+}
+
+/* The numbers: one telemetry strip instead of four tiles */
+:root.home-v2 .hero > .container > .featured-stats {
+    grid-column: 1 / -1;
+}
+
+:root.home-v2 .featured-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: clamp(2.5rem, 7vh, 4.5rem);
+    padding: 0.35rem;
+    background: var(--home-pane);
+    border: 1px solid var(--home-pane-edge);
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 var(--home-pane-hi), var(--home-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    backdrop-filter: blur(14px) saturate(1.3);
+}
+
+:root.home-v2 .featured-stats .stat-card {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    padding: 0.6rem 1.25rem;
+    background: none !important;
+    border: 0 !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+    text-align: left;
+}
+
+:root.home-v2 .featured-stats .stat-card::before,
+:root.home-v2 .featured-stats .stat-card::after {
+    display: none !important;
+}
+
+:root.home-v2 .featured-stats .stat-card + .stat-card {
+    border-left: 1px solid var(--home-pane-edge) !important;
+}
+
+:root.home-v2 .featured-stats .stat-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--home-ink);
+    margin: 0;
+}
+
+:root.home-v2 .featured-stats .stat-label {
+    font-size: 0.86rem;
+    color: var(--home-ink-2);
+}
+
+/* ---------- Sections: panels that alternate sides ---------- */
+
+:root.home-v2 body > section:not(.hero) {
+    padding: clamp(3.5rem, 12vh, 8rem) 0;
+    border: 0;
+    background: none;
+}
+
+:root.home-v2 body > section > .container.home-pane {
+    --pane-w: 47rem;
+    width: min(var(--pane-w), calc(100% - 2rem));
+    max-width: none;
+    margin-left: max(1rem, calc(50% - 600px + 1rem));
+    margin-right: auto;
+    padding: clamp(1.5rem, 3vw, 2.4rem);
+    background: var(--home-pane);
+    border: 1px solid var(--home-pane-edge);
+    border-radius: var(--home-radius);
+    box-shadow: inset 0 1px 0 var(--home-pane-hi), var(--home-shadow);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    backdrop-filter: blur(18px) saturate(1.35);
+}
+
+/* What WSA does: the panel sits on the right */
+:root.home-v2 .overview > .container.home-pane {
+    --pane-w: 46rem;
+    margin-left: auto;
+    margin-right: max(1rem, calc(50% - 600px + 1rem));
+}
+
+/* Programs: no panel; the cards themselves are the glass */
+:root.home-v2 .featured-programs > .container.home-pane {
+    width: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+:root.home-v2 .cta-section > .container.home-pane {
+    --pane-w: 52rem;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+:root.home-v2 body > section h2 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.7rem, 1.3rem + 1.3vw, 2.3rem);
+    font-weight: 720;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    color: var(--home-ink);
+}
+
+:root.home-v2 .news-section-head {
+    margin-bottom: 1.4rem;
+}
+
+:root.home-v2 .news-section-head h2 {
+    margin: 0;
+}
+
+/* Latest news inside its panel: the cards sit on the panel, quieter than glass on glass */
+:root.home-v2 .latest-news .news-cards {
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 1rem;
+}
+
+:root.home-v2 .latest-news .overview-card.news-card {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--home-pane-edge) !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border-radius: 14px;
+    transform: none !important;
+}
+
+:root.home-v2[data-theme="light"] .latest-news .overview-card.news-card {
+    background: rgba(255, 255, 255, 0.55) !important;
+}
+
+:root.home-v2 .latest-news .overview-card.news-card::before,
+:root.home-v2 .latest-news .overview-card.news-card::after {
+    display: none !important;
+}
+
+/* What WSA does: a two-column list with hairlines rather than six identical cards */
+:root.home-v2 .overview .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 2rem;
+}
+
+:root.home-v2 .overview .overview-card {
+    padding: 1.1rem 0 1.2rem;
+    background: none !important;
+    border: 0 !important;
+    border-top: 1px solid var(--home-pane-edge) !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+}
+
+:root.home-v2 .overview .overview-card::before,
+:root.home-v2 .overview .overview-card::after {
+    display: none !important;
+}
+
+:root.home-v2 .overview .overview-card h3 {
+    margin-bottom: 0.4rem;
+    font-size: 1.05rem;
+    color: var(--home-ink);
+}
+
+:root.home-v2 .overview .overview-card p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--home-ink-2);
+}
+
+/* Programs */
+:root.home-v2 .featured-programs h2 {
+    max-width: 47rem;
+}
+
+:root.home-v2 .program-cards {
+    gap: 1.25rem;
+}
+
+:root.home-v2 .program-card {
+    border-radius: 18px;
+}
+
+:root.home-v2:not([data-liquid-glass]) .program-card {
+    background: var(--home-pane);
+    border: 1px solid var(--home-pane-edge);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+}
+
+/* Milestones: a list along a line, like stops on a trajectory */
+:root.home-v2 .achievement-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding-left: 1.4rem;
+    border-left: 1px dashed var(--home-pane-edge);
+}
+
+:root.home-v2 .achievement {
+    position: relative;
+    padding: 0.9rem 0 1.1rem;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+}
+
+:root.home-v2 .achievement::before,
+:root.home-v2 .achievement::after {
+    display: none !important;
+}
+
+:root.home-v2 .achievement h4::before {
+    content: "";
+    position: absolute;
+    left: calc(-1.4rem - 4.5px);
+    top: 1.45rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--home-blue);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--home-blue) 22%, transparent);
+}
+
+:root.home-v2 .achievement h4 {
+    color: var(--home-ink);
+}
+
+:root.home-v2 .achievement p {
+    color: var(--home-ink-2);
+}
+
+/* Explore WSA */
+:root.home-v2 .cta-section > .container > p {
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--home-ink-2);
+}
+
+/* Footer: a quiet strip on the sky */
+:root.home-v2 body > footer {
+    background: color-mix(in srgb, var(--home-void) 55%, transparent);
+    border-top: 1px solid var(--home-pane-edge);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+/* Text colours over the sky, both themes */
+:root.home-v2 body > section :is(p, li, h3, h4) {
+    color: inherit;
+}
+
+:root.home-v2 body > section {
+    color: var(--home-ink);
+}
+
+/* ---------- Labels for worlds (pointing at one; Explore mode) ---------- */
+
+.home-label {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--home-ink);
+    white-space: nowrap;
+    background: var(--home-pane);
+    border: 1px solid var(--home-pane-edge);
+    border-radius: 999px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.2s ease;
+}
+
+.home-label.is-shown {
+    opacity: 1;
+}
+
+.home-label small {
+    display: block;
+    font-weight: 500;
+    color: var(--home-ink-3);
+}
+
+:root.home-v2.home-pointing-world body {
+    cursor: pointer;
+}
+
+/* ---------- Explore mode ---------- */
+
+:root.home-exploring {
+    overflow: hidden;
+}
+
+:root.home-exploring .home-sky {
+    pointer-events: auto;
+    touch-action: none;
+    z-index: 2;
+}
+
+/* (they are also made inert, which takes them out of the tab order and away from screen readers) */
+:root.home-exploring body > section,
+:root.home-exploring body > footer {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+:root.home-v2 body > section,
+:root.home-v2 body > footer {
+    transition: opacity 0.6s ease;
+}
+
+:root.home-exploring .wsa-ai-launcher {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.home-explore {
+    position: fixed;
+    inset: 72px 0 0;
+    z-index: 3;
+    pointer-events: none;
+    color: var(--home-ink);
+}
+
+.home-explore[hidden] {
+    display: none;
+}
+
+.home-explore > :not(.hx-labels) {
+    pointer-events: auto;
+}
+
+.hx-bar,
+.hx-places,
+.hx-info {
+    background: var(--home-pane);
+    border: 1px solid var(--home-pane-edge);
+    box-shadow: inset 0 1px 0 var(--home-pane-hi), var(--home-shadow);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+}
+
+.hx-bar {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    padding: 0.5rem 0.5rem 0.5rem 1.1rem;
+    border-radius: 999px;
+}
+
+.hx-help {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--home-ink-2);
+}
+
+.hx-tools {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.hx-zoom {
+    width: 36px;
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.hx-places {
+    position: absolute;
+    left: 1rem;
+    top: 5rem;
+    bottom: 1rem;
+    width: 15rem;
+    overflow-y: auto;
+    padding: 1rem;
+    border-radius: 18px;
+}
+
+.hx-places h2 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+}
+
+.hx-places h3 {
+    margin: 0.8rem 0 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--home-ink-3);
+}
+
+.hx-places ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hx-place,
+.hx-hint,
+.hx-reveal {
+    display: block;
+    width: 100%;
+    padding: 0.32rem 0.55rem;
+    font: inherit;
+    font-size: 0.88rem;
+    text-align: left;
+    color: var(--home-ink-2);
+    background: none;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.hx-place:hover,
+.hx-hint:hover,
+.hx-reveal:hover {
+    color: var(--home-ink);
+    background: color-mix(in srgb, var(--home-ink) 7%, transparent);
+}
+
+.hx-place[aria-current="true"] {
+    color: var(--home-ink);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--home-blue) 18%, transparent);
+}
+
+.hx-discoveries {
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--home-pane-edge);
+}
+
+.hx-found {
+    margin: 0 0 0.3rem;
+    font-size: 0.82rem;
+    color: var(--home-ink-3);
+}
+
+.hx-hint {
+    color: var(--home-blue);
+}
+
+.hx-hint-text {
+    margin: 0.4rem 0 0;
+    font-size: 0.82rem;
+    color: var(--home-ink-2);
+}
+
+.hx-reveal {
+    display: inline;
+    width: auto;
+    padding: 0;
+    color: var(--home-blue);
+    text-decoration: underline;
+}
+
+.hx-info {
+    position: absolute;
+    right: 1rem;
+    top: 5rem;
+    width: 20rem;
+    max-height: calc(100% - 6rem);
+    overflow-y: auto;
+    padding: 1.2rem 1.3rem;
+    border-radius: 18px;
+}
+
+.hx-kind {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--home-ink-3);
+}
+
+.hx-name {
+    margin: 0.1rem 0 0.6rem;
+    font-size: 1.6rem;
+    font-weight: 720;
+    letter-spacing: -0.02em;
+}
+
+.hx-note {
+    margin: 0 0 1rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--home-ink-2);
+}
+
+.hx-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.3rem 1rem;
+    margin: 0 0 1rem;
+    font-size: 0.86rem;
+}
+
+.hx-facts dt {
+    color: var(--home-ink-3);
+}
+
+.hx-facts dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.hx-missions h3 {
+    margin: 0 0 0.4rem;
+    font-size: 0.86rem;
+}
+
+.hx-missions ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+.hx-missions a,
+.hx-more a {
+    color: var(--home-blue);
+}
+
+.hx-none {
+    list-style: none;
+    margin-left: -1.1rem;
+    color: var(--home-ink-3);
+}
+
+.hx-more {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+}
+
+.hx-label {
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--home-ink-2);
+    background: color-mix(in srgb, var(--home-void) 55%, transparent);
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.hx-label.is-focus {
+    color: var(--home-ink);
+}
+
+/* ---------- The WSA Guide ---------- */
+
+.wsa-guide {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.wsa-guide[hidden] {
+    display: none;
+}
+
+.wsa-guide.is-open {
+    opacity: 1;
+}
+
+.wsa-guide-spot {
+    position: fixed;
+    border-radius: 12px;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--home-blue) 80%, transparent), 0 0 0 200vmax rgba(3, 5, 12, 0.66);
+    transition: left 0.45s cubic-bezier(0.3, 0.7, 0.2, 1), top 0.45s cubic-bezier(0.3, 0.7, 0.2, 1),
+        width 0.45s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.45s cubic-bezier(0.3, 0.7, 0.2, 1), border-radius 0.45s ease;
+    pointer-events: none;
+}
+
+.wsa-guide-spot.is-empty {
+    box-shadow: 0 0 0 200vmax rgba(3, 5, 12, 0.66);
+}
+
+:root[data-theme="light"] .wsa-guide-spot {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--home-blue) 80%, transparent), 0 0 0 200vmax rgba(24, 32, 50, 0.45);
+}
+
+.wsa-guide-card {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: min(22rem, calc(100vw - 24px));
+    padding: 1.2rem 1.3rem 1rem;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    transition: left 0.45s cubic-bezier(0.3, 0.7, 0.2, 1), top 0.45s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.wsa-guide-card:not([style*="left"]) {
+    transform: translate(-50%, -50%);
+}
+
+:root[data-liquid-glass] .wsa-guide-card {
+    background: rgb(var(--lg-bar-tint) / var(--lg-fill-dialog));
+    -webkit-backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat));
+    backdrop-filter: blur(var(--lg-blur-dialog)) saturate(var(--lg-sat));
+}
+
+.wsa-guide.is-sheet .wsa-guide-card {
+    left: 12px !important;
+    right: 12px;
+    top: auto !important;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: auto;
+    transform: none;
+}
+
+.wsa-guide.is-sheet.is-sheet-top .wsa-guide-card {
+    top: calc(68px + env(safe-area-inset-top)) !important;
+    bottom: auto;
+}
+
+.wsa-guide-count {
+    margin: 0 0 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.wsa-guide-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+}
+
+.wsa-guide-text {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.wsa-guide-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.wsa-guide-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.wsa-guide-skip {
+    padding: 0.4rem 0;
+    font: inherit;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    background: none;
+    border: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.wsa-guide-skip[hidden],
+.wsa-guide-back[hidden] {
+    display: none;
+}
+
+/* ---------- The homepage's settings (in the gear's panel) ---------- */
+
+.settings-panel {
+    max-height: calc(100vh - 96px);
+    max-height: calc(100dvh - 96px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.settings-home {
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+}
+
+.settings-panel .settings-subtitle {
+    margin: 0.2rem 0 0.2rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.settings-row.settings-stack {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.6rem 0;
+}
+
+.settings-stack .settings-choice button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.settings-value {
+    margin-left: 0.35rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.settings-range {
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+.settings-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 46px;
+    height: 26px;
+    padding: 0;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background-color 0.25s, border-color 0.2s;
+}
+
+.settings-switch .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
+    transition: transform 0.25s ease, background-color 0.25s;
+}
+
+.settings-switch[aria-checked="true"] {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.settings-switch[aria-checked="true"] .knob {
+    transform: translateX(20px);
+    background-color: #fff;
+}
+
+.settings-note {
+    margin: 0.3rem 0 0.4rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.settings-actions {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.5rem 0 0.6rem;
+    border-top: 1px solid var(--border);
+}
+
+.settings-action {
+    padding: 0.45rem 0;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    color: var(--accent);
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.settings-action:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Confirming the switch back to 1.0 */
+.home-confirm {
+    width: min(440px, calc(100% - 2rem));
+}
+
+.home-confirm-body {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.home-confirm-body h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.2rem;
+}
+
+.home-confirm-body p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.home-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 1.2rem 1.5rem 1.4rem;
+}
+
+/* A short confirmation at the bottom of the screen */
+.home-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    z-index: 1300;
+    max-width: calc(100% - 2rem);
+    margin: 0;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: var(--bg-primary);
+    background: var(--text-primary);
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+}
+
+.home-toast.is-shown {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 900px) {
+    :root.home-v2 .hero {
+        align-items: flex-end;
+        min-height: calc(100svh - 56px);
+        padding-top: 42svh;
+        text-align: center;
+    }
+
+    :root.home-v2 .hero > .container {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    :root.home-v2 .hero-logo {
+        margin: 0 auto 1.1rem;
+    }
+
+    :root.home-v2 .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    :root.home-v2 .hero-actions {
+        justify-content: center;
+    }
+
+    :root.home-v2 .featured-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    :root.home-v2 .featured-stats .stat-card {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.1rem;
+        padding: 0.7rem 0.5rem;
+        text-align: center;
+    }
+
+    :root.home-v2 .featured-stats .stat-card + .stat-card {
+        border-left: 0 !important;
+    }
+
+    :root.home-v2 .featured-stats .stat-card:nth-child(2n) {
+        border-left: 1px solid var(--home-pane-edge) !important;
+    }
+
+    :root.home-v2 .featured-stats .stat-card:nth-child(n + 3) {
+        border-top: 1px solid var(--home-pane-edge) !important;
+    }
+
+    :root.home-v2 body > section > .container.home-pane,
+    :root.home-v2 .overview > .container.home-pane {
+        width: calc(100% - 1.5rem);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    :root.home-v2 .overview .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-explore {
+        inset: 56px 0 0;
+    }
+
+    .hx-bar {
+        top: 0.6rem;
+        padding-left: 0.5rem;
+    }
+
+    .hx-help {
+        display: none;
+    }
+
+    /* Places: a strip along the bottom; the record above it */
+    .hx-places {
+        left: 0.6rem;
+        right: 0.6rem;
+        top: auto;
+        bottom: 0.6rem;
+        width: auto;
+        max-height: 30vh;
+        padding: 0.7rem;
+    }
+
+    .hx-places .hx-groups ul,
+    .hx-found-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    .hx-place {
+        width: auto;
+    }
+
+    .hx-info {
+        left: 0.6rem;
+        right: 0.6rem;
+        top: 4rem;
+        width: auto;
+        max-height: 34vh;
+        padding: 0.9rem 1rem;
+    }
+
+    .hx-name {
+        font-size: 1.3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-sky canvas.home-universe,
+    .home-sky::before {
+        transition: none;
+    }
+}
+
+@media print {
+    .home-sky {
+        display: none;
+    }
+}
