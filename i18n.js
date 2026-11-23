@@ -19,7 +19,7 @@
     'use strict';
     var KEY = 'wsa-lang';
     var ZH = 'zh-Hant';
-    var DICT_SRC = 'i18n-zh-Hant.js?v=7';
+    var DICT_SRC = 'i18n-zh-Hant.js?v=8';
     var root = document.documentElement;
 
     var ATTRS = ['title', 'aria-label', 'alt', 'placeholder', 'data-tip', 'aria-description', 'aria-roledescription', 'aria-valuetext', 'label'];

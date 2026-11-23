@@ -657,6 +657,9 @@
 
     const newsFigure = (n, loading) => `<figure class="news-article-image"><a href="${esc(((n.links || [])[0] || { href: n.image.src }).href)}"><img src="${esc(n.image.src)}" alt="${esc(n.image.alt || '')}" width="1600" height="1000" loading="${loading}"></a></figure>`;
 
+    // A story's film: played on request (never on its own), poster first, nothing downloaded until it is pressed
+    const newsVideo = n => n.video ? `<figure class="news-article-video"><video controls playsinline preload="none" poster="${esc(n.video.poster)}" aria-label="${esc(n.video.label)}" width="1280" height="720"><source src="${esc(n.video.src)}" type="video/mp4"></video><figcaption>${esc(n.video.caption)}</figcaption></figure>` : '';
+
     // news.html: every story, newest first (a featured one, a release, opens with its picture)
     function initNews() {
         const root = document.getElementById('news-root');
@@ -670,6 +673,7 @@
                 <p class="news-lede">${esc(n.summary)}</p>
                 ${!n.featured && n.image ? newsFigure(n, 'lazy') : ''}
                 ${(n.body || []).length ? `<div class="news-article-body">${n.body.map(p => `<p>${esc(p)}</p>`).join('')}</div>` : ''}
+                ${newsVideo(n)}
                 ${(n.links || []).length ? `<p class="news-links">${n.links.map(l => `<a class="card-link" href="${esc(l.href)}">${esc(l.label)} →</a>`).join('')}</p>` : ''}
             </article>`).join('') : '<p class="muted">No news yet.</p>';
         const key = location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : '';

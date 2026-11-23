@@ -1499,6 +1499,9 @@ window.WSA = {
                 'The homepage intro now opens with the NovaUI 2.0 title in slim obsidian lettering, and its sound is on by default. Your browser may wait for your first click or tap before playing it, and if you turn it off, it stays off.',
                 'The original design is still there: choose Version 1.0 under Design in Settings, on any page.'
             ],
+            video: { src: 'media/news/novaui-2-film.mp4', poster: 'images/news/novaui-2-film.jpg',
+                     label: 'The NovaUI 2.0 film',
+                     caption: 'The NovaUI 2.0 film (24 seconds, with sound): the intro, the live homepage, Liquid Glass, and Explore on a phone.' },
             links: [{ label: 'Explore the universe', href: 'index.html#explore' },
                     { label: 'Watch the intro again', href: 'index.html?intro' }]
         },

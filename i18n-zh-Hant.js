@@ -29,6 +29,8 @@ exact: {
  "Explore the universe →": "探索宇宙 →",
  "Watch the intro again →": "再看一次片頭 →",
  "Watch the intro again": "再看一次片頭",
+ "The NovaUI 2.0 film": "NovaUI 2.0 短片",
+ "The NovaUI 2.0 film (24 seconds, with sound): the intro, the live homepage, Liquid Glass, and Explore on a phone.": "NovaUI 2.0 短片（24 秒，含聲音）：片頭、即時渲染的首頁、液態玻璃，以及手機上的探索模式。",
  "The words NovaUI 2.0 in slim obsidian lettering on black": "黑色背景上以黑曜石質感纖細字體呈現的 NovaUI 2.0 字樣",
  "Main": "主選單",
  "Woody Space Agency home": "Woody Space Agency 首頁",
