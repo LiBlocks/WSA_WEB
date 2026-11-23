@@ -47,7 +47,7 @@ float ringDensity(float r) {
     float t = (r - uRing.x) / (uRing.y - uRing.x);
     float bands = 0.55 + 0.45 * sin(t * 61.0 + 2.0 * sin(t * 13.0));
     float gap = smoothstep(0.0, 0.015, abs(t - 0.62) - 0.035);             // a dark division
-    return bands * gap * smoothstep(0.0, 0.06, t) * smoothstep(1.0, 0.9, t);
+    return bands * gap * smoothstep(0.0, 0.06, t) * (1.0 - smoothstep(0.9, 1.0, t));
 }
 
 vec3 rotY(vec3 p, float a) { float c = cos(a), s = sin(a); return vec3(c * p.x - s * p.z, p.y, s * p.x + c * p.z); }
@@ -79,7 +79,7 @@ vec3 surface(vec3 p, out float spec) {
         vec3 col = mix(uC2, uC1, smoothstep(-0.4, 0.3, h));
         col = mix(col, uC1 * 1.18 + 0.04, smoothstep(0.25, 0.5, fbm3(s * 4.5 + 3.0)) * 0.5);
         col *= 0.78 + 0.32 * smoothstep(0.0, 0.6, 1.0 - abs(fbm3(s * 6.0)));
-        float rim = smoothstep(0.07, 0.0, abs(snoise(s * 6.5) - 0.38));
+        float rim = (1.0 - smoothstep(0.0, 0.07, abs(snoise(s * 6.5) - 0.38)));
         col = mix(col, uC1 * 1.25, rim * 0.35);
         float cap = smoothstep(0.86, 0.92, abs(p.y) + 0.05 * fbm3(s * 5.0));
         return mix(col, uC3, cap);
@@ -90,13 +90,13 @@ vec3 surface(vec3 p, out float spec) {
         vec3 col = mix(uC2, uC1, 0.5 + 0.5 * bands);
         col = mix(col, uC3, smoothstep(0.55, 1.0, sin(p.y * 31.0 + turb * 4.0)) * 0.45);
         vec3 so = normalize(vec3(0.75, -0.32, 0.55));
-        float storm = smoothstep(0.16, 0.0, length((p - so) * vec3(1.0, 2.4, 1.0)) + 0.05 * turb);
+        float storm = (1.0 - smoothstep(0.0, 0.16, length((p - so) * vec3(1.0, 2.4, 1.0)) + 0.05 * turb));
         col = mix(col, uC3 * 1.05, storm * 0.8);
         return col;
     }
     if (type == 4) {                                    // ice: bright, cracked
         float n = fbm3(s * 3.0);
-        float crack = smoothstep(0.03, 0.0, abs(snoise(s * 7.0)));
+        float crack = (1.0 - smoothstep(0.0, 0.03, abs(snoise(s * 7.0))));
         return mix(mix(uC2, uC1, 0.55 + 0.45 * n), uC2 * 0.8, crack * 0.6);
     }
     if (type == 6) {                                    // Eve: violet with dark seas
@@ -108,13 +108,13 @@ vec3 surface(vec3 p, out float spec) {
     if (type == 7) {                                    // Minmus: mint, with pale flats
         float h = fbm3(s * 2.4);
         vec3 col = mix(uC2, uC1, 0.5 + 0.5 * h);
-        float flat_ = smoothstep(-0.18, -0.22, h);
+        float flat_ = (1.0 - smoothstep(-0.22, -0.18, h));
         return mix(col, uC3, flat_ * 0.9);
     }
     // rock: maria, highlands and crater rims
     float h = fbm3(s * 2.1);
     vec3 col = mix(uC2, uC1, smoothstep(-0.35, 0.3, h));
-    float rim = smoothstep(0.08, 0.0, abs(snoise(s * 5.5) - 0.35)) + 0.6 * smoothstep(0.06, 0.0, abs(snoise(s * 11.0) - 0.4));
+    float rim = (1.0 - smoothstep(0.0, 0.08, abs(snoise(s * 5.5) - 0.35))) + 0.6 * (1.0 - smoothstep(0.0, 0.06, abs(snoise(s * 11.0) - 0.4)));
     col = mix(col, uC3, clamp(rim, 0.0, 1.0) * 0.45);
     return col;
 }
@@ -143,7 +143,7 @@ void main() {
     vec3 H = normalize(L + V);
     col += spec * pow(max(dot(N, H), 0.0), 70.0) * 0.55 * day * vec3(1.0, 0.95, 0.85);
     float fres = pow(1.0 - max(dot(N, V), 0.0), 3.0);
-    float twilight = smoothstep(0.25, 0.0, abs(ndl - 0.02)) * uAtmo.a;
+    float twilight = (1.0 - smoothstep(0.0, 0.25, abs(ndl - 0.02))) * uAtmo.a;
     col *= mix(vec3(1.0), vec3(1.15, 0.82, 0.62), twilight * 0.45 * (1.0 - uTheme));
     float forward = pow(max(dot(-V, L), 0.0), 6.0);
     col += uAtmo.rgb * fres * uAtmo.a * (smoothstep(-0.25, 0.45, ndl) * 0.9 + forward * 2.2 * smoothstep(-0.35, 0.05, ndl)) * (1.0 - 0.75 * uTheme);
@@ -217,7 +217,7 @@ void main() {
     float core = exp(-r * 10.0);
     float halo = exp(-r * 4.0) * 0.3 + 0.05 * exp(-r * 2.0);
     float spikes = uSpikes * (exp(-abs(vUv.x) * 70.0) * exp(-abs(vUv.y) * 4.0) + exp(-abs(vUv.y) * 70.0) * exp(-abs(vUv.x) * 4.0)) * 0.2;
-    float i = (core + halo + spikes) * smoothstep(1.0, 0.75, r) * uStrength;
+    float i = (core + halo + spikes) * (1.0 - smoothstep(0.75, 1.0, r)) * uStrength;
     vec3 dark = uColor * i;
     gl_FragColor = vec4(mix(dark, uColor * 0.9, uTheme), mix(1.0, clamp(i * 0.55, 0.0, 1.0), uTheme));
 }
@@ -235,7 +235,7 @@ float ringDensity(float r) {
     float t = (r - uRing.x) / (uRing.y - uRing.x);
     float bands = 0.55 + 0.45 * sin(t * 61.0 + 2.0 * sin(t * 13.0));
     float gap = smoothstep(0.0, 0.015, abs(t - 0.62) - 0.035);
-    return bands * gap * smoothstep(0.0, 0.06, t) * smoothstep(1.0, 0.9, t);
+    return bands * gap * smoothstep(0.0, 0.06, t) * (1.0 - smoothstep(0.9, 1.0, t));
 }
 void main() {
     float r = length(vPosW - uCenter);
@@ -265,6 +265,8 @@ attribute float aSpin;
 uniform float uTime;
 varying vec3 vNormalW;
 varying vec3 vPosW;
+varying vec3 vObj;
+varying float vTone;
 mat3 tumble(float a, vec3 axis) {
     float c = cos(a), s = sin(a), t = 1.0 - c;
     return mat3(t * axis.x * axis.x + c, t * axis.x * axis.y + s * axis.z, t * axis.x * axis.z - s * axis.y,
@@ -277,20 +279,34 @@ void main() {
     vec4 w = modelMatrix * instanceMatrix * vec4(rot * position, 1.0);
     vPosW = w.xyz;
     vNormalW = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * (rot * normal));
+    // The surface pattern is fixed to the rock (it tumbles with it) and different on every rock
+    vObj = position * 1.7 + vec3(aSpin * 31.0, aSpin * 17.0, aSpin * 23.0);
+    vTone = 0.78 + 0.44 * fract(aSpin * 7.31);
     gl_Position = projectionMatrix * viewMatrix * w;
 }
 `;
+// Asteroids: dusty grey-brown rock, mottled, with a few crater rims and a darker regolith in the hollows; lit by
+// the star with a little light from the sky so the night side still reads as a shape
 const ROCK_FRAG = /* glsl */ `
 uniform vec3 uSun;
 uniform float uTheme;
 varying vec3 vNormalW;
 varying vec3 vPosW;
+varying vec3 vObj;
+varying float vTone;
+#define OCTAVES 2
+${NOISE}
 void main() {
     vec3 N = normalize(vNormalW);
     vec3 L = normalize(uSun - vPosW);
     float d = max(dot(N, L), 0.0);
-    vec3 base = mix(vec3(0.52, 0.47, 0.42), vec3(0.74, 0.75, 0.79), uTheme);
-    float amb = mix(0.03, 0.62, uTheme);
+    float mottle = snoise(vObj * 1.6) * 0.6 + snoise(vObj * 4.3) * 0.3;
+    float rim = 1.0 - smoothstep(0.0, 0.1, abs(snoise(vObj * 2.7 + 4.0) - 0.32));
+    vec3 dark = mix(vec3(0.3, 0.27, 0.24), vec3(0.6, 0.61, 0.65), uTheme);
+    vec3 light = mix(vec3(0.62, 0.56, 0.5), vec3(0.8, 0.81, 0.84), uTheme);
+    vec3 base = mix(dark, light, clamp(0.5 + 0.5 * mottle, 0.0, 1.0)) * vTone;
+    base = mix(base, light * 1.12, rim * 0.35);
+    float amb = mix(0.06, 0.62, uTheme);
     gl_FragColor = vec4(base * (amb + d * (1.0 - amb)), 1.0);
 }
 `;

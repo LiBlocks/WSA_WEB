@@ -51,7 +51,7 @@ void main() {
     if (r2 > 1.0) discard;
     float core = exp(-r2 * 7.0) + 0.18 * exp(-r2 * 2.2);
     vec3 dark = vColor * core * vBright * 1.35 * uFade;
-    float ink = smoothstep(1.0, 0.25, sqrt(r2)) * clamp(0.18 + 0.85 * vBright, 0.0, 1.0) * uFade;
+    float ink = (1.0 - smoothstep(0.25, 1.0, sqrt(r2))) * clamp(0.18 + 0.85 * vBright, 0.0, 1.0) * uFade;
     vec3 inkCol = mix(vec3(0.09, 0.12, 0.19), vColor * 0.35, 0.18);
     gl_FragColor = vec4(mix(dark, inkCol, uTheme), mix(1.0, ink, uTheme));
 }
@@ -68,9 +68,9 @@ void main() {
     float core = exp(-r * r * 60.0);
     float halo = exp(-r * 6.0) * 0.35;
     float spikes = (exp(-abs(c.x) * 38.0) * exp(-abs(c.y) * 3.2) + exp(-abs(c.y) * 38.0) * exp(-abs(c.x) * 3.2)) * 0.55;
-    float i = (core + halo + spikes) * vBright * smoothstep(1.0, 0.7, r);
+    float i = (core + halo + spikes) * vBright * (1.0 - smoothstep(0.7, 1.0, r));
     vec3 dark = mix(vColor, vec3(1.0), core * 0.6) * i * 1.4 * uFade;
-    float ink = (smoothstep(0.22, 0.08, r) + spikes * 0.35) * clamp(vBright, 0.0, 1.0) * uFade;
+    float ink = ((1.0 - smoothstep(0.08, 0.22, r)) + spikes * 0.35) * clamp(vBright, 0.0, 1.0) * uFade;
     gl_FragColor = vec4(mix(dark, vec3(0.09, 0.12, 0.2), uTheme), mix(1.0, ink, uTheme));
 }
 `;
@@ -92,7 +92,7 @@ void main() {
     vec4 mv = viewMatrix * vec4(uCam + rel, 1.0);
     gl_Position = projectionMatrix * mv;
     float d = length(rel) / (uBox * 0.5);
-    vA = smoothstep(1.0, 0.55, d) * smoothstep(0.15, 0.6, -mv.z);
+    vA = (1.0 - smoothstep(0.55, 1.0, d)) * smoothstep(0.15, 0.6, -mv.z);
     gl_PointSize = clamp(uPixelRatio * 22.0 / -mv.z, 1.0, 5.0 * uPixelRatio);
 }
 `;

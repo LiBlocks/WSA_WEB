@@ -633,8 +633,9 @@
     const LENS_CONTROLS = '.btn, .chip, .related-chip, .icon-button:not(.lightbox-nav), .menu-fab';
     const LENS_PANES = CARDS + ', .stat-card, .expandable-section, .achievement, .tl-toggle, .search-field, ' +
         '.module-card:not(.expandable-section .module-card)';
-    // On the 2.0 homepage the panels sit over a live 3D canvas: they keep their glass, but a lens that would be
-    // redrawn on every frame of the canvas is not worth its cost there (home/home.css)
+    // On the 2.0 homepage the panels sit over a live 3D canvas, and a backdrop lens there would be recomputed for
+    // every frame of it (measured: 13-15 frames a second). The universe bends itself under them instead
+    // (home/universe/glass.js), which every browser that draws it can do.
     const LENS_SKIP = 'header, .nav-drawer, .settings-panel, dialog, footer, :root.home-v2 .home-pane';
     const backdropLens = !!(navigator.userAgentData && navigator.userAgentData.brands &&
         navigator.userAgentData.brands.some(b => b.brand === 'Chromium')) &&

@@ -1,8 +1,7 @@
 // The homepage's part of the Settings panel (the gear in the top bar, built by navigation.js). Only on the
-// homepage. On 2.0: background effects, animation, graphics quality, ambient sound, the guide, resetting
-// these, and going back to the original homepage. On 1.0: the way back to 2.0.
+// homepage, and only with NovaUI 2.0: background effects, animation, graphics quality, ambient sound, the guide
+// and resetting these. (Choosing the site's design, NovaUI 2.0 or Version 1.0, is the panel's own Design row.)
 
-let dialog = null;
 let toastEl = null;
 
 export function notify(text) {
@@ -29,37 +28,6 @@ function choice(name, label, options, current) {
         </div>`;
 }
 
-function confirmV1() {
-    return new Promise(resolve => {
-        if (!dialog) {
-            dialog = document.createElement('dialog');
-            dialog.className = 'wsa-dialog home-confirm';
-            dialog.setAttribute('aria-labelledby', 'home-confirm-title');
-            dialog.setAttribute('aria-describedby', 'home-confirm-text');
-            dialog.innerHTML = `
-                <form method="dialog">
-                    <div class="home-confirm-body">
-                        <h2 id="home-confirm-title">Return to the WSA V1.0 homepage?</h2>
-                        <p id="home-confirm-text">The original homepage comes back, without the 3D universe, the guide or Explore mode. Your other settings stay as they are, and you can switch back to WSA 2.0 any time in Settings.</p>
-                    </div>
-                    <div class="home-confirm-actions">
-                        <button type="submit" value="cancel" class="btn btn-secondary" autofocus>Keep WSA 2.0</button>
-                        <button type="submit" value="v1" class="btn btn-primary">Switch to V1.0</button>
-                    </div>
-                </form>`;
-            dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close('cancel'); });
-            document.body.appendChild(dialog);
-        }
-        dialog.returnValue = '';
-        dialog.addEventListener('close', () => {
-            if (!document.querySelector('dialog[open]')) document.body.classList.remove('dialog-open');
-            resolve(dialog.returnValue === 'v1');
-        }, { once: true });
-        dialog.showModal();
-        document.body.classList.add('dialog-open');
-    });
-}
-
 export function initSettings(home, prefs) {
     home.notify = notify;
     // navigation.js builds the panel when the document has loaded; this module may run first
@@ -79,13 +47,9 @@ export function initSettings(home, prefs) {
     panel.appendChild(box);
 
     function render() {
-        if (!home.isV2()) {
-            box.innerHTML = `
-                <h3 class="settings-subtitle" id="settings-home-title">Homepage</h3>
-                <p class="settings-note">You're seeing the original WSA V1.0 homepage.</p>
-                <div class="settings-actions">
-                    <button type="button" class="settings-action" data-act="v2">Switch to the WSA 2.0 homepage</button>
-                </div>`;
+        box.hidden = !home.isV2();
+        if (box.hidden) {
+            box.innerHTML = '';
             return;
         }
         const effects = prefs.effects();
@@ -105,7 +69,6 @@ export function initSettings(home, prefs) {
             <div class="settings-actions">
                 <button type="button" class="settings-action" data-act="guide">Restart the WSA Guide</button>
                 <button type="button" class="settings-action" data-act="reset">Reset homepage preferences</button>
-                <button type="button" class="settings-action is-v1" data-act="v1">Return to WSA V1.0 homepage</button>
             </div>`;
         const range = box.querySelector('#sh-intensity');
         const out = box.querySelector('.settings-value');
@@ -120,7 +83,7 @@ export function initSettings(home, prefs) {
         if (off) box.querySelectorAll('[data-quality]').forEach(b => { b.disabled = true; });
     }
 
-    box.addEventListener('click', async e => {
+    box.addEventListener('click', e => {
         const t = e.target.closest('button');
         if (!t) return;
         if (t.dataset.effects) {
@@ -143,17 +106,11 @@ export function initSettings(home, prefs) {
             render();
             notify('Homepage preferences are back to their defaults.');
             box.querySelector('[data-act="reset"]').focus();
-        } else if (t.dataset.act === 'v1') {
-            if (await confirmV1()) {
-                await home.useVersion('v1');
-                render();
-                notify('You\'re on the WSA V1.0 homepage. Switch back any time in Settings.');
-            }
-        } else if (t.dataset.act === 'v2') {
-            await home.useVersion('v2');
-            render();
-            notify('Welcome to the WSA 2.0 homepage.');
         }
+    });
+    window.addEventListener('wsa-design', e => {
+        render();
+        notify(e.detail === 'v1' ? 'You\'re on Version 1.0, the original design. Switch back any time in Settings.' : 'Welcome to NovaUI 2.0.');
     });
     render();
 }

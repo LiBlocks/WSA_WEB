@@ -97,7 +97,14 @@ function buildSettings() {
             </div>
         </div>
         <div class="settings-row settings-theme"><span class="settings-label">Dark mode</span></div>
-        <div class="settings-row settings-glass" hidden><span class="settings-label">Liquid Glass <small>Experimental</small></span></div>`;
+        <div class="settings-row settings-glass" hidden><span class="settings-label">Liquid Glass <small>Experimental</small></span></div>
+        <div class="settings-row settings-design" hidden>
+            <span class="settings-label" id="settings-design-label">Design</span>
+            <div class="settings-choice" role="group" aria-labelledby="settings-design-label">
+                <button type="button" data-design="v2" aria-pressed="true">NovaUI 2.0</button>
+                <button type="button" data-design="v1" aria-pressed="false">Version 1.0</button>
+            </div>
+        </div>`;
     const themeToggle = navbar.querySelector('.theme-toggle');
     if (themeToggle) panel.querySelector('.settings-theme').appendChild(themeToggle);
     if (window.WSAi18n) {
@@ -105,6 +112,19 @@ function buildSettings() {
         panel.querySelectorAll('.settings-lang [data-lang]').forEach(button => {
             button.addEventListener('click', () => window.WSAi18n.set(button.dataset.lang));
         });
+    }
+    // The site's design: NovaUI 2.0 or the original Version 1.0, on every page (ui-boot.js)
+    if (window.WSADesign) {
+        const row = panel.querySelector('.settings-design');
+        const sync = () => row.querySelectorAll('[data-design]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.design === window.WSADesign.get())));
+        row.hidden = false;
+        sync();
+        row.querySelectorAll('[data-design]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.dataset.design !== window.WSADesign.get()) window.WSADesign.set(button.dataset.design);
+            });
+        });
+        window.addEventListener('wsa-design', () => { sync(); fitLogo(); });
     }
     document.body.appendChild(panel);
 

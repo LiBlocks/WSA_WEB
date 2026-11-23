@@ -1,0 +1,223 @@
+/* NovaUI 2.0: the site's design language on every page. ui-boot.js sets <html class="ui-v2"> (and data-world,
+   the world on the page's horizon); Version 1.0 has no ui-v2 class, so nothing here applies and the original
+   site is exactly as it was. The homepage keeps its own, fuller version (home/home.css, with the live universe):
+   rules meant only for the other pages say :not(.home-v2).
+
+   What carries over from the homepage:
+   - the void: the same deep black-blue and the same scattered starfield behind everything (in the light theme, an
+     observatory plate: pale paper, ink stars);
+   - a world on the horizon: each page's head has its own world rising at the top right, lit from the lower left
+     with a ring of air glow, in that world's colours (news: Kerbin, missions: Duna, games: Jool...). Like the
+     homepage's planets it sits beside the words, never behind them;
+   - glass: cards and panels are slabs of glass in one family: one radius, a highlight along the top and left edge
+     where the light falls, a faint split of red and cyan round the rim, a soft deep shadow. With Liquid Glass on
+     they stay clear and bend what lies behind (liquid-glass.js); with it off they are frosted;
+   - type: tight, heavy display headings and calm, readable body text, on the same system fonts.
+   Every page keeps its own layout and personality; this only changes the materials they're made of. */
+
+:root.ui-v2 {
+    --ui-void: #03050c;
+    --ui-ink: #eef1fa;
+    --ui-ink-2: rgba(222, 229, 247, 0.76);
+    --ui-ink-3: rgba(222, 229, 247, 0.54);
+    --ui-pane: rgba(9, 13, 28, 0.74);
+    --ui-edge: rgba(205, 218, 255, 0.13);
+    --ui-hi: rgba(255, 255, 255, 0.34);
+    --ui-shadow: 0 24px 60px -36px rgba(0, 0, 0, 0.8);
+    --ui-radius: 18px;
+    --ui-world: 111 168 255;
+    --ui-world-2: 50 96 190;
+    --ui-planet: #060912;
+    --ui-star: 255 255 255;
+    --ui-stars:
+        radial-gradient(1px 1px at 12% 18%, rgb(var(--ui-star) / 0.85), transparent 60%),
+        radial-gradient(1px 1px at 28% 64%, rgb(var(--ui-star) / 0.6), transparent 60%),
+        radial-gradient(1.5px 1.5px at 47% 31%, rgb(var(--ui-star) / 0.9), transparent 60%),
+        radial-gradient(1px 1px at 63% 82%, rgb(var(--ui-star) / 0.7), transparent 60%),
+        radial-gradient(1px 1px at 81% 12%, rgb(var(--ui-star) / 0.75), transparent 60%),
+        radial-gradient(1px 1px at 92% 47%, rgb(var(--ui-star) / 0.55), transparent 60%),
+        radial-gradient(1.2px 1.2px at 7% 79%, rgb(var(--ui-star) / 0.7), transparent 60%),
+        radial-gradient(1px 1px at 38% 9%, rgb(var(--ui-star) / 0.5), transparent 60%);
+    --ui-stars-size: 340px 340px, 520px 520px, 610px 610px, 430px 430px, 290px 290px, 470px 470px, 380px 380px, 560px 560px;
+}
+
+:root.ui-v2[data-theme="light"] {
+    --ui-void: #eef2f8;
+    --ui-ink: #18202f;
+    --ui-ink-2: rgba(24, 32, 47, 0.78);
+    --ui-ink-3: rgba(24, 32, 47, 0.58);
+    --ui-pane: rgba(250, 251, 254, 0.8);
+    --ui-edge: rgba(24, 32, 47, 0.1);
+    --ui-hi: rgba(255, 255, 255, 0.95);
+    --ui-shadow: 0 24px 56px -40px rgba(30, 41, 70, 0.5);
+    --ui-planet: #e3e9f2;
+    --ui-star: 24 32 47;
+}
+
+/* The worlds on the pages' horizons */
+:root.ui-v2[data-world="kerbol"] { --ui-world: 255 207 134; --ui-world-2: 230 130 50; }
+:root.ui-v2[data-world="kerbin"] { --ui-world: 111 168 255; --ui-world-2: 50 96 190; }
+:root.ui-v2[data-world="mun"]    { --ui-world: 214 218 228; --ui-world-2: 120 128 142; }
+:root.ui-v2[data-world="minmus"] { --ui-world: 143 224 192; --ui-world-2: 70 160 128; }
+:root.ui-v2[data-world="duna"]   { --ui-world: 255 140 106; --ui-world-2: 190 70 44; }
+:root.ui-v2[data-world="eve"]    { --ui-world: 186 148 255; --ui-world-2: 110 70 190; }
+:root.ui-v2[data-world="jool"]   { --ui-world: 170 220 106; --ui-world-2: 96 150 46; }
+:root.ui-v2[data-world="laythe"] { --ui-world: 120 212 255; --ui-world-2: 40 130 196; }
+:root.ui-v2[data-world="eeloo"]  { --ui-world: 220 232 246; --ui-world-2: 140 160 190; }
+
+/* ---------- The void ---------- */
+
+:root.ui-v2:not(.home-v2) {
+    --lg-space: var(--ui-void);
+}
+
+:root.ui-v2:not(.home-v2) body {
+    background-color: var(--ui-void);
+    background-image: var(--ui-stars);
+    background-size: var(--ui-stars-size);
+}
+
+/* With Liquid Glass the sky is a fixed layer (and Firefox's glass bends a live copy of it): the same void and
+   stars, without the line drawings */
+:root.ui-v2:not(.home-v2)[data-liquid-glass] .lg-cosmos {
+    background-color: var(--ui-void);
+    background-image: var(--ui-stars);
+    background-size: var(--ui-stars-size);
+}
+
+:root.ui-v2:not(.home-v2) .lg-cosmos > *,
+:root.ui-v2:not(.home-v2) .page-head > .deco,
+:root.ui-v2:not(.home-v2) .hero > .deco {
+    display: none !important;
+}
+
+/* ---------- A world on the horizon ---------- */
+
+:root.ui-v2:not(.home-v2)[data-world] .page-head {
+    --ui-world-size: clamp(420px, 44vw, 720px);
+}
+
+/* A dark world with a thin lit crescent on its lower left (a lit disc, and a dark one just offset over it) and
+   its air glowing round the limb; it fades out before the bottom of the page's head */
+:root.ui-v2:not(.home-v2)[data-world] .page-head::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: calc(var(--ui-world-size) * -0.42);
+    right: calc(var(--ui-world-size) * -0.4);
+    width: var(--ui-world-size);
+    height: var(--ui-world-size);
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+        radial-gradient(circle closest-side at 53% 47.5%, var(--ui-planet) 0 97.5%, transparent 99.5%),
+        radial-gradient(circle closest-side at 50% 50%, rgb(var(--ui-world-2) / 0.3) 0 88%, rgb(var(--ui-world) / 0.95) 99%, transparent 100%);
+    box-shadow:
+        -6px 8px 26px -10px rgb(var(--ui-world) / 0.55),
+        -22px 28px 100px -34px rgb(var(--ui-world-2) / 0.55);
+    -webkit-mask-image: linear-gradient(180deg, #000 52%, transparent 76%);
+    mask-image: linear-gradient(180deg, #000 52%, transparent 76%);
+}
+
+/* The light theme draws it in ink, like a plate from an observatory */
+:root.ui-v2:not(.home-v2)[data-world][data-theme="light"] .page-head::before {
+    background:
+        radial-gradient(circle closest-side at 53% 47.5%, var(--ui-planet) 0 97.5%, transparent 99.5%),
+        radial-gradient(circle closest-side at 50% 50%, rgb(var(--ui-world-2) / 0.45) 0 98.5%, transparent 100%);
+    box-shadow:
+        0 0 0 1px rgba(24, 32, 47, 0.14),
+        0 0 0 calc(var(--ui-world-size) * 0.07) rgba(24, 32, 47, 0),
+        0 0 0 calc(var(--ui-world-size) * 0.07 + 1px) rgba(24, 32, 47, 0.07);
+}
+
+@media (max-width: 760px) {
+    :root.ui-v2:not(.home-v2)[data-world] .page-head {
+        --ui-world-size: 320px;
+    }
+
+    :root.ui-v2:not(.home-v2)[data-world] .page-head::before {
+        top: -150px;
+        right: -120px;
+        opacity: 0.7;
+    }
+}
+
+/* ---------- Type ---------- */
+
+:root.ui-v2:not(.home-v2) .page-head h1 {
+    font-size: clamp(2.3rem, 1.4rem + 2.8vw, 3.6rem);
+    font-weight: 750;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--ui-ink);
+}
+
+:root.ui-v2:not(.home-v2) .page-head p {
+    max-width: 62ch;
+    color: var(--ui-ink-2) !important;
+    line-height: 1.6;
+}
+
+:root.ui-v2:not(.home-v2) body > section > .container > h2,
+:root.ui-v2:not(.home-v2) body > section > .container > header > h2 {
+    font-size: clamp(1.7rem, 1.2rem + 1.4vw, 2.3rem);
+    font-weight: 720;
+    letter-spacing: -0.028em;
+    line-height: 1.12;
+}
+
+/* ---------- Glass: one family of panes ---------- */
+
+:root.ui-v2:not(.home-v2) :is(.overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
+    .module-card:not(.expandable-section .module-card), .expandable-section, .achievement, .stat-card, .news-article) {
+    border-radius: var(--ui-radius);
+}
+
+/* Liquid Glass on: clear slabs, with the light along the top and left edge and a hairline split of colour round the
+   rim (in Chromium the lens adds its own split; liquid-glass.js) */
+:root.ui-v2:not(.home-v2)[data-liquid-glass] :is(.overview-card, .program-card, .vehicle-card, .album-card, .wallet-card,
+    .status-card, .module-card:not(.expandable-section .module-card), .expandable-section, .achievement, .stat-card) {
+    --lg-a: 0.035;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.06),
+        inset 1.5px 1.5px 0 -0.5px rgba(255, 128, 118, 0.14),
+        inset -1.5px -1.5px 0 -0.5px rgba(110, 205, 255, 0.16),
+        var(--ui-shadow);
+}
+
+:root.ui-v2:not(.home-v2)[data-liquid-glass][data-theme="light"] :is(.overview-card, .program-card, .vehicle-card, .album-card,
+    .wallet-card, .status-card, .module-card:not(.expandable-section .module-card), .expandable-section, .achievement, .stat-card) {
+    --lg-a: 0.5;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 1px rgba(24, 32, 47, 0.07), var(--ui-shadow);
+}
+
+/* Liquid Glass off: frosted, in the same shape */
+:root.ui-v2:not(.home-v2):not([data-liquid-glass]) :is(.overview-card, .program-card, .vehicle-card, .album-card, .wallet-card,
+    .status-card, .module-card, .expandable-section, .achievement, .stat-card, .technical-details) {
+    background-color: var(--ui-pane);
+    border-color: var(--ui-edge);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05), var(--ui-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* ---------- The page's foot ---------- */
+
+:root.ui-v2:not(.home-v2) footer {
+    background: transparent;
+    border-top-color: var(--ui-edge);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    :root.ui-v2:not(.home-v2) :is(.overview-card, .program-card, .vehicle-card, .album-card, .wallet-card, .status-card,
+        .module-card, .expandable-section, .achievement, .stat-card) {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+
+@media print {
+    :root.ui-v2:not(.home-v2) .page-head::before {
+        display: none;
+    }
+}

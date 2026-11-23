@@ -10,6 +10,7 @@
  *  - Mission:   add an entry to MISSIONS (rules and fields are described above that list).
  *  - Image:     put the file in images/gallery/ and add an entry to GALLERY (example at the bottom).
  *  - News:      add an entry at the top of NEWS. The home page shows the newest two; news.html shows them all.
+ *               `featured: true` gives a release its picture across the top of its card on news.html.
  *
  * Every `status` must be a key of STATUSES. Links (`page`, `href`) are relative to the site root.
  */
@@ -1482,6 +1483,25 @@ window.WSA = {
      *   links     [{ label, href }]
      */
     NEWS: [
+        {
+            id: 'novaui-2',
+            date: '2026-11-23',
+            topic: 'Website',
+            featured: true,
+            title: 'Introducing NovaUI 2.0',
+            summary: 'NovaUI 2.0 is the new design of the WSA website. The homepage now sits inside a live 3D Kerbol system, its panels are Liquid Glass, and every page shares one design language.',
+            image: { src: 'images/news/novaui-2.jpg', thumb: 'images/news/thumbs/novaui-2.jpg',
+                     alt: 'The words NovaUI 2.0 in polished metal on black' },
+            body: [
+                'The homepage is drawn live in your browser. Kerbin, the Mun, Duna, Jool and the rest of the Kerbol system turn behind the page, with a galaxy, nebulae and an asteroid swarm beyond them. Moving from one section to the next takes the camera to a new place in the system, and on wider screens each world is framed beside the text rather than behind it.',
+                'Click a world, or Explore the universe, to fly round the system. Each world shows its real radius and gravity and the WSA missions that went there. On phones, its record is a sheet along the bottom of the screen, and the world is framed in the space above it.',
+                'The homepage\'s panels are Liquid Glass: the universe bends at their edges and splits faintly into colour, like light through a slab of glass. Every other page now shares the homepage\'s look: the same deep sky, the same glass cards and type, and a world of its own on the horizon.',
+                'The homepage intro now opens with the NovaUI 2.0 title in polished metal, and its sound is on by default. Your browser may wait for your first click or tap before playing it, and if you turn it off, it stays off.',
+                'The original design is still there: choose Version 1.0 under Design in Settings, on any page.'
+            ],
+            links: [{ label: 'Explore the universe', href: 'index.html#explore' },
+                    { label: 'Watch the intro again', href: 'index.html?intro' }]
+        },
         {
             id: 'two-new-games',
             date: '2026-11-17',

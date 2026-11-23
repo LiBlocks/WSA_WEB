@@ -6,6 +6,10 @@
 //   u.setScroll(f) u.setNarrow(b) u.setMood(name, 0..1) u.setTheme('light'|'dark') u.setIntensity(0..1)
 //   u.pointer(x, y, active) u.pick(x, y) -> id | null    u.screenPosition(id) -> {x, y, visible, r}
 //   u.explorer: enter(id) exit() focus(id) orbit(dx, dy) zoom(k)
+//   u.setRegions({pose: {x0, x1, y0, y1}})  free parts of the view per pose (fractions), for composing
+//   u.setSafeArea({x0, x1, y0, y1} | null)   the free part of the view in Explore mode
+//   u.setFollow('sections'|'scroll')          how the camera follows the page (see camera.js)
+//   u.setGlass([{x, y, w, h, r}], on)         the panels the scene bends under (page px; see glass.js)
 //   u.setSuspended(b)  u.on('ready'|'lost'|'slow', fn)   u.dispose()
 import * as THREE from 'three';
 import { createSky } from './sky.js';
@@ -15,12 +19,15 @@ import { createSystem } from './system.js';
 import { createEffects } from './effects.js';
 import { makeLayout } from './layout.js';
 import { CameraRig, Explorer } from './camera.js';
+import { Glass } from './glass.js';
 import { MOODS, POSES, SCROLL_PATH } from './environments.js';
 
 // Colours here are authored as display values; nothing is converted on the way out
 THREE.ColorManagement.enabled = false;
 
-const DPR = { low: 1, high: 1.5, ultra: 2 };
+// Pixel-ratio budget per quality. Phones get 1.5, not 1: at 1 a 3x screen shows the scene three times
+// enlarged, and the small worlds and the asteroids break up into blocks. Auto quality steps it down if slow.
+const DPR = { low: 1.5, high: 1.5, ultra: 2 };
 
 export function detectQuality() {
     const coarse = matchMedia('(pointer: coarse)').matches;
@@ -68,7 +75,7 @@ export class Universe {
         canvas.tabIndex = -1;
         let renderer;
         try {
-            renderer = new THREE.WebGLRenderer({ canvas, antialias: this.quality !== 'low', alpha: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false });
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false });
         } catch (e) {
             throw new Error('WebGL unavailable: ' + (e && e.message));
         }
@@ -78,6 +85,7 @@ export class Universe {
         this.canvas = canvas;
         this.host.appendChild(canvas);
 
+        this.glass = new Glass(renderer, { samples: this.quality === 'low' ? 2 : 4 });
         const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 6000);
         this.camera = camera;
         this.scene = new THREE.Scene();
@@ -177,12 +185,19 @@ export class Universe {
         return this.reducedMotion ? 0 : this.intensity;
     }
 
+    // Resizing a canvas clears it. Drawn again here, in the same task as the resize (before the page is
+    // painted), it never shows empty: before, a frame of black could be painted in between, which flashed
+    // whenever a phone's toolbar came back on scrolling up. (The sky is sized to the large viewport too,
+    // home/home.css, so the toolbar doesn't resize it at all.)
     resize() {
         const w = this.host.clientWidth, h = this.host.clientHeight;
         if (!w || !h || this.disposed) return;
         const pr = this.pixelRatio();
+        if (w === this.size?.w && h === this.size?.h && pr === this.size?.pr) return;
+        this.size = { w, h, pr };
         this.renderer.setPixelRatio(pr);
         this.renderer.setSize(w, h, false);
+        this.glass.setSize(w, h, pr);
         this.camera.aspect = w / h;
         this.camera.updateProjectionMatrix();
         this.ctx.pixelRatio = pr;
@@ -190,7 +205,8 @@ export class Universe {
         this.ctx.height = h * pr;
         this.ctx.uniforms.uAspect.value = w / h;
         this.rig.narrow = w / h < 0.95;
-        this.invalidate();
+        if (this.firstFrame && !this.starting && !this.suspended && !this.lost) this.frame(performance.now(), true);
+        else this.invalidate();
     }
 
     // Continuous animation unless nothing moves (zero intensity or reduced motion): then frames are drawn
@@ -215,6 +231,7 @@ export class Universe {
         if (!this.rig.settled()) return true;
         for (const b of this.system.bodies.values()) if (Math.abs(b.hover - b.hoverTarget) > 0.002) return true;
         if (this.effectsLayer.state && Math.abs(this.effectsLayer.state.climb - this.effectsLayer.state.climbTarget) > 0.002) return true;
+        if (this.glass.enabled && this.glass.strength < 0.99) return true;
         return this.explorer.controls.enabled;
     }
 
@@ -228,10 +245,10 @@ export class Universe {
         });
     }
 
-    frame(now) {
+    frame(now, force) {
         if (this.disposed) return;
         // Reduced effects: about 30 frames a second
-        if (this.effects === 'reduced' && this.looping && now - this.lastDraw < 30) return;
+        if (!force && this.effects === 'reduced' && this.looping && now - this.lastDraw < 30) return;
         const dt = Math.min(0.1, Math.max(0, (now - this.last) / 1000));
         this.last = now;
         this.lastDraw = now;
@@ -255,7 +272,8 @@ export class Universe {
         this.rig.update(dt, c);
         for (const l of this.layers) if (l !== this.system) l.update(c);
         const r0 = this.firstFrame ? 0 : performance.now();
-        this.renderer.render(this.scene, this.camera);
+        if (!this.explorer.controls.enabled && this.glass.place(window.scrollY, dt)) this.glass.render(this.scene, this.camera);
+        else this.renderer.render(this.scene, this.camera);
         if (!this.firstFrame) this.timings.firstFrame = Math.round(performance.now() - r0);
         this.watchSpeed(dt);
         if (!this.firstFrame) { this.firstFrame = true; this.emit('ready'); }
@@ -293,6 +311,37 @@ export class Universe {
         this.rig.scroll = f;
         this.invalidate();
         this.syncLoop();
+    }
+
+    setRegions(regions) {
+        this.rig.regions = regions || {};
+        this.syncLoop();
+        this.invalidate();
+    }
+
+    setSafeArea(rect) {
+        this.explorer.setSafe(rect);
+        this.syncLoop();
+        this.invalidate();
+    }
+
+    setGlass(panes, on) {
+        this.glass.setPanes(panes);
+        this.glass.enabled = !!on && this.effects === 'full';
+        this.invalidate();
+    }
+
+    // Draw now (from a page's own animation frame), so what follows the scroll is drawn in the same frame
+    drawNow() {
+        if (this.disposed || this.lost || this.starting || this.suspended || this.looping || !this.firstFrame) return;
+        cancelAnimationFrame(this.pending);
+        this.pending = 0;
+        this.frame(performance.now(), true);
+        this.syncLoop();
+    }
+
+    setFollow(mode) {
+        this.rig.follow = mode;
     }
 
     setMood(name, value) {
@@ -370,9 +419,10 @@ export class Universe {
         return {
             quality: this.quality, pixelRatio: c.pixelRatio, looping: this.looping, clock: c.clock, fade: c.fade, theme: this.theme,
             intensity: this.intensity, scroll: this.rig.scroll, mood: { ...c.mood }, explore: !!this.explorer.controls.enabled,
-            focus: this.explorer.focusId, calls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles,
+            focus: this.explorer.focusId, follow: this.rig.follow, lens: [this.rig.sx, this.rig.sy],
+            camera: this.camera.position.toArray(), aim: this.rig.look.toArray(), calls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles,
             geometries: this.renderer.info.memory.geometries, textures: this.renderer.info.memory.textures, poses: Object.keys(POSES),
-            timings: this.timings, programs: this.renderer.info.programs ? this.renderer.info.programs.length : null,
+            timings: this.timings, glass: { on: this.glass.enabled, panes: this.glass.panes.length, drawn: this.glass.material.uniforms.uCount.value, strength: this.glass.strength }, programs: this.renderer.info.programs ? this.renderer.info.programs.length : null,
         };
     }
 
@@ -389,6 +439,7 @@ export class Universe {
         for (const l of this.layers || []) l.dispose();
         if (this.system && !(this.layers || []).includes(this.system)) this.system.dispose();
         (this.ownedExtra || []).forEach(o => o.dispose());
+        if (this.glass) this.glass.dispose();
         if (this.renderer) this.renderer.dispose();
         if (this.canvas) this.canvas.remove();
     }

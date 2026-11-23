@@ -6,6 +6,10 @@
  * "Replay intro" in the homepage footer, or ?intro in the address, plays it again. Loaded in <head> so
  * the page is covered from the first paint. On a first visit the language picker (i18n.js) comes first.
  *
+ *   NovaUI 2.0 (~6 s) the title of the site's interface as a polished metal object (intro-nova.js, three.js):
+ *                     extreme close-ups travel across its letters under a moving light, the camera draws back
+ *                     to the whole title, holds, and it goes dark as the opening begins. Without WebGL, on the
+ *                     'lite' version, or if it can't load in time, the title is set in type instead (~2.4 s).
  *   Opening (~5.6 s)  the insignia fades in, a planet rises behind it, an orbit is traced round it, then
  *                     the name and the motto.
  *   Film (9 s)        media/intro/wsa-intro-*.webm|mp4, an orbital sunrise rendered in Blender
@@ -21,10 +25,13 @@
  *
  * Three versions: 'full'; 'lite' (data saver, a slow connection or very little memory: the same intro
  * with two stills of the film instead of the video, nothing large downloaded); 'calm'
- * (prefers-reduced-motion: the opening's lockup fades in and out, nothing moves). If the video fails
- * or can't buffer in time, 'full' falls back to the stills. Sound is on: where the browser holds it back
- * until the visitor interacts, their first click, tap or key press turns it on (or the sound button does).
- * Escape or "Skip intro" goes straight to the page.
+ * (prefers-reduced-motion: the title, then the opening's lockup, each fade in and out; nothing moves). If the
+ * video fails or can't buffer in time, 'full' falls back to the stills.
+ *
+ * Sound is on by default. Browsers hold sound back until the visitor interacts with the page; then their first
+ * click, tap or key press turns it on, in step with the picture (or the sound button does). A visitor who turns
+ * it off keeps it off on later visits (localStorage 'wsa-intro-sound'), until they turn it on again.
+ * Escape or "Skip intro" (shown from the title onward) goes straight to the page at any point.
  */
 (function () {
     'use strict';
@@ -71,14 +78,15 @@
 
     var STR = {
         en: { skip: 'Skip intro', soundOn: 'Turn sound on', soundOff: 'Turn sound off', motto: 'Wonders Seek Above',
-              sr: 'Woody Space Agency intro. Press Escape to skip.' },
+              sr: 'NovaUI 2.0, and the Woody Space Agency intro. Press Escape to skip.' },
         zh: { skip: '略過片頭', soundOn: '開啟聲音', soundOff: '關閉聲音', motto: '向上探尋奇蹟',
-              sr: 'Woody Space Agency 片頭動畫。按 Esc 鍵可略過。' }
+              sr: 'NovaUI 2.0 與 Woody Space Agency 片頭動畫。按 Esc 鍵可略過。' }
     };
 
     var running = null;
 
-    // The page can follow along: 'wsa-intro-film' once the film (or its stills) is on screen, 'wsa-intro-release'
+    // The page can follow along: 'wsa-intro-opening' when the NovaUI title hands over to the WSA opening,
+    // 'wsa-intro-film' once the film (or its stills) is on screen, 'wsa-intro-release'
     // as the black clears to the page, 'wsa-intro-end' when the intro is over (naturally or skipped). The 2.0
     // homepage builds its universe during the film, where a busy moment can't be seen, and starts drawing it
     // on the release.
@@ -92,6 +100,22 @@
             sessionStorage.setItem(key, value);
         } catch (e) { return null; }
         return null;
+    }
+
+    // The visitor's own choice of sound, kept across visits
+    function soundChoice(value) {
+        try {
+            if (value === undefined) return localStorage.getItem(SOUND);
+            localStorage.setItem(SOUND, value);
+        } catch (e) { /* storage blocked: the choice lasts for this intro only */ }
+        return null;
+    }
+
+    function webglOK() {
+        try {
+            var c = document.createElement('canvas');
+            return !!(window.WebGL2RenderingContext && c.getContext('webgl2'));
+        } catch (e) { return false; }
     }
 
     function chooseMode() {
@@ -154,6 +178,7 @@
         }).join('');
         var orbit = orbitPath();
         o.innerHTML =
+            '<div class="wsa-intro-nova" aria-hidden="true"></div>' +
             '<div class="wsa-intro-media" aria-hidden="true">' +
                 '<img class="wsa-intro-still" alt="" decoding="async">' +
                 '<svg class="wsa-intro-orbit" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" focusable="false">' +
@@ -177,6 +202,7 @@
         o.querySelector('.wsa-intro-skip').textContent = t.skip;
         o.querySelector('.wsa-intro-sr').textContent = t.sr;
         this.el = o;
+        this.novaLayer = o.querySelector('.wsa-intro-nova');
         this.media = o.querySelector('.wsa-intro-media');
         this.still = o.querySelector('.wsa-intro-still');
         this.orbit = o.querySelector('.wsa-intro-orbit');
@@ -243,19 +269,105 @@
         this.loadEmblem();
         this.prepareAudio();
         if (this.mode === 'full') this.loadFilm();
+        // The controls from the start, whether or not the title is ready yet: skipping is always one step away
+        this.at(450, function () { this.soundBtn.classList.add('is-shown'); });
+        this.at(800, function () { this.skipBtn.classList.add('is-shown'); });
+        this.nova();
+    };
+
+    /* ------------------------------------------------------------------ NovaUI 2.0, the title */
+
+    Intro.prototype.nova = function () {
+        var self = this;
+        var settled = false;
+        function typeset() {
+            if (settled || self.done) return;
+            settled = true;
+            self.novaType(false);
+        }
+        if (this.mode !== 'full' || !webglOK()) { typeset(); return; }
+        // The 3D title, if it is ready within 2.6 s; otherwise the typeset one
+        var wait = setTimeout(typeset, 2600);
+        this.timers.push(wait);
+        import('./intro-nova.js?v=1').then(function (m) {
+            return m.createNova(self.novaLayer, { url: MEDIA + 'novaui-title.bin' });
+        }).then(function (player) {
+            clearTimeout(wait);
+            if (settled || self.done) { player.dispose(); return; }
+            settled = true;
+            self.novaPlayer = player;
+            self.novaBegins();
+            player.start(function () { self.novaHandoff(); }, function () { self.novaGone(); });
+        }).catch(function (e) {
+            if (window.console) console.warn('NovaUI title (3D) unavailable:', e);
+            clearTimeout(wait);
+            typeset();
+        });
+    };
+
+    // Common to both versions of the title: its sound, and the controls
+    Intro.prototype.novaBegins = function () {
+        this.novaT0 = performance.now();
+        this.novaActive = true;
+        this.novaCue = this.cue('nova');
+    };
+
+    // The title goes dark: the WSA opening begins underneath
+    Intro.prototype.novaHandoff = function () {
+        if (this.done || this.openingStarted) return;
+        this.novaActive = false;
+        this.animate(this.novaLayer, [{ opacity: 1 }, { opacity: 0 }], { duration: 520, easing: 'ease-in', fill: 'forwards' });
+        this.beginOpening();
+    };
+
+    Intro.prototype.novaGone = function () {
+        if (this.novaPlayer) { this.novaPlayer.dispose(); this.novaPlayer = null; }
+        if (this.novaLayer) this.novaLayer.hidden = true;
+    };
+
+    // The title set in type: for the 'lite' and calm versions, without WebGL, or when the 3D one can't load
+    Intro.prototype.novaType = function (calm) {
+        var self = this;
+        var title = document.createElement('p');
+        title.className = 'wsa-intro-nova-type' + (calm ? ' is-still' : '');
+        title.textContent = 'NovaUI 2.0';
+        this.novaLayer.appendChild(title);
+        if (!calm) this.novaBegins();
+        this.animate(title, [{ opacity: 0 }, { opacity: 1 }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
+        this.at(1900, function () {
+            this.animate(title, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, easing: 'ease-in', fill: 'forwards' });
+        });
+        this.at(2400, function () {
+            self.novaGone();
+            if (calm) self.calmLockup();
+            else self.novaHandoff();
+        });
+    };
+
+    Intro.prototype.beginOpening = function () {
+        if (this.openingStarted) return;
+        this.openingStarted = true;
+        this.t0 = performance.now();
+        announce('wsa-intro-opening');
         this.opening();
+        if (this.audio && this.audio.buffers.ambient) this.startAmbient();
     };
 
     /* ------------------------------------------------------------------ the calm version */
 
     Intro.prototype.calm = function () {
-        var self = this;
         this.media.hidden = true;
         this.word.hidden = true;
         this.cornerWord.hidden = true;
         this.badge.hidden = true;
         this.soundBtn.hidden = true;
-        // No movement at all: the lockup fades in, holds, and the intro fades away
+        this.skipBtn.classList.add('is-shown');
+        // No movement at all: the title fades in and out, then the lockup does, and the intro fades away
+        this.novaType(true);
+    };
+
+    Intro.prototype.calmLockup = function () {
+        var self = this;
         var shown = [this.insignia, this.motto];
         shown.forEach(function (el) { self.animate(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 700, fill: 'forwards' }); });
         this.el.classList.add('is-titled');
@@ -859,19 +971,20 @@
         var probe = document.createElement('audio');
         var ext = probe.canPlayType('audio/ogg; codecs="opus"') ? '.ogg' : '.m4a';
         this.audio = { ctx: ctx, master: master, buffers: {}, ext: ext };
-        ['ambient', 'dissolve', 'logo'].forEach(function (name) {
+        ['nova', 'ambient', 'dissolve', 'logo'].forEach(function (name) {
             fetch(MEDIA + 'wsa-intro-' + name + ext).then(function (r) { return r.ok ? r.arrayBuffer() : Promise.reject(r.status); })
                 .then(function (data) { return new Promise(function (res, rej) { ctx.decodeAudioData(data, res, rej); }); })
                 .then(function (buf) {
                     self.audio.buffers[name] = buf;
-                    if (name === 'ambient') self.startAmbient();
+                    if (name === 'ambient' && self.openingStarted) self.startAmbient();
+                    if (name === 'nova') self.catchUpNova();
                 })
                 .catch(function () { /* a missing cue is just silence */ });
         });
         // Sound is on unless the visitor turned it off. Browsers hold sound back until the visitor's first
         // click, tap or key press on the page; if that happens here, that first interaction switches it on
         // (the sound button itself excepted: it is a choice of its own)
-        var wanted = store(true, SOUND) !== 'off';
+        var wanted = soundChoice() !== 'off';
         if (ctx.state === 'running') { if (wanted) this.setSound(true); }
         else if (wanted) {
             var p = ctx.resume();
@@ -914,22 +1027,37 @@
     };
 
     // A cue plays only while the audio clock is running: one started while sound is blocked would wait and
-    // then play late, out of step with the picture
+    // then play late, out of step with the picture. Returns whether it started.
     Intro.prototype.cue = function (name, offset) {
         var a = this.audio;
-        if (!a || !a.buffers[name] || this.done || a.ctx.state !== 'running') return;
+        if (!a || !a.buffers[name] || this.done || a.ctx.state !== 'running') return false;
+        if (offset && offset >= a.buffers[name].duration - 0.05) return false;
         var src = a.ctx.createBufferSource();
         src.buffer = a.buffers[name];
         src.connect(a.master);
         src.start(a.ctx.currentTime, Math.max(0, offset || 0));
+        return true;
+    };
+
+    // The title's cue, if the title is still on and its sound didn't start with it (the cue arrived late, or the
+    // browser only now allows sound): from where the picture is, never from the top
+    Intro.prototype.catchUpNova = function () {
+        if (!this.novaActive || this.novaCue || this.done) return;
+        this.novaCue = this.cue('nova', (performance.now() - this.novaT0) / 1000);
     };
 
     Intro.prototype.setSound = function (on, byVisitor) {
         var a = this.audio;
         if (!a) return;
+        var self = this;
         this.soundOn = on;
-        if (byVisitor) store(false, SOUND, on ? 'on' : 'off');
-        if (on && a.ctx.state !== 'running') a.ctx.resume();
+        if (byVisitor) soundChoice(on ? 'on' : 'off');
+        if (on && a.ctx.state !== 'running') {
+            var p = a.ctx.resume();
+            if (p && p.then) p.then(function () { self.catchUpNova(); }, function () {});
+        } else if (on) {
+            this.catchUpNova();
+        }
         var now = a.ctx.currentTime;
         a.master.gain.cancelScheduledValues(now);
         a.master.gain.setValueAtTime(a.master.gain.value, now);
@@ -952,6 +1080,8 @@
         var self = this;
         this.timers.forEach(clearTimeout);
         this.frames.forEach(function (f) { cancelAnimationFrame(f); });
+        this.novaActive = false;
+        if (this.novaPlayer) { this.novaPlayer.dispose(); this.novaPlayer = null; }
         if (this.film) { try { this.film.pause(); } catch (e) {} }
         if (this.audio) {
             var a = this.audio, now = a.ctx.currentTime;

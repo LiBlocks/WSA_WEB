@@ -56,15 +56,18 @@ export class Explorer {
                     <p class="hx-hint-text" hidden></p>
                 </div>
             </nav>
-            <article class="hx-info" aria-live="polite" aria-labelledby="hx-name">
-                <p class="hx-kind"></p>
-                <h2 class="hx-name" id="hx-name"></h2>
-                <p class="hx-note"></p>
-                <dl class="hx-facts"></dl>
-                <div class="hx-missions">
-                    <h3>WSA missions here</h3>
-                    <ul></ul>
-                    <p class="hx-more"></p>
+            <article class="hx-info" aria-labelledby="hx-name">
+                <button type="button" class="hx-sheet" aria-expanded="false" aria-controls="hx-body" aria-label="Show the details"></button>
+                <div class="hx-body" id="hx-body" aria-live="polite">
+                    <p class="hx-kind"></p>
+                    <h2 class="hx-name" id="hx-name"></h2>
+                    <p class="hx-note"></p>
+                    <dl class="hx-facts"></dl>
+                    <div class="hx-missions">
+                        <h3>WSA missions here</h3>
+                        <ul></ul>
+                        <p class="hx-more"></p>
+                    </div>
                 </div>
             </article>
             <div class="hx-labels" aria-hidden="true"></div>`;
@@ -79,6 +82,7 @@ export class Explorer {
         el.querySelector('.hx-exit').addEventListener('click', () => this.exit());
         el.querySelectorAll('.hx-zoom').forEach(b => b.addEventListener('click', () => this.zoom(b.dataset.zoom === 'in' ? 0.75 : 1.33)));
         el.querySelector('.hx-hint').addEventListener('click', () => this.hint());
+        this.sheet(el.querySelector('.hx-sheet'));
         document.body.appendChild(el);
         this.el = el;
         this.labelBox = el.querySelector('.hx-labels');
@@ -118,10 +122,12 @@ export class Explorer {
         this.inerted = [...document.querySelectorAll('body > section, body > footer')];
         this.inerted.forEach(s => { s.inert = true; });
         this.el.hidden = false;
+        this.measure();                  // so the first flight already ends framed in the free space
         u.explorer.enter(id || 'kerbin');
         u.syncLoop();
         this.select(id || 'kerbin', true);
         this.bind();
+        this.watchLayout();
         this.el.querySelector('.hx-exit').focus({ preventScroll: true });
         this.tick = requestAnimationFrame(() => this.frame());
     }
@@ -131,6 +137,8 @@ export class Explorer {
         this.active = false;
         cancelAnimationFrame(this.tick);
         this.unbind();
+        if (this.layoutObserver) this.layoutObserver.disconnect();
+        window.removeEventListener('resize', this.onResize);
         root.classList.remove('home-exploring', 'home-pointing-world');
         this.inerted.forEach(s => { s.inert = false; });
         this.el.hidden = true;
@@ -156,6 +164,82 @@ export class Explorer {
         if (DISCOVERIES.includes(id)) this.discover(id);
         this.el.querySelectorAll('.hx-place').forEach(b => b.setAttribute('aria-current', String(b.dataset.id === id)));
         this.info(id);
+        const chip = this.el.querySelector(`.hx-place[data-id="${id}"]`);
+        if (chip && this.layout() !== 'desk') chip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: prefs.reducedMotion.matches ? 'auto' : 'smooth' });
+        this.measure();
+    }
+
+    // ---------- the record's sheet (phones and small tablets) and the room it leaves the camera ----------
+
+    layout() {
+        return this.el ? getComputedStyle(this.el).getPropertyValue('--hx-layout').trim() || 'desk' : 'desk';
+    }
+
+    // The handle opens and closes the sheet: a tap, Enter or Space, or a swipe up or down on it
+    sheet(handle) {
+        const set = open => {
+            this.el.classList.toggle('is-expanded', open);
+            handle.setAttribute('aria-expanded', String(open));
+            handle.setAttribute('aria-label', open ? 'Hide the details' : 'Show the details');
+        };
+        this.setSheet = set;
+        let start = null, swiped = false;
+        handle.addEventListener('pointerdown', e => {
+            start = { y: e.clientY, id: e.pointerId };
+            swiped = false;
+            handle.setPointerCapture(e.pointerId);
+        });
+        handle.addEventListener('pointermove', e => {
+            if (!start || e.pointerId !== start.id || swiped) return;
+            const dy = e.clientY - start.y;
+            if (Math.abs(dy) > 24) {
+                swiped = true;
+                set(dy < 0);
+            }
+        });
+        const end = () => { start = null; };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+        handle.addEventListener('click', () => {
+            if (swiped) { swiped = false; return; }
+            set(!this.el.classList.contains('is-expanded'));
+        });
+    }
+
+    watchLayout() {
+        if (!this.layoutObserver) {
+            this.layoutObserver = new ResizeObserver(() => this.measure());
+            this.onResize = () => this.measure();
+        }
+        ['.hx-bar', '.hx-places', '.hx-info'].forEach(sel => this.layoutObserver.observe(this.el.querySelector(sel)));
+        window.addEventListener('resize', this.onResize);
+        this.measure();
+    }
+
+    // The part of the view the panels leave free, for the camera to frame the world in
+    measure() {
+        const u = this.home.universe;
+        if (!u || !this.active) return;
+        const W = u.host.clientWidth, H = u.host.clientHeight;
+        if (!W || !H) return;
+        const rect = sel => this.el.querySelector(sel).getBoundingClientRect();
+        const mode = this.layout();
+        const bar = rect('.hx-bar'), info = rect('.hx-info');
+        // the places row rides just above the sheet
+        if (mode === 'sheet') this.el.style.setProperty('--hx-sheet-h', `${Math.round(innerHeight - info.top)}px`);
+        const places = rect('.hx-places');
+        let x0 = 0, x1 = W, y0 = bar.bottom + 8, y1 = H - 8;
+        if (mode === 'sheet') {
+            y1 = Math.min(info.top, places.top) - 8;
+        } else if (mode === 'side') {
+            x1 = info.left - 8;
+            y1 = places.top - 8;
+        } else {
+            x0 = places.right + 8;
+            x1 = info.left - 8;
+        }
+        if (x1 - x0 < 80 || y1 - y0 < 80) return;
+        u.setSafeArea({ x0: x0 / W, x1: x1 / W, y0: y0 / H, y1: y1 / H });
     }
 
     info(id) {

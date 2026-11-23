@@ -643,7 +643,7 @@
         root.innerHTML = items.map(n => {
             const more = (n.links || [])[0];
             return `
-            <article class="overview-card news-card">
+            <article class="overview-card news-card${n.featured ? ' is-featured' : ''}">
                 ${n.image ? `<a class="news-card-image" href="${newsHref(n)}" tabindex="-1" aria-hidden="true"><img src="${esc(n.image.thumb || n.image.src)}" alt="" width="640" height="400" loading="lazy"></a>` : ''}
                 <div class="news-card-body">
                     ${newsMeta(n)}
@@ -655,17 +655,20 @@
         }).join('');
     }
 
-    // news.html: every story, newest first
+    const newsFigure = (n, loading) => `<figure class="news-article-image"><a href="${esc(((n.links || [])[0] || { href: n.image.src }).href)}"><img src="${esc(n.image.src)}" alt="${esc(n.image.alt || '')}" width="1600" height="1000" loading="${loading}"></a></figure>`;
+
+    // news.html: every story, newest first (a featured one, a release, opens with its picture)
     function initNews() {
         const root = document.getElementById('news-root');
         if (!root) return;
         const items = newsByDate();
         root.innerHTML = items.length ? items.map(n => `
-            <article class="module-card news-article" id="${esc(n.id)}" aria-labelledby="${esc(n.id)}-title">
+            <article class="module-card news-article${n.featured ? ' is-featured' : ''}" id="${esc(n.id)}" aria-labelledby="${esc(n.id)}-title">
+                ${n.featured && n.image ? newsFigure(n, 'eager') : ''}
                 ${newsMeta(n)}
                 <h2 id="${esc(n.id)}-title">${esc(n.title)}</h2>
                 <p class="news-lede">${esc(n.summary)}</p>
-                ${n.image ? `<figure class="news-article-image"><a href="${esc(((n.links || [])[0] || { href: n.image.src }).href)}"><img src="${esc(n.image.src)}" alt="${esc(n.image.alt || '')}" width="1600" height="1000" loading="lazy"></a></figure>` : ''}
+                ${!n.featured && n.image ? newsFigure(n, 'lazy') : ''}
                 ${(n.body || []).length ? `<div class="news-article-body">${n.body.map(p => `<p>${esc(p)}</p>`).join('')}</div>` : ''}
                 ${(n.links || []).length ? `<p class="news-links">${n.links.map(l => `<a class="card-link" href="${esc(l.href)}">${esc(l.label)} →</a>`).join('')}</p>` : ''}
             </article>`).join('') : '<p class="muted">No news yet.</p>';

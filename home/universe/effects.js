@@ -57,7 +57,7 @@ uniform float uDashes;
 varying float vT;
 void main() {
     float dash = step(0.45, fract(vT * uDashes - uFlow));
-    float ends = smoothstep(0.0, 0.06, vT) * smoothstep(1.0, 0.9, vT);
+    float ends = smoothstep(0.0, 0.06, vT) * (1.0 - smoothstep(0.9, 1.0, vT));
     gl_FragColor = vec4(uColor, uOpacity * dash * ends);
 }
 `;

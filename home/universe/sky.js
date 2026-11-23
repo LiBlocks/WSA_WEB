@@ -40,10 +40,10 @@ void main() {
     float cloud = smoothstep(-0.15, 0.55, fbm3(q * 1.3 + 1.2 * warp));
     float fil = pow(1.0 - abs(fbm3(q * 2.6 + warp * 1.6)), 6.0);
     float a = angleTo(d, uNebA);
-    float envA = smoothstep(0.42, 0.0, a + 0.14 * fbm3(d * 5.0));
-    float nebA = envA * (0.65 * cloud + 0.35 * fil * smoothstep(0.32, 0.05, a)) * smoothstep(0.0, 0.3, cloud);
+    float envA = (1.0 - smoothstep(0.0, 0.42, a + 0.14 * fbm3(d * 5.0)));
+    float nebA = envA * (0.65 * cloud + 0.35 * fil * (1.0 - smoothstep(0.05, 0.32, a))) * smoothstep(0.0, 0.3, cloud);
     float b = angleTo(d, uNebB);
-    float envB = smoothstep(0.28, 0.0, b + 0.1 * fbm3(d * 6.0 + 4.0));
+    float envB = (1.0 - smoothstep(0.0, 0.28, b + 0.1 * fbm3(d * 6.0 + 4.0)));
     float nebB = envB * (0.6 * smoothstep(-0.1, 0.6, fbm3(q * 1.7 - 1.1 * warp)) + 0.3 * fil);
 
     // Distant galaxies: small soft ellipses with brighter cores

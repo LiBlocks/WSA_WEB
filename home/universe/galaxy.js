@@ -53,7 +53,7 @@ uniform float uTheme;
 uniform float uFade;
 void main() {
     float r = length(vUv);
-    float i = (exp(-r * 7.0) + 0.25 * exp(-r * 2.5)) * smoothstep(1.0, 0.6, r) * uFade;
+    float i = (exp(-r * 7.0) + 0.25 * exp(-r * 2.5)) * (1.0 - smoothstep(0.6, 1.0, r)) * uFade;
     gl_FragColor = vec4(mix(vec3(1.0, 0.88, 0.7) * i * 0.7, vec3(0.3, 0.28, 0.25), uTheme), mix(1.0, i * 0.3, uTheme));
 }
 `;
@@ -68,14 +68,14 @@ void main() {
     // the accretion disc: a flattened, tilted ellipse, brighter on the side turning toward us
     vec2 e = vec2(vUv.x, vUv.y * 3.6 - 0.05);
     float disc = exp(-pow((length(e) - 0.62) / 0.2, 2.0)) * (0.55 + 0.45 * vUv.x / max(r, 0.01));
-    float shadow = smoothstep(0.33, 0.3, r);
+    float shadow = (1.0 - smoothstep(0.3, 0.33, r));
     float swirl = 0.8 + 0.2 * sin(atan(vUv.y, vUv.x) * 5.0 - uTime * 0.6);
     vec3 glow = vec3(1.0, 0.78, 0.5) * (ring * 1.4 + disc * swirl * (1.0 - shadow));
-    float a = clamp(ring + disc + shadow, 0.0, 1.0) * smoothstep(1.0, 0.85, r);
+    float a = clamp(ring + disc + shadow, 0.0, 1.0) * (1.0 - smoothstep(0.85, 1.0, r));
     vec3 dark = glow * uFade;
     vec3 light = mix(vec3(0.08, 0.1, 0.15), vec3(0.55, 0.42, 0.3), clamp(ring + disc, 0.0, 1.0));
     // In the dark theme the hole itself must cover the stars behind it: output black with full alpha there
-    gl_FragColor = uTheme < 0.5 ? vec4(dark, max(shadow, clamp(ring + disc, 0.0, 1.0)) * smoothstep(1.0, 0.85, r) * uFade) : vec4(light, a * uFade);
+    gl_FragColor = uTheme < 0.5 ? vec4(dark, max(shadow, clamp(ring + disc, 0.0, 1.0)) * (1.0 - smoothstep(0.85, 1.0, r)) * uFade) : vec4(light, a * uFade);
 }
 `;
 
