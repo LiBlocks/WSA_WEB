@@ -241,8 +241,8 @@
     border: 1px solid var(--home-pane-edge);
     border-radius: 16px;
     box-shadow: inset 0 1px 0 var(--home-pane-hi), var(--home-shadow);
-    -webkit-backdrop-filter: blur(var(--home-glass-blur)) saturate(1.3);
-    backdrop-filter: var(--lg-refract,) blur(var(--home-glass-blur)) saturate(1.3);
+    -webkit-backdrop-filter: var(--home-glass);
+    backdrop-filter: var(--home-glass);
 }
 
 :root.home-v2 .featured-stats .stat-card {
@@ -302,30 +302,79 @@
     border: 1px solid var(--home-pane-edge);
     border-radius: var(--home-radius);
     box-shadow: inset 0 1px 0 var(--home-pane-hi), var(--home-shadow);
-    -webkit-backdrop-filter: blur(var(--home-glass-blur)) saturate(1.35);
-    backdrop-filter: var(--lg-refract,) blur(var(--home-glass-blur)) saturate(1.35);
+    -webkit-backdrop-filter: var(--home-glass);
+    backdrop-filter: var(--home-glass);
 }
 
 /* ---------- Liquid Glass panels ----------
-   With Liquid Glass on, each panel is a slab of glass floating in the universe rather than frosted plastic:
-   a lighter tint and a light blur, so the stars and nebulae stay visible through it, and in Chromium a lens
-   (liquid-glass.js, --lg-refract) that bends what lies behind toward the middle along the rim and splits it
-   slightly into red and cyan there, with a faint split line of light just inside the edge (.lg-rim). The
-   middle stays flat and clear, so the text reads as on any panel. Where the lens isn't available (Safari,
-   Firefox, phones and small windows) the panel keeps the blur and tint, and its rim is drawn: a highlight
-   along the top and left, and a hairline red and cyan split round the edge. Without Liquid Glass the panels
-   are frosted. */
+   With Liquid Glass on, each panel is a clear slab of glass floating in the universe rather than frosted
+   plastic: a faint tint and a light blur, so the stars, nebulae and planets stay plainly visible through it.
+   What lies behind is dimmed a little and its colour lifted (brightness and saturation in the backdrop), which
+   keeps the text readable without a heavy overlay. The edge carries the material: along the rim the universe
+   bends and splits into a red and cyan fringe (the rim canvas below, drawn by home/universe/glass.js), with a
+   highlight along the top and left where the light falls, a soft shade inside the bottom edge and a colour
+   hairline. All of it belongs to the panel itself, so it moves with the panel exactly as the page scrolls and
+   nothing changes when the page comes to rest. Without Liquid Glass the panels are frosted; where the browser
+   has no backdrop blur they are tinted more heavily instead. */
 :root.home-v2 {
-    --home-glass-blur: 18px;
+    --home-glass: blur(18px) saturate(1.35);
 }
 
 :root.home-v2[data-liquid-glass] {
-    --home-glass-blur: 5px;
-    --home-pane: rgba(7, 11, 25, 0.46);
+    --home-glass: blur(3.5px) saturate(1.7) brightness(0.9);
+    --home-pane: rgba(8, 12, 26, 0.1);
 }
 
 :root.home-v2[data-liquid-glass][data-theme="light"] {
-    --home-pane: rgba(250, 251, 254, 0.58);
+    --home-glass: blur(4px) saturate(1.35) brightness(1.08);
+    --home-pane: rgba(250, 251, 254, 0.3);
+}
+
+/* The rim: each panel's canvas, into which the universe copies the bent, colour-split view along that panel's
+   edge (home/universe/glass.js). It sits behind the panel's content, inside the panel, so it scrolls with the panel
+   exactly. Only with Liquid Glass and the 2.0 homepage. */
+.home-glass-rim {
+    display: none;
+}
+
+:root.home-v2[data-liquid-glass] :is(.home-pane, .featured-programs .program-card):has(> .home-glass-rim) {
+    position: relative;
+    isolation: isolate;
+}
+
+:root.home-v2[data-liquid-glass] .home-glass-rim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* Phones: the panels span the screen, so the planets pass behind the text itself; a little more blur and
+   dimming keeps a bright world from washing it out (still far clearer than frosted) */
+@media (max-width: 760px) {
+    :root.home-v2[data-liquid-glass] {
+        --home-glass: blur(9px) saturate(1.5) brightness(0.7);
+        --home-pane: rgba(8, 12, 26, 0.24);
+    }
+
+    :root.home-v2[data-liquid-glass][data-theme="light"] {
+        --home-glass: blur(9px) saturate(1.3) brightness(1.12);
+        --home-pane: rgba(250, 251, 254, 0.46);
+    }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root.home-v2 {
+        --home-pane: rgba(9, 13, 28, 0.78);
+    }
+
+    :root.home-v2[data-theme="light"] {
+        --home-pane: rgba(250, 251, 254, 0.88);
+    }
 }
 
 :root.home-v2[data-liquid-glass] .home-pane:not(.featured-programs > .home-pane)::before {
@@ -334,29 +383,37 @@
     inset: 0;
     padding: 1px;
     border-radius: inherit;
-    background: linear-gradient(158deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05) 32%,
-        rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.14));
+    background: linear-gradient(158deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.06) 32%,
+        rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.16));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
     pointer-events: none;
 }
 
-:root.home-v2[data-liquid-glass] .home-pane:not(.featured-programs > .home-pane):not(.lg-rim)::after {
+:root.home-v2[data-liquid-glass] .home-pane:not(.featured-programs > .home-pane)::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
     box-shadow:
-        inset 1.5px 1.5px 0 -0.5px rgba(255, 128, 118, 0.2),
-        inset -1.5px -1.5px 0 -0.5px rgba(110, 205, 255, 0.24),
-        inset 0 18px 30px -26px rgba(205, 220, 255, 0.22);
+        inset 1.5px 1.5px 0 -0.5px rgba(255, 128, 118, 0.22),
+        inset -1.5px -1.5px 0 -0.5px rgba(110, 205, 255, 0.26),
+        inset 0 18px 30px -26px rgba(205, 220, 255, 0.24),
+        inset 0 -22px 34px -30px rgba(0, 0, 0, 0.4);
     pointer-events: none;
 }
 
 :root.home-v2[data-liquid-glass][data-theme="light"] .home-pane:not(.featured-programs > .home-pane)::before {
     background: linear-gradient(158deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4) 32%,
         rgba(24, 32, 47, 0.06) 60%, rgba(255, 255, 255, 0.6));
+}
+
+:root.home-v2[data-liquid-glass][data-theme="light"] .home-pane:not(.featured-programs > .home-pane)::after {
+    box-shadow:
+        inset 1.5px 1.5px 0 -0.5px rgba(214, 80, 70, 0.16),
+        inset -1.5px -1.5px 0 -0.5px rgba(40, 130, 200, 0.18),
+        inset 0 -22px 34px -30px rgba(30, 41, 70, 0.16);
 }
 
 :root.home-v2 .featured-stats {
@@ -425,6 +482,15 @@
 
 :root.home-v2[data-theme="light"] .latest-news .overview-card.news-card {
     background: rgba(255, 255, 255, 0.55) !important;
+}
+
+/* With Liquid Glass the cards are only a breath lighter than the clear panel they sit on */
+:root.home-v2[data-liquid-glass][data-theme="light"] .latest-news .overview-card.news-card {
+    background: rgba(255, 255, 255, 0.28) !important;
+}
+
+:root.home-v2[data-liquid-glass] .latest-news .overview-card.news-card {
+    background: rgba(255, 255, 255, 0.025) !important;
 }
 
 :root.home-v2 .latest-news .overview-card.news-card::before,

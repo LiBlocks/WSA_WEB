@@ -1,14 +1,17 @@
-// Liquid Glass for the homepage's panels, done by the universe itself. The scene is drawn into a texture and
-// copied to the screen; inside each panel's rounded rectangle the copy looks through a slab of glass:
+// Liquid Glass for the homepage's panels: the rim of each panel bends the universe behind it and splits it
+// slightly into colour, like the curved edge of a thick pane.
 //   - along the rim the view bends inward (what is seen at the edge lies a little further in), strongest at the
-//     very edge and rolling off over the bezel, as through the curved edge of a thick pane;
-//   - the bend splits colour slightly (chromatic aberration): red bends a little less, blue a little more, so a
-//     star under the rim shows a hairline red and cyan fringe, and the flat middle has none;
-//   - the middle magnifies what lies behind by a few percent, so the whole panel reads as a lens, not a hole.
-// The panel's own blur and tint stay in CSS (home/home.css), which keeps the text crisp and the blur in step
-// with the page as it scrolls. Panels are given in page coordinates; each frame places them from the current
-// scroll position. While the page is flung fast the bend eases off, so a frame of scroll lag never shows as a
-// misplaced rim. Only drawn this way while a panel is on screen: otherwise the scene goes straight out.
+//     very edge and rolling off over the bezel;
+//   - the bend splits colour (chromatic aberration): red bends a little less, blue a little more, so a star or a
+//     planet's edge under the rim shows a red and cyan fringe; the flat middle has none.
+//
+// Where it is drawn matters. The universe is a fixed canvas drawn by the page's own thread, but browsers scroll
+// the page on another thread, a frame or more ahead of it; a rim drawn into the fixed canvas would trail behind
+// its panel whenever the page moves. So the rim is drawn into the panel itself: each frame the scene is rendered
+// once with the rims, each panel's rim is copied into a small canvas that lives inside that panel (and so moves
+// with it exactly, however the page scrolls), and the scene is rendered again without them for the page behind.
+// The copy is a ring that fades out toward the middle, where the panel's own blur and tint (home/home.css) take
+// over. Nothing here eases or animates: when the page stops, the glass is simply where the panel is.
 import * as THREE from 'three';
 
 const MAX = 12;
@@ -27,7 +30,6 @@ uniform vec2 uRes;
 uniform vec4 uRects[${MAX}];
 uniform float uRadius[${MAX}];
 uniform int uCount;
-uniform float uStrength;
 uniform float uBezel;
 uniform float uDispersion;
 varying vec2 vUv;
@@ -39,9 +41,6 @@ float sdBox(vec2 p, vec2 b, float r) {
 
 void main() {
     vec2 px = vUv * uRes;
-    vec2 off = vec2(0.0);
-    float rim = 0.0;
-    bool inside = false;
     for (int i = 0; i < ${MAX}; i++) {
         if (i >= uCount) break;
         vec4 r = uRects[i];
@@ -56,42 +55,63 @@ void main() {
                           sdBox(p + vec2(0.0, 1.0), b, rad) - sdBox(p - vec2(0.0, 1.0), b, rad));
             g /= max(length(g), 1e-4);
             float bezel = min(uBezel, 0.45 * min(b.x, b.y));
-            float t = clamp(-d / bezel, 0.0, 1.0);
-            rim = pow(1.0 - t, 2.4);
-            off = -g * rim * bezel * 0.5 - p * 0.03 * (1.0 - rim);
-            inside = true;
-            break;
+            float rim = pow(1.0 - clamp(-d / bezel, 0.0, 1.0), 2.4);
+            vec2 o = -g * rim * bezel * 0.5 / uRes;
+            float k = uDispersion * rim;
+            gl_FragColor = vec4(texture2D(tScene, vUv + o * (1.0 - k)).r,
+                                texture2D(tScene, vUv + o).g,
+                                texture2D(tScene, vUv + o * (1.0 + k)).b, 1.0);
+            return;
         }
     }
-    if (!inside || uStrength <= 0.0) {
-        gl_FragColor = vec4(texture2D(tScene, vUv).rgb, 1.0);
-        return;
-    }
-    vec2 o = off * uStrength / uRes;
-    float k = uDispersion * rim;
-    vec3 col;
-    col.r = texture2D(tScene, vUv + o * (1.0 - k)).r;
-    col.g = texture2D(tScene, vUv + o).g;
-    col.b = texture2D(tScene, vUv + o * (1.0 + k)).b;
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(texture2D(tScene, vUv).rgb, 1.0);
 }
 `;
+
+// The ring each copy is cut to: opaque at the panel's edge, fading to nothing a bezel in
+function ringMask(w, h, r, bezel) {
+    const m = document.createElement('canvas');
+    m.width = w; m.height = h;
+    const c = m.getContext('2d');
+    const round = (x, y, rw, rh, rr) => {
+        rr = Math.max(0, Math.min(rr, rw / 2, rh / 2));
+        c.beginPath();
+        c.moveTo(x + rr, y);
+        c.arcTo(x + rw, y, x + rw, y + rh, rr);
+        c.arcTo(x + rw, y + rh, x, y + rh, rr);
+        c.arcTo(x, y + rh, x, y, rr);
+        c.arcTo(x, y, x + rw, y, rr);
+        c.closePath();
+    };
+    c.fillStyle = '#fff';
+    round(0, 0, w, h, r);
+    c.fill();
+    // a feathered hole: the inner shape drawn far off the canvas, its blurred shadow landing in place
+    const inset = bezel * 0.45, far = w * 3;
+    c.globalCompositeOperation = 'destination-out';
+    c.shadowColor = '#000';
+    c.shadowBlur = bezel * 0.7;
+    c.shadowOffsetX = far;
+    round(inset - far, inset, w - 2 * inset, h - 2 * inset, r - inset);
+    c.fill();
+    return m;
+}
 
 export class Glass {
     constructor(renderer, { samples = 4 } = {}) {
         this.renderer = renderer;
-        this.panes = [];             // { x, y, w, h, r } in CSS px, page coordinates
+        this.panes = [];             // { x, y, w, h, r, canvas } in CSS px, page coordinates
         this.enabled = false;
-        this.strength = 1;
-        this.speed = 0;
-        this.lastScroll = null;
+        this.visible = [];
+        this.drawn = new Set();      // the panes' canvases holding a copy now
+        this.masks = new Map();
         this.target = new THREE.WebGLRenderTarget(1, 1, { samples, depthBuffer: true });
         this.material = new THREE.ShaderMaterial({
             vertexShader: VERT, fragmentShader: FRAG, depthTest: false, depthWrite: false,
             uniforms: {
                 tScene: { value: this.target.texture }, uRes: { value: new THREE.Vector2(1, 1) },
                 uRects: { value: Array.from({ length: MAX }, () => new THREE.Vector4()) },
-                uRadius: { value: new Array(MAX).fill(0) }, uCount: { value: 0 }, uStrength: { value: 1 },
+                uRadius: { value: new Array(MAX).fill(0) }, uCount: { value: 0 },
                 uBezel: { value: 36 }, uDispersion: { value: 0.22 },
             },
         });
@@ -110,46 +130,83 @@ export class Glass {
         this.target.setSize(Math.round(w * pr), Math.round(h * pr));
         this.material.uniforms.uRes.value.set(Math.round(w * pr), Math.round(h * pr));
         this.material.uniforms.uBezel.value = 36 * pr;
+        this.masks.clear();
+        this.panes.forEach(p => this.fit(p));
     }
 
     setPanes(panes) {
+        this.clear();
         this.panes = panes || [];
+        this.panes.forEach(p => this.fit(p));
     }
 
-    // Which panels are on screen now, in drawing-buffer pixels (origin bottom left). False when none is.
-    place(scrollY, dt) {
+    // Each panel's canvas holds its rim at the scene's resolution
+    fit(p) {
+        if (!p.canvas || !this.pr) return;
+        const w = Math.max(1, Math.round(p.w * this.pr)), h = Math.max(1, Math.round(p.h * this.pr));
+        if (p.canvas.width !== w || p.canvas.height !== h) { p.canvas.width = w; p.canvas.height = h; }
+        p.ctx = p.ctx || p.canvas.getContext('2d');
+    }
+
+    mask(w, h, r) {
+        const key = `${w}x${h}r${r}`;
+        if (!this.masks.has(key)) this.masks.set(key, ringMask(w, h, r, 36 * this.pr));
+        return this.masks.get(key);
+    }
+
+    // Which panels are on screen now (in drawing-buffer pixels, origin bottom left). False when none is.
+    place(scrollY) {
+        this.visible = [];
         if (!this.enabled || !this.panes.length || !this.w) return false;
-        // Fast flings ease the bend off (to a third), and it returns as the page slows down
-        if (this.lastScroll !== null && dt > 0) {
-            const v = Math.abs(scrollY - this.lastScroll) / dt;
-            this.speed += (v - this.speed) * Math.min(1, dt * 12);
-        }
-        this.lastScroll = scrollY;
-        const calm = 1 - 0.65 * Math.min(1, Math.max(0, (this.speed - 900) / 1800));
-        this.strength += (calm - this.strength) * Math.min(1, dt * 10);
         const u = this.material.uniforms, pr = this.pr;
         let n = 0;
         for (const p of this.panes) {
             const top = p.y - scrollY;
-            if (top > this.h || top + p.h < 0 || n >= MAX) continue;
+            if (top > this.h || top + p.h < 0 || n >= MAX || !p.ctx) continue;
             u.uRects.value[n].set(p.x * pr, (this.h - top - p.h) * pr, (p.x + p.w) * pr, (this.h - top) * pr);
             u.uRadius.value[n] = p.r * pr;
+            this.visible.push({ p, top });
             n++;
         }
-        u.uCount.value = n;
-        u.uStrength.value = this.strength;
+        this.count = n;
         return n > 0;
     }
 
     render(scene, camera) {
-        const r = this.renderer;
+        const r = this.renderer, u = this.material.uniforms, pr = this.pr, src = r.domElement;
         r.setRenderTarget(this.target);
         r.render(scene, camera);
         r.setRenderTarget(null);
+        // 1. the scene with the rims
+        u.uCount.value = this.count;
+        r.render(this.scene, this.camera);
+        // 2. each panel's rim into its own canvas
+        const now = new Set();
+        for (const { p, top } of this.visible) {
+            const c = p.ctx, cw = p.canvas.width, ch = p.canvas.height;
+            c.globalCompositeOperation = 'copy';
+            c.drawImage(src, p.x * pr, top * pr, p.w * pr, p.h * pr, 0, 0, cw, ch);
+            c.globalCompositeOperation = 'destination-in';
+            c.drawImage(this.mask(cw, ch, Math.round(p.r * pr)), 0, 0);
+            c.globalCompositeOperation = 'source-over';
+            now.add(p);
+        }
+        // panels that have left the view keep nothing stale for their return
+        this.drawn.forEach(p => { if (!now.has(p)) p.ctx.clearRect(0, 0, p.canvas.width, p.canvas.height); });
+        this.drawn = now;
+        // 3. the plain scene, for the page behind the panels
+        u.uCount.value = 0;
         r.render(this.scene, this.camera);
     }
 
+    // No rims drawn this frame (none on screen, Explore mode, glass off): the panels' copies are emptied
+    clear() {
+        this.drawn.forEach(p => p.ctx && p.ctx.clearRect(0, 0, p.canvas.width, p.canvas.height));
+        this.drawn = new Set();
+    }
+
     dispose() {
+        this.clear();
         this.target.dispose();
         this.material.dispose();
         this.geometry.dispose();

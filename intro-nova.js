@@ -1,27 +1,57 @@
 // NovaUI 2.0: the title that opens the homepage intro (intro.js plays it before the WSA opening).
 //
-// The words are a real 3D object: Inter Display SemiBold (OFL 1.1) extruded into a slab with a rounded bevel
-// (media/intro/novaui-title.bin, built in Blender: ~/Documents/wsa-intro-production/nova/build_title.py),
-// polished metal lit by a small studio (a softbox above, a cool and a warm strip at the sides, a low band of
-// WSA blue behind) whose reflections drift across it, and a light that passes close over the letters.
+// Three shots, each from a camera that does not move:
+//   A  0.00-1.95 s  an extreme close-up of one corner of the lettering; the light shifts slightly, and the
+//                   highlight on the letters' chamfer slides a little along the edge
+//   B  1.95-3.85 s  a second close-up, of another part of the title, lit the same way
+//   C  3.85-6.45 s  the whole title: it settles gently back into frame, holds, and goes dark as the WSA opening
+//                   begins (intro.js starts the opening at the hand-over)
+// Between the shots the picture dips to black for a moment.
 //
-//   0.0-2.2 s   extreme close-up: the camera skims the face of the N, the o and the v, a light travelling ahead
-//   2.2-3.5 s   (a breath of darkness) the curve of the 2 from above, its bevel catching the light
-//   3.5-5.1 s   the camera draws back, turning to face the title, until all of it is in frame
-//   5.1-5.95 s  the title, held; one last light sweeps across it
-//   5.95-6.45 s it goes dark as the WSA opening begins (intro.js starts it at the hand-over)
+// The words are Inter Display Light (OFL 1.1) with just a little depth: a thin slab with a small rounded chamfer
+// round the face (media/intro/novaui-title.bin, built in Blender: ~/Documents/wsa-intro-production/nova/
+// build_title.py), in obsidian. One material, one soft studio reflected in it (a softbox above, a wall facing
+// the letters, two narrow strips whose reflections slide across the faces in the close-ups), one key light and a
+// faint fill; nothing else.
 //
-// Framing adapts to the screen: the closing shot fits the whole title to the width of any window. The
-// renderer, its textures and its geometry are released as soon as the title is over (or skipped).
+// Framing adapts to the screen: each close-up fits its part of the title to the window, and the closing shot
+// fits the whole title to its width. The renderer, its textures and its geometry are released as soon as the
+// title is over (or skipped).
 import * as THREE from 'three';
 
-export const TIMING = { cut: 2.2, pull: 3.5, full: 5.1, handoff: 5.95, end: 6.45 };
+export const TIMING = { b: 1.95, c: 3.85, settle: 5.0, handoff: 5.95, end: 6.45 };
+const DIP = 0.14;               // half the length of the dip to black between shots
+
+// The finish of the letters: obsidian, a dark glass with a polished edge. The faces are near-black slate that
+// picks up the studio's cool light; the chamfer catches warm and cool reflections that slide along it in the
+// close-ups; the whole title is lifted (hold) so its thin letters read at a glance.
+const FINISH = {
+    color: [0.042, 0.045, 0.056], metalness: 0.9, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.03,
+    ior: 1.9, env: 1.65, key: 1.05, fill: 0.03,
+    keyColor: [1, 0.985, 0.96],
+    tint: { soft: [1.1, 1.15, 1.3], strip: [1.2, 1.3, 1.5], strip2: [1.5, 1.25, 1.15], back: [2, 2.2, 3], wall: [1.35, 1.4, 1.65] },
+    hold: { env: 1.6, key: 1.8 },
+};
 
 const ease = t => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10));     // smootherstep
 const sine = t => (t <= 0 ? 0 : t >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * t));
 const clamp01 = t => Math.max(0, Math.min(1, t));
 const lin = (r, g, b) => new THREE.Color().setRGB(r, g, b);          // working (linear) values, whatever the page set
-const V = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+const rad = THREE.MathUtils.degToRad;
+
+// The two close-ups, in the title's own units (font size 1; the title, Inter Display Light, runs from x -1.63 to
+// 1.65, its capitals from y -0.26 to 0.27, its face at z = bbox max). Each looks at a point on the face from a
+// fixed direction (yaw about the vertical, pitch about the horizontal, degrees) and fits a patch of the face
+// (w x h) in view; upright screens frame a narrower, taller patch of the same part. The key light turns slightly
+// over the shot (azimuth / elevation, degrees, from -> to), so the highlight on the chamfer moves a little.
+const SHOTS = {
+    // the top left corner of the N
+    A: { wide: { at: [-1.497, 0.173], w: 0.366, h: 0.234 }, tall: { at: [-1.487, 0.1], w: 0.224, h: 0.305 },
+         yaw: -15, pitch: 9, key: [[-64, 28], [-36, 34]], env: [0.24, 0.06] },
+    // the bowl of the 2
+    B: { wide: { at: [0.963, 0.081], w: 0.489, h: 0.326 }, tall: { at: [0.963, 0.081], w: 0.275, h: 0.407 },
+         yaw: 14, pitch: -6, key: [[58, 30], [30, 42]], env: [-0.16, 0.02] },
+};
 
 // The mesh file: see build_title.py for the layout
 function decode(buf) {
@@ -46,34 +76,43 @@ function decode(buf) {
     return geo;
 }
 
-// The studio the metal reflects: rendered once into an environment map
-function studio() {
+// The studio the letters reflect, rendered once into an environment map: a large soft light above and in
+// front, a wall facing the letters that fades from grey at the top to black at the bottom (what the flat faces
+// reflect, so they read as a soft gradient), a dim light behind, and darkness everywhere else
+function studio(tint = {}) {
     const s = new THREE.Scene();
+    const T = (c, t) => (t ? c.map((v, i) => v * t[i]) : c);
     const owned = [];
-    const panel = (w, h, rgb, pos) => {
+    const panel = (w, h, top, bottom, pos) => {
         const geo = new THREE.PlaneGeometry(w, h);
-        const mat = new THREE.MeshBasicMaterial({ color: lin(...rgb), side: THREE.DoubleSide });
+        const c = [], a = lin(...top), b = lin(...bottom);
+        for (let i = 0; i < geo.attributes.position.count; i++) {
+            const k = geo.attributes.position.getY(i) > 0 ? a : b;
+            c.push(k.r, k.g, k.b);
+        }
+        geo.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
+        const mat = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide });
         const m = new THREE.Mesh(geo, mat);
         m.position.set(...pos);
         m.lookAt(0, 0, 0);
         s.add(m);
         owned.push(geo, mat);
     };
-    panel(7, 2.4, [2.3, 2.35, 2.45], [0, 4.6, 3.4]);         // softbox, above and in front
-    panel(0.4, 8, [5.2, 5.6, 6.4], [-5.2, 0.4, 2.4]);        // a cool strip on the left
-    panel(0.32, 8, [4.6, 4.1, 3.5], [5.6, 0, 1.4]);          // a warm strip on the right
-    panel(18, 0.7, [0.07, 0.15, 0.42], [0, -1.7, -4.5]);     // a low band of WSA blue behind
-    panel(5, 3, [0.45, 0.47, 0.52], [0, 1.4, -6.5]);         // a faint fill from behind, for the upright faces
-    panel(16, 7, [0.16, 0.17, 0.2], [0, 1.6, 8]);            // a dim wall in front: the faces are never quite black
-    panel(0.7, 9, [4.2, 4.3, 4.5], [0, 0.6, 7.6]);           // a tall strip in front: the band that sweeps the faces
+    panel(9, 3.2, T([1.7, 1.72, 1.78], tint.soft), T([1.7, 1.72, 1.78], tint.soft), [0, 4.4, 3.6]);     // the softbox
+    panel(16, 8, T([0.5, 0.51, 0.54], tint.wall), T([0.015, 0.015, 0.018], tint.wall), [0, 0.6, 7]);    // the wall facing the letters
+    // two narrow soft strips in front, where the faces look in the two close-ups: as the light drifts over each
+    // shot, the strip's reflection slides across the letter's face (the whole title, straight on, sees neither)
+    panel(0.7, 9, T([4, 4.05, 4.2], tint.strip), T([1.2, 1.22, 1.28], tint.strip), [0.8, 0.4, 6.4]);
+    panel(0.7, 9, T([4, 4.05, 4.2], tint.strip2 || tint.strip), T([1.2, 1.22, 1.28], tint.strip2 || tint.strip), [-1.1, 0.4, 6.4]);
+    panel(10, 2, T([0.22, 0.23, 0.26], tint.back), T([0.22, 0.23, 0.26], tint.back), [0, 2.5, -6]);     // a dim light behind
     return { scene: s, dispose: () => owned.forEach(o => o.dispose()) };
 }
 
-export async function createNova(host, { url, signal } = {}) {
+export async function createNova(host, { url, signal, finish } = {}) {
     const res = await fetch(url, { signal });
     if (!res.ok) throw new Error('title mesh: HTTP ' + res.status);
     const geo = decode(await res.arrayBuffer());
-    const nova = new Nova(host, geo);
+    const nova = new Nova(host, geo, { ...FINISH, ...finish });
     try {
         await nova.prepare();
     } catch (e) {
@@ -84,7 +123,7 @@ export async function createNova(host, { url, signal } = {}) {
 }
 
 class Nova {
-    constructor(host, geo) {
+    constructor(host, geo, finish) {
         this.host = host;
         this.geo = geo;
         const canvas = document.createElement('canvas');
@@ -94,28 +133,35 @@ class Nova {
         this.canvas = canvas;
         this.renderer = renderer;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMapping = THREE.NeutralToneMapping;
         renderer.toneMappingExposure = 0;
         renderer.setClearColor(0x000000, 1);
         host.appendChild(canvas);
 
         this.scene = new THREE.Scene();
         const pmrem = new THREE.PMREMGenerator(renderer);
-        const st = studio();
-        this.env = pmrem.fromScene(st.scene, 0.03);
+        const st = studio(finish.tint);
+        this.env = pmrem.fromScene(st.scene, 0.04);
         st.dispose();
         pmrem.dispose();
         this.scene.environment = this.env.texture;
+        this.scene.environmentIntensity = finish.env;
 
         this.material = new THREE.MeshPhysicalMaterial({
-            color: lin(0.86, 0.88, 0.92), metalness: 1, roughness: 0.17,
-            clearcoat: 0.35, clearcoatRoughness: 0.05, envMapIntensity: 1.05,
+            color: lin(...finish.color), metalness: finish.metalness || 0, roughness: finish.roughness, ior: finish.ior,
+            clearcoat: finish.clearcoat || 0, clearcoatRoughness: finish.clearcoatRoughness || 0,
+            ...finish.extra,
         });
         this.title = new THREE.Mesh(geo, this.material);
-        this.light = new THREE.PointLight(lin(1, 0.98, 0.95), 0, 5, 2);
-        this.scene.add(this.title, this.light);
-        this.camera = new THREE.PerspectiveCamera(30, 1, 0.01, 60);
+        this.key = new THREE.DirectionalLight(lin(...(finish.keyColor || [1, 0.985, 0.96])), finish.key);
+        this.fill = new THREE.HemisphereLight(lin(0.5, 0.52, 0.58), lin(0.02, 0.02, 0.025), finish.fill);
+        this.scene.add(this.title, this.key, this.key.target, this.fill);
+        this.shots = finish.shots || SHOTS;
+        this.hold = finish.hold || { env: 1, key: 1 };
+        this.baseEnv = finish.env; this.baseKey = finish.key;
+        this.camera = new THREE.PerspectiveCamera(24, 1, 0.01, 60);
         this.box = geo.boundingBox;
+        this.face = this.box.max.z;
         this._p = new THREE.Vector3(); this._l = new THREE.Vector3();
 
         this.resize();
@@ -140,70 +186,74 @@ class Nova {
         this.renderer.render(this.scene, this.camera);
     }
 
-    // Where the whole title fits the width of the view (with a margin), at the closing shot's lens
-    finalDistance(fov) {
+    // The distance at which a w x h patch fills the view (the tighter of width and height), at the camera's fov
+    fit(w, h) {
+        const tan = Math.tan(rad(this.camera.fov) / 2), aspect = this.camera.aspect || 1;
+        return Math.max(h / (2 * tan), w / (2 * tan * aspect));
+    }
+
+    // A close-up: the camera fixed for the whole shot; only the light changes
+    closeUp(s, k) {
+        const cam = this.camera, p = this._p, l = this._l;
+        const f = (cam.aspect || 1) < 1 ? s.tall : s.wide;
+        l.set(f.at[0], f.at[1], this.face);
+        const d = this.fit(f.w, f.h);
+        const yaw = rad(s.yaw), pitch = rad(s.pitch);
+        p.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(d).add(l);
+        cam.position.copy(p);
+        cam.lookAt(l);
+        this.light(s.key[0], s.key[1], k, l);
+        this.scene.environmentRotation.set(0, s.env[0] + (s.env[1] - s.env[0]) * k, 0);
+    }
+
+    // The key light, turned from one direction to another over the shot (k 0..1), aimed at the point in view
+    light(from, to, k, at) {
+        const az = rad(from[0] + (to[0] - from[0]) * k), el = rad(from[1] + (to[1] - from[1]) * k);
+        this.key.position.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(4).add(at);
+        this.key.target.position.copy(at);
+    }
+
+    // Where the whole title fits the width of the view, with a margin
+    finalDistance() {
         const b = this.box, aspect = this.camera.aspect || 1;
         const half = (b.max.x - b.min.x) / 2;
-        const frac = aspect >= 1 ? 0.7 : 0.86;
-        return half / (frac * Math.tan(THREE.MathUtils.degToRad(fov) / 2) * Math.min(aspect, 2.2));
+        const frac = aspect >= 1 ? 0.62 : 0.84;
+        return half / (frac * Math.tan(rad(this.camera.fov) / 2) * Math.min(aspect, 2.2));
     }
 
     // The camera, the light and the exposure at time t (seconds)
     pose(t) {
-        const T = TIMING, cam = this.camera, p = this._p, l = this._l;
-        const midX = (this.box.min.x + this.box.max.x) / 2;
-        // Portrait screens: a wider lens, so the close-ups still show a letter's shape and not just a sliver
-        const wide = cam.aspect < 1 ? 1 + (1 - cam.aspect) * 2 : 1;
-        let fov = 30 * wide, light = 0, exposure = 1;
-        if (t < T.cut) {
-            // A: skimming the face of N, o, v
-            const k = sine(t / T.cut);
-            p.copy(V([-1.66, 0.11, 0.4])).lerp(V([-0.74, 0.03, 0.37]), k);
-            l.copy(V([-1.42, 0.03, 0.0])).lerp(V([-0.5, -0.05, 0.0]), k);
-            this.light.position.set(-2.3 + 2.2 * ease(t / T.cut), 0.5, 0.55);
-            light = 2.6;
-            exposure = ease(t / 0.55);
-        } else if (t < T.pull) {
-            // B: the 2, from above
-            const k = sine((t - T.cut) / (T.pull - T.cut));
-            p.copy(V([1.42, 0.36, 0.42])).lerp(V([1.1, 0.4, 0.47]), k);
-            l.copy(V([0.95, 0.06, 0.08])).lerp(V([0.9, 0.03, 0.08]), k);
-            this.light.position.set(1.7 - 1.1 * k, 0.62, 0.6);
-            light = 2.4;
+        const T = TIMING, cam = this.camera;
+        cam.fov = 24;
+        cam.updateProjectionMatrix();
+        let exposure = 1;
+        // the close-ups are lit as authored; the whole title is lifted (finish.hold) so its letters read at a glance
+        const whole = t >= T.c ? 1 : 0;
+        this.scene.environmentIntensity = this.baseEnv * (whole ? this.hold.env : 1);
+        this.key.intensity = this.baseKey * (whole ? this.hold.key : 1);
+        if (t < T.b) {
+            this.closeUp(this.shots.A, sine(t / T.b));
+            exposure = ease(t / 0.5);
+        } else if (t < T.c) {
+            this.closeUp(this.shots.B, sine((t - T.b) / (T.c - T.b)));
         } else {
-            // C: drawing back to the whole title, then holding on it
-            const D = this.finalDistance(26 * wide);
-            const u = ease((t - T.pull) / (T.full - T.pull));
-            const p0 = V([1.1, 0.4, 0.47]), p3 = V([midX, 0.0, D]);
-            const p1 = p0.clone().add(V([0.25, 0.18, 0.9]));
-            const p2 = V([midX + 0.55, 0.16, D * 0.84]);
-            const a = 1 - u;
-            p.set(0, 0, 0).addScaledVector(p0, a * a * a).addScaledVector(p1, 3 * a * a * u).addScaledVector(p2, 3 * a * u * u).addScaledVector(p3, u * u * u);
-            l.copy(V([0.9, 0.03, 0.08])).lerp(V([midX, 0, 0]), ease(Math.min(1, (t - T.pull) / (T.full - T.pull) * 1.15)));
-            fov = (30 - 4 * u) * wide;
-            // the hold: a slow push in
-            const hold = clamp01((t - T.full) / (T.end - T.full));
-            p.z -= D * 0.02 * sine(hold);
-            // the last sweep of light, left to right across the whole title
-            const sw = clamp01((t - (T.full - 0.15)) / 1.05);
-            this.light.position.set(-2.7 + 5.4 * sine(sw), 0.22, 1.05);
-            light = 3.4 * Math.sin(Math.PI * sw) + 0.4 * (1 - u);
+            // The whole title, straight on: it begins a touch closer and settles back, then holds
+            const midX = (this.box.min.x + this.box.max.x) / 2;
+            const D = this.finalDistance();
+            const u = ease((t - T.c) / (T.settle - T.c));
+            this._l.set(midX, 0, this.face);
+            cam.position.set(midX, 0.012 * D * (1 - u), D * (0.93 + 0.07 * u));
+            cam.lookAt(this._l);
+            this.light([-30, 34], [-24, 32], clamp01((t - T.c) / (T.end - T.c)), this._l);
+            this.scene.environmentRotation.set(0, 0.04 - 0.05 * clamp01((t - T.c) / (T.end - T.c)), 0);
             exposure = 1 - ease((t - T.handoff) / (T.end - T.handoff));
         }
-        // a breath of darkness at the cut between the two close-ups
-        const dip = Math.abs(t - T.cut);
-        if (dip < 0.16) exposure *= ease(dip / 0.16);
-        cam.position.copy(p);
-        cam.lookAt(l);
-        cam.fov = fov;
-        cam.updateProjectionMatrix();
-        this.light.intensity = light;
-        // The studio's reflections drift across the metal all the way through; over the closing shot the strip in
-        // front sweeps across the faces from left to right (the environment turns about the vertical)
-        const sweep = sine(clamp01((t - (T.full - 0.3)) / 1.15));
-        const drift = 0.75 - 0.9 * (Math.min(t, T.full) / T.full);
-        this.scene.environmentRotation.set(0.06, t < T.full - 0.3 ? drift : drift + (-0.42 + 0.84 * sweep) - (-0.42), 0);
-        this.renderer.toneMappingExposure = exposure * 1.05;
+        // the dips to black between the shots
+        for (const cut of [T.b, T.c]) {
+            const d = Math.abs(t - cut);
+            if (d < DIP) exposure *= ease(d / DIP);
+        }
+        this.renderer.toneMappingExposure = exposure;
     }
 
     draw(now) {

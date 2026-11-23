@@ -9,7 +9,7 @@
 //   u.setRegions({pose: {x0, x1, y0, y1}})  free parts of the view per pose (fractions), for composing
 //   u.setSafeArea({x0, x1, y0, y1} | null)   the free part of the view in Explore mode
 //   u.setFollow('sections'|'scroll')          how the camera follows the page (see camera.js)
-//   u.setGlass([{x, y, w, h, r}], on)         the panels the scene bends under (page px; see glass.js)
+//   u.setGlass([{x, y, w, h, r, canvas}], on) the panels whose rims bend the scene (page px; see glass.js)
 //   u.setSuspended(b)  u.on('ready'|'lost'|'slow', fn)   u.dispose()
 import * as THREE from 'three';
 import { createSky } from './sky.js';
@@ -231,7 +231,6 @@ export class Universe {
         if (!this.rig.settled()) return true;
         for (const b of this.system.bodies.values()) if (Math.abs(b.hover - b.hoverTarget) > 0.002) return true;
         if (this.effectsLayer.state && Math.abs(this.effectsLayer.state.climb - this.effectsLayer.state.climbTarget) > 0.002) return true;
-        if (this.glass.enabled && this.glass.strength < 0.99) return true;
         return this.explorer.controls.enabled;
     }
 
@@ -272,8 +271,8 @@ export class Universe {
         this.rig.update(dt, c);
         for (const l of this.layers) if (l !== this.system) l.update(c);
         const r0 = this.firstFrame ? 0 : performance.now();
-        if (!this.explorer.controls.enabled && this.glass.place(window.scrollY, dt)) this.glass.render(this.scene, this.camera);
-        else this.renderer.render(this.scene, this.camera);
+        if (!this.explorer.controls.enabled && this.glass.place(window.scrollY)) this.glass.render(this.scene, this.camera);
+        else { this.glass.clear(); this.renderer.render(this.scene, this.camera); }
         if (!this.firstFrame) this.timings.firstFrame = Math.round(performance.now() - r0);
         this.watchSpeed(dt);
         if (!this.firstFrame) { this.firstFrame = true; this.emit('ready'); }
@@ -326,8 +325,8 @@ export class Universe {
     }
 
     setGlass(panes, on) {
-        this.glass.setPanes(panes);
         this.glass.enabled = !!on && this.effects === 'full';
+        this.glass.setPanes(this.glass.enabled ? panes : []);
         this.invalidate();
     }
 
@@ -422,7 +421,7 @@ export class Universe {
             focus: this.explorer.focusId, follow: this.rig.follow, lens: [this.rig.sx, this.rig.sy],
             camera: this.camera.position.toArray(), aim: this.rig.look.toArray(), calls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles,
             geometries: this.renderer.info.memory.geometries, textures: this.renderer.info.memory.textures, poses: Object.keys(POSES),
-            timings: this.timings, glass: { on: this.glass.enabled, panes: this.glass.panes.length, drawn: this.glass.material.uniforms.uCount.value, strength: this.glass.strength }, programs: this.renderer.info.programs ? this.renderer.info.programs.length : null,
+            timings: this.timings, glass: { on: this.glass.enabled, panes: this.glass.panes.length, drawn: this.glass.drawn.size }, programs: this.renderer.info.programs ? this.renderer.info.programs.length : null,
         };
     }
 

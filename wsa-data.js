@@ -1491,12 +1491,12 @@ window.WSA = {
             title: 'Introducing NovaUI 2.0',
             summary: 'NovaUI 2.0 is the new design of the WSA website. The homepage now sits inside a live 3D Kerbol system, its panels are Liquid Glass, and every page shares one design language.',
             image: { src: 'images/news/novaui-2.jpg', thumb: 'images/news/thumbs/novaui-2.jpg',
-                     alt: 'The words NovaUI 2.0 in polished metal on black' },
+                     alt: 'The words NovaUI 2.0 in slim obsidian lettering on black' },
             body: [
                 'The homepage is drawn live in your browser. Kerbin, the Mun, Duna, Jool and the rest of the Kerbol system turn behind the page, with a galaxy, nebulae and an asteroid swarm beyond them. Moving from one section to the next takes the camera to a new place in the system, and on wider screens each world is framed beside the text rather than behind it.',
                 'Click a world, or Explore the universe, to fly round the system. Each world shows its real radius and gravity and the WSA missions that went there. On phones, its record is a sheet along the bottom of the screen, and the world is framed in the space above it.',
-                'The homepage\'s panels are Liquid Glass: the universe bends at their edges and splits faintly into colour, like light through a slab of glass. Every other page now shares the homepage\'s look: the same deep sky, the same glass cards and type, and a world of its own on the horizon.',
-                'The homepage intro now opens with the NovaUI 2.0 title in polished metal, and its sound is on by default. Your browser may wait for your first click or tap before playing it, and if you turn it off, it stays off.',
+                'The homepage\'s panels are Liquid Glass: clear panes the universe shows through, with light along their edges and a faint split of colour at the rim. Every other page now shares the homepage\'s look: the same deep sky, the same glass cards and type, and a world of its own on the horizon.',
+                'The homepage intro now opens with the NovaUI 2.0 title in slim obsidian lettering, and its sound is on by default. Your browser may wait for your first click or tap before playing it, and if you turn it off, it stays off.',
                 'The original design is still there: choose Version 1.0 under Design in Settings, on any page.'
             ],
             links: [{ label: 'Explore the universe', href: 'index.html#explore' },

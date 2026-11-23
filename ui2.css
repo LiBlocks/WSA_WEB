@@ -174,7 +174,8 @@
 }
 
 /* Liquid Glass on: clear slabs, with the light along the top and left edge and a hairline split of colour round the
-   rim (in Chromium the lens adds its own split; liquid-glass.js) */
+   rim, drawn on the pane itself so it stays on the edge as the page scrolls (in Chromium the lens adds the real
+   split of what lies behind, at rest; liquid-glass.js) */
 :root.ui-v2:not(.home-v2)[data-liquid-glass] :is(.overview-card, .program-card, .vehicle-card, .album-card, .wallet-card,
     .status-card, .module-card:not(.expandable-section .module-card), .expandable-section, .achievement, .stat-card) {
     --lg-a: 0.035;

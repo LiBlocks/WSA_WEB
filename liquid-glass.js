@@ -457,6 +457,8 @@
 
     function startSkyClock(cosmos) {
         stopSkyClock();
+        // (a scene swap's timer can fire after Liquid Glass was turned off and the sky removed)
+        if (!cosmos || !cosmos.isConnected) return;
         const loops = cosmos.getAnimations({ subtree: true })
             .filter(a => a.effect && a.effect.getTiming().iterations === Infinity);
         if (!loops.length) return;
@@ -634,8 +636,8 @@
     const LENS_PANES = CARDS + ', .stat-card, .expandable-section, .achievement, .tl-toggle, .search-field, ' +
         '.module-card:not(.expandable-section .module-card)';
     // On the 2.0 homepage the panels sit over a live 3D canvas, and a backdrop lens there would be recomputed for
-    // every frame of it (measured: 13-15 frames a second). The universe bends itself under them instead
-    // (home/universe/glass.js), which every browser that draws it can do.
+    // every frame of it (measured: 13-15 frames a second). The universe bends itself at their rims instead, into a
+    // canvas inside each panel (home/universe/glass.js), and the stylesheet does the rest (home/home.css).
     const LENS_SKIP = 'header, .nav-drawer, .settings-panel, dialog, footer, :root.home-v2 .home-pane';
     const backdropLens = !!(navigator.userAgentData && navigator.userAgentData.brands &&
         navigator.userAgentData.brands.some(b => b.brand === 'Chromium')) &&
@@ -656,10 +658,12 @@
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const RESIZE_SETTLE_MS = 150;
 
-    // Chromatic aberration: the rim bends short wavelengths further than long ones, so what lies
-    // behind it is seen twice, slightly apart: a red image bent a little less and a cyan-blue one a
-    // little more. A star or line under the rim gets a tiny red fringe on one side and a cyan one on
-    // the other. Where nothing bends (the flat middle) the two coincide and there is no colour at all.
+    // Chromatic aberration: the rim bends short wavelengths further than long ones, so what lies behind it is seen
+    // twice, slightly apart: a red image bent a little less and a cyan-blue one a little more. A star or line under
+    // the rim gets a tiny red fringe on one side and a cyan one on the other; the flat middle has none. The lens is
+    // part of the pane itself (its backdrop filter), so the fringe can't trail behind it. While the page scrolls
+    // the lenses do step aside (bending every pane again on every scrolled frame is too heavy: measured at 20-35
+    // frames a second) and return once it rests; the pane's colour hairline (ui2.css) stays on its edge throughout.
     const DISPERSION = 0.15;    // red bends (1 - this), cyan (1 + this), as a share of the bend
     // Controls: a capsule rim that bends evenly all round
     const BEZEL_CONTROL = 18;   // px of rim that bends, at most
@@ -863,8 +867,13 @@
     const softenTilted = `<feGaussianBlur in="SourceGraphic" stdDeviation="${SOFTEN}"/>` +
         '<feOffset dx="0" dy="0" result="soft"/>';
 
-    // Two passes of the same bend: a weaker one gives the red channel, a stronger one green and blue
+    // Two passes of the same bend: a weaker one gives the red channel, a stronger one green and blue (one pass
+    // when nothing splits)
     function dispersed(map, scale, result = '', source = 'soft', dispersion = DISPERSION) {
+        if (!dispersion) {
+            return `<feDisplacementMap in="${source}" in2="${map}" scale="${scale.toFixed(2)}" xChannelSelector="R" yChannelSelector="G"` +
+                `${result && ` result="${result}"`}/>`;
+        }
         const pass = (factor, values, result) =>
             `<feDisplacementMap in="${source}" in2="${map}" scale="${(scale * factor).toFixed(2)}" xChannelSelector="R" yChannelSelector="G"/>` +
             `<feColorMatrix type="matrix" values="${values}" result="${result}"/>`;

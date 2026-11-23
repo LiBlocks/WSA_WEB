@@ -6,14 +6,21 @@
  * "Replay intro" in the homepage footer, or ?intro in the address, plays it again. Loaded in <head> so
  * the page is covered from the first paint. On a first visit the language picker (i18n.js) comes first.
  *
- *   NovaUI 2.0 (~6 s) the title of the site's interface as a polished metal object (intro-nova.js, three.js):
- *                     extreme close-ups travel across its letters under a moving light, the camera draws back
- *                     to the whole title, holds, and it goes dark as the opening begins. Without WebGL, on the
- *                     'lite' version, or if it can't load in time, the title is set in type instead (~2.4 s).
+ *   NovaUI 2.0 (~6 s) the title of the site's interface, in slim obsidian lettering with a little depth (intro-nova.js,
+ *                     three.js): two still close-ups of parts of it, the light shifting slightly along the
+ *                     letters' edges, then the whole title, held, going dark as the opening begins. Without
+ *                     WebGL, on the 'lite' version, or if it can't load in time, the title is set in type
+ *                     instead (~2.4 s).
  *   Opening (~5.6 s)  the insignia fades in, a planet rises behind it, an orbit is traced round it, then
  *                     the name and the motto.
  *   Film (9 s)        media/intro/wsa-intro-*.webm|mp4, an orbital sunrise rendered in Blender
- *                     (sources: ~/Documents/wsa-intro-production). It ends pulling back from the planet.
+ *                     (sources: ~/Documents/wsa-intro-production): the station passes, satellites drift
+ *                     behind it, and it ends pulling back from the planet. The video is always muted (its
+ *                     sound, wsa-intro-film.ogg|m4a, plays with the other cues) and is fetched whole while the
+ *                     title plays, so it is ready at its moment whatever the browser's own preloading does
+ *                     (phones' web views don't preload video at all). Where video can't play without a tap
+ *                     (some phones' in-app web views, low-power modes), the same film plays as an animated
+ *                     image instead (wsa-intro-film.avif, 960 x 540).
  *   Landing (~7.6 s)  the planet shrinks into a disc and the insignia builds itself on it: WSA; the rocket
  *                     flies in drawing its trail, then the spaceplane; the blue and red arcs sweep in from
  *                     either side; the stars and the horizon; the outer ring. (Layers: media/intro/logo/,
@@ -24,13 +31,16 @@
  *                     from the landing.
  *
  * Three versions: 'full'; 'lite' (data saver, a slow connection or very little memory: the same intro
- * with two stills of the film instead of the video, nothing large downloaded); 'calm'
- * (prefers-reduced-motion: the title, then the opening's lockup, each fade in and out; nothing moves). If the
- * video fails or can't buffer in time, 'full' falls back to the stills.
+ * with the film as the small animated image, no video downloaded); 'calm' (prefers-reduced-motion: the title,
+ * then the opening's lockup, each fade in and out; nothing moves). If neither the video nor the animated image
+ * can be shown in time, the film's first and last frames stand in for it.
  *
- * Sound is on by default. Browsers hold sound back until the visitor interacts with the page; then their first
- * click, tap or key press turns it on, in step with the picture (or the sound button does). A visitor who turns
- * it off keeps it off on later visits (localStorage 'wsa-intro-sound'), until they turn it on again.
+ * Sound is on by default, and the sound button shows the visitor's choice: on unless they turned it off
+ * (localStorage 'wsa-intro-sound', kept across visits). Whether the browser lets sound play yet is a separate
+ * matter: most hold it back until the visitor interacts with the page. Until then the button says so ("Tap for
+ * sound"), and the visitor's first click, tap or key press anywhere starts it, in step with the picture: each
+ * cue that should already be playing joins in from where the picture is. A blocked start never turns the
+ * choice off.
  * Escape or "Skip intro" (shown from the title onward) goes straight to the page at any point.
  */
 (function () {
@@ -78,8 +88,10 @@
 
     var STR = {
         en: { skip: 'Skip intro', soundOn: 'Turn sound on', soundOff: 'Turn sound off', motto: 'Wonders Seek Above',
+              tapSound: 'Tap for sound', clickSound: 'Click for sound',
               sr: 'NovaUI 2.0, and the Woody Space Agency intro. Press Escape to skip.' },
         zh: { skip: '略過片頭', soundOn: '開啟聲音', soundOff: '關閉聲音', motto: '向上探尋奇蹟',
+              tapSound: '輕觸以播放聲音', clickSound: '按一下以播放聲音',
               sr: 'NovaUI 2.0 與 Woody Space Agency 片頭動畫。按 Esc 鍵可略過。' }
     };
 
@@ -195,6 +207,7 @@
             '<button type="button" class="wsa-intro-control wsa-intro-sound" aria-pressed="false">' +
                 '<svg class="is-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>' +
                 '<svg class="is-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>' +
+                '<span class="wsa-intro-sound-hint" aria-hidden="true"></span>' +
             '</button>' +
             '<button type="button" class="wsa-intro-control wsa-intro-skip"></button>' +
             '<p class="wsa-intro-sr"></p>';
@@ -260,7 +273,15 @@
         window.addEventListener('pageshow', this.onShow);
         document.addEventListener('visibilitychange', this.onHide);
         this.skipBtn.addEventListener('click', function (e) { self.finish(true, e.detail === 0); });
-        this.soundBtn.addEventListener('click', function () { self.setSound(!self.soundOn, true); });
+        // While the browser is holding sound back, pressing the button is the visitor's go-ahead, never "off"
+        // (the press itself is what lets the sound start)
+        this.soundBtn.addEventListener('pointerdown', function () { self.pressedWaiting = self.soundWaiting(); });
+        this.soundBtn.addEventListener('click', function () {
+            var waiting = self.pressedWaiting || self.soundWaiting();
+            self.pressedWaiting = false;
+            if (waiting) self.unlock();
+            else self.setSound(!self.wantSound, true);
+        });
         this.soundBtn.setAttribute('aria-label', this.t.soundOn);
         this.soundBtn.title = this.t.soundOn;
 
@@ -269,6 +290,7 @@
         this.loadEmblem();
         this.prepareAudio();
         if (this.mode === 'full') this.loadFilm();
+        else this.loadFlipbook();
         // The controls from the start, whether or not the title is ready yet: skipping is always one step away
         this.at(450, function () { this.soundBtn.classList.add('is-shown'); });
         this.at(800, function () { this.skipBtn.classList.add('is-shown'); });
@@ -289,7 +311,7 @@
         // The 3D title, if it is ready within 2.6 s; otherwise the typeset one
         var wait = setTimeout(typeset, 2600);
         this.timers.push(wait);
-        import('./intro-nova.js?v=1').then(function (m) {
+        import('./intro-nova.js?v=3').then(function (m) {
             return m.createNova(self.novaLayer, { url: MEDIA + 'novaui-title.bin' });
         }).then(function (player) {
             clearTimeout(wait);
@@ -307,9 +329,8 @@
 
     // Common to both versions of the title: its sound, and the controls
     Intro.prototype.novaBegins = function () {
-        this.novaT0 = performance.now();
         this.novaActive = true;
-        this.novaCue = this.cue('nova');
+        this.cue('nova');
     };
 
     // The title goes dark: the WSA opening begins underneath
@@ -574,26 +595,101 @@
 
     /* ------------------------------------------------------------------ the film */
 
+    // Which file of the film: WebM (VP9) is the smaller, but where the device can't decode VP9 in hardware and can
+    // decode H.264 (iPhones, most Macs) the MP4 is easier on it
+    function filmType(res) {
+        var v = document.createElement('video');
+        var webm = v.canPlayType('video/webm; codecs="vp9"'), mp4 = v.canPlayType('video/mp4; codecs="avc1.640028"');
+        if (!webm || !mp4) return Promise.resolve(webm ? '.webm' : '.mp4');
+        var mc = navigator.mediaCapabilities;
+        if (!mc || !mc.decodingInfo) return Promise.resolve('.webm');
+        var big = res === '1080';
+        function info(type) {
+            try {
+                return mc.decodingInfo({ type: 'file', video: { contentType: type, width: big ? 1920 : 1280,
+                    height: big ? 1080 : 720, bitrate: big ? 2600000 : 1000000, framerate: 24 } }).catch(function () { return null; });
+            } catch (e) { return Promise.resolve(null); }
+        }
+        return Promise.all([info('video/webm; codecs="vp09.00.40.08"'), info('video/mp4; codecs="avc1.640028"')]).then(function (r) {
+            if (r[0] && r[0].supported && r[0].powerEfficient) return '.webm';
+            if (r[1] && r[1].supported && r[1].powerEfficient) return '.mp4';
+            return '.webm';
+        });
+    }
+
+    // The film is fetched whole during the title and opening and played from memory: its moment never waits on
+    // the browser's own preloading, which phones' web views don't do for video at all
     Intro.prototype.loadFilm = function () {
         var self = this;
         var v = document.createElement('video');
         v.className = 'wsa-intro-film';
         v.muted = true;
         v.defaultMuted = true;
+        v.setAttribute('muted', '');
         v.playsInline = true;
         v.setAttribute('playsinline', '');
         v.setAttribute('aria-hidden', 'true');
         v.preload = 'auto';
         v.poster = MEDIA + 'wsa-intro-poster.webp';
-        var big = Math.max(screen.width, screen.height) * (window.devicePixelRatio || 1) >= 1700 &&
-            Math.max(window.innerWidth, window.innerHeight) >= 1000;
-        var res = big ? '1080' : '720';
-        var webm = v.canPlayType('video/webm; codecs="vp9, opus"');
-        v.src = MEDIA + 'wsa-intro-' + res + (webm ? '.webm' : '.mp4');
         v.addEventListener('error', function () { self.filmFailed = true; });
         this.media.insertBefore(v, this.orbit);
         this.film = v;
-        v.load();
+        var big = Math.max(screen.width, screen.height) * (window.devicePixelRatio || 1) >= 1700 &&
+            Math.max(window.innerWidth, window.innerHeight) >= 1000;
+        var res = big ? '1080' : '720';
+        this.filmReady = filmType(res).then(function (ext) {
+            return fetch(MEDIA + 'wsa-intro-' + res + ext);
+        }).then(function (r) {
+            if (!r.ok) throw new Error('film: HTTP ' + r.status);
+            return r.blob();
+        }).then(function (blob) {
+            if (self.done) return false;
+            self.filmURL = URL.createObjectURL(blob);
+            v.src = self.filmURL;
+            self.rehearse();
+            return true;
+        }).catch(function () {
+            self.filmFailed = true;
+            self.loadFlipbook();
+            return false;
+        });
+    };
+
+    // A rehearsal, unseen, while the title plays: does this browser let the film play without a tap? Some
+    // phones' in-app web views and low-power modes don't, even muted; then the animated image is fetched in good
+    // time. (A tap before the film's moment lets the video play after all: see unlock.)
+    Intro.prototype.rehearse = function () {
+        var self = this, v = this.film;
+        if (!v || !v.src || this.filmStarted || this.done) return;
+        var p;
+        try { p = v.play(); } catch (e) { p = null; }
+        if (!p || !p.then) return;
+        p.then(function () {
+            self.filmAllowed = true;
+            if (self.filmStarted) return;
+            v.pause();
+            try { v.currentTime = 0; } catch (e) { /* the first frame is close enough */ }
+        }, function (e) {
+            if (self.filmStarted || (e && e.name === 'AbortError')) return;
+            self.filmAllowed = false;
+            self.loadFlipbook();
+        });
+    };
+
+    // The film as an animated image (no sound of its own, like the video): fetched once, when it may be needed
+    Intro.prototype.loadFlipbook = function () {
+        var self = this;
+        if (!this.flipbook) {
+            this.flipbook = fetch(MEDIA + 'wsa-intro-film.avif').then(function (r) {
+                if (!r.ok) throw new Error('flipbook: HTTP ' + r.status);
+                return r.blob();
+            }).then(function (blob) {
+                if (self.done) return null;
+                self.flipURL = URL.createObjectURL(blob);
+                return self.flipURL;
+            }).catch(function () { return null; });
+        }
+        return this.flipbook;
     };
 
     Intro.prototype.dissolve = function () {
@@ -604,38 +700,26 @@
         this.animate(this.orbit, [{ opacity: 1 }, { opacity: 0 }], { duration: 1100, easing: 'ease-in', fill: 'forwards' });
         this.cue('dissolve');
         this.fadeAmbient(0, 2.2);
-        if (this.mode === 'lite') { this.stills(); return; }
-        var v = this.film;
+        if (this.mode === 'lite' || !this.film) { this.flip(); return; }
         var started = false;
-        function go() {
+        function go(how) {
             if (started || self.done) return;
             started = true;
-            self.playFilm();
+            how.call(self);
         }
-        if (this.filmFailed) { this.stills(); return; }
-        if (v.readyState >= 3) { go(); return; }
-        // Still buffering: wait a little (the poster holds the frame), then make do with the stills
-        v.addEventListener('canplay', go, { once: true });
-        this.at(T.filmWait, function () {
-            if (!started) { started = true; v.removeEventListener('canplay', go); this.stills(); }
-        });
+        // The film when it has arrived and may play; the animated image when it may not; and if it still hasn't
+        // arrived after a little wait (the poster holds the frame meanwhile), the animated image too
+        this.filmReady.then(function (ok) { go(ok && self.filmAllowed !== false ? self.playFilm : self.flip); });
+        this.at(T.filmWait, function () { go(this.flip); });
     };
 
     Intro.prototype.playFilm = function () {
         var self = this;
         var v = this.film;
-        if (this.soundOn) { v.muted = false; v.volume = 0.9; }
+        this.filmStarted = true;
         var p = v.play();
-        if (p && p.catch) p.catch(function () {
-            // Sound allowed for the cues but not for the film: play it muted rather than not at all
-            if (!v.muted && !self.done) {
-                v.muted = true;
-                self.setSound(false);
-                var again = v.play();
-                if (again && again.catch) again.catch(function () { self.stills(); });
-            } else {
-                self.stills();
-            }
+        if (p && p.catch) p.catch(function (e) {
+            if (!(e && e.name === 'AbortError')) self.flip();
         });
         v.addEventListener('playing', function () {
             if (self.done) return;
@@ -643,10 +727,18 @@
             self.still.style.visibility = 'hidden';
             announce('wsa-intro-film');
         }, { once: true });
+        // Its sound follows the picture: it starts where the picture is, and if a stutter has let the two drift
+        // apart by the time the picture moves again, it starts again from there (a long stall ends in the stills,
+        // which stop it)
+        v.addEventListener('playing', function () {
+            var c = self.cues && self.cues.film;
+            if (c && c.src && Math.abs((performance.now() - c.at) / 1000 - v.currentTime) > 0.2) self.stopCue('film');
+            self.cue('film', v.currentTime);
+        });
         // The film's own clock drives the landing, so it stays in step if playback stutters
         var stalledAt = 0;
         (function watch() {
-            if (self.done || self.contracting) return;
+            if (self.done || self.contracting || self.usingStills) return;
             if (v.currentTime >= CONTRACT_AT || v.ended) { self.contract(); return; }
             if (v.paused || v.readyState < 3) {
                 stalledAt = stalledAt || performance.now();
@@ -658,12 +750,49 @@
         })();
     };
 
-    // The fallback (and the lite version): the film's first and last frames, with a slow push-in between
+    // The film as an animated image: shown once it has decoded, its first frame being the poster's; the landing
+    // follows a clock started with it. If the image can't be had in time, the stills.
+    Intro.prototype.flip = function () {
+        if (this.contracting || this.usingStills || this.flipping) return;
+        this.flipping = true;
+        var self = this;
+        if (this.film) { try { this.film.pause(); } catch (e) {} this.film.style.opacity = '0'; }
+        var settled = false;
+        function stills() {
+            if (settled) return;
+            settled = true;
+            self.stills();
+        }
+        this.at(T.filmWait, stills);
+        this.loadFlipbook().then(function (url) {
+            if (!url || settled || self.done) { stills(); return; }
+            var img = document.createElement('img');
+            img.className = 'wsa-intro-flip';
+            img.alt = '';
+            img.src = url;
+            (img.decode ? img.decode() : Promise.resolve()).then(function () {
+                if (settled || self.done || self.contracting) return;
+                settled = true;
+                self.media.insertBefore(img, self.orbit);
+                requestAnimationFrame(function () {
+                    if (self.done) return;
+                    img.style.opacity = '1';
+                    self.still.style.visibility = 'hidden';
+                    announce('wsa-intro-film');
+                    self.cue('film');
+                    self.at(Math.round(CONTRACT_AT * 1000), self.contract);
+                });
+            }, stills);
+        });
+    };
+
+    // The last resort: the film's first and last frames, with a slow push-in between
     Intro.prototype.stills = function (late) {
         if (this.contracting || this.usingStills) return;
         this.usingStills = true;
         var self = this;
         announce('wsa-intro-film');
+        this.stopCue('film');
         if (this.film) { this.film.pause(); this.film.style.opacity = '0'; }
         this.still.style.visibility = '';
         var end = document.createElement('img');
@@ -758,6 +887,7 @@
         this.at(L.shrink, function () {
             this.animate(this.media, [{ opacity: 1 }, { opacity: 0 }], { duration: 90, fill: 'forwards' });
             if (this.film) this.film.pause();
+            this.stopCue('film');
         });
         var landing = L.jump + Math.round(L.jumpDur * LAND_AT);
         this.at(L.pieces, this.holdPieces);
@@ -958,9 +1088,15 @@
 
     /* ------------------------------------------------------------------ sound */
 
+    // What the visitor wants (wantSound: on unless they turned it off) and what the browser allows (the audio
+    // clock running) are kept apart: the button shows the first; sound is heard when both are true.
+    var GESTURES = ['pointerup', 'touchend', 'click', 'keydown'];
+
     Intro.prototype.prepareAudio = function () {
         var Ctx = window.AudioContext || window.webkitAudioContext;
+        this.wantSound = soundChoice() !== 'off';
         this.soundOn = false;
+        this.cues = {};
         if (!Ctx) { this.soundBtn.hidden = true; return; }
         var self = this;
         var ctx;
@@ -971,34 +1107,88 @@
         var probe = document.createElement('audio');
         var ext = probe.canPlayType('audio/ogg; codecs="opus"') ? '.ogg' : '.m4a';
         this.audio = { ctx: ctx, master: master, buffers: {}, ext: ext };
-        ['nova', 'ambient', 'dissolve', 'logo'].forEach(function (name) {
+        ['nova', 'ambient', 'dissolve', 'film', 'logo'].forEach(function (name) {
             fetch(MEDIA + 'wsa-intro-' + name + ext).then(function (r) { return r.ok ? r.arrayBuffer() : Promise.reject(r.status); })
                 .then(function (data) { return new Promise(function (res, rej) { ctx.decodeAudioData(data, res, rej); }); })
                 .then(function (buf) {
                     self.audio.buffers[name] = buf;
                     if (name === 'ambient' && self.openingStarted) self.startAmbient();
-                    if (name === 'nova') self.catchUpNova();
+                    self.catchUp(name);
                 })
                 .catch(function () { /* a missing cue is just silence */ });
         });
-        // Sound is on unless the visitor turned it off. Browsers hold sound back until the visitor's first
-        // click, tap or key press on the page; if that happens here, that first interaction switches it on
-        // (the sound button itself excepted: it is a choice of its own)
-        var wanted = soundChoice() !== 'off';
-        if (ctx.state === 'running') { if (wanted) this.setSound(true); }
-        else if (wanted) {
-            var p = ctx.resume();
-            setTimeout(function () { if (!self.done && ctx.state === 'running') self.setSound(true); }, 250);
-            if (p && p.catch) p.catch(function () {});
-            this.onFirstGesture = function (e) {
-                ['pointerdown', 'keydown'].forEach(function (t) { window.removeEventListener(t, self.onFirstGesture, true); });
-                if (self.done || self.soundOn) return;
-                if (e.target && e.target.closest && e.target.closest('.wsa-intro-sound')) return;
-                if (e.type === 'keydown' && e.key === 'Escape') return;
-                self.setSound(true);
-            };
-            ['pointerdown', 'keydown'].forEach(function (t) { window.addEventListener(t, self.onFirstGesture, true); });
+        ctx.onstatechange = function () { if (!self.done) self.syncSound(); };
+        // Browsers hold sound back until the visitor interacts with the page. Every click, tap or key press
+        // (the moments a browser accepts as the visitor's say-so) asks again, until sound is allowed.
+        this.onGesture = function (e) {
+            if (self.done || !self.wantSound || ctx.state === 'running') return;
+            if (e.type === 'keydown' && (e.key === 'Escape' || e.repeat)) return;
+            self.unlock();
+        };
+        GESTURES.forEach(function (t) { window.addEventListener(t, self.onGesture, true); });
+        // Some browsers allow it straight away (a site the visitor often plays sound on, or the language picker's
+        // click just now)
+        if (this.wantSound && ctx.state !== 'running') {
+            try { var p = ctx.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
         }
+        this.syncSound();
+    };
+
+    // Asks the browser to let sound play: called from inside a click, tap or key press. Also lets the film play
+    // in browsers that wouldn't play it without one (see rehearse).
+    Intro.prototype.unlock = function () {
+        var a = this.audio;
+        if (a && a.ctx.state !== 'running') {
+            try {
+                var p = a.ctx.resume();
+                if (p && p.catch) p.catch(function () {});
+                // older iPhones also want a sound started inside the gesture: one silent sample
+                var src = a.ctx.createBufferSource();
+                src.buffer = a.ctx.createBuffer(1, 1, 22050);
+                src.connect(a.ctx.destination);
+                src.start(0);
+            } catch (e) { /* asked; the browser decides */ }
+        }
+        if (this.filmAllowed === false && !this.filmStarted) this.rehearse();
+    };
+
+    Intro.prototype.soundWaiting = function () {
+        return !!(this.audio && this.wantSound && this.audio.ctx.state !== 'running');
+    };
+
+    // The sound and the button brought in line with the wish and the browser's permission
+    Intro.prototype.syncSound = function () {
+        var a = this.audio;
+        if (!a) return;
+        var live = a.ctx.state === 'running';
+        var on = this.wantSound && live;
+        if (on !== this.soundOn) {
+            this.soundOn = on;
+            var now = a.ctx.currentTime, g = a.master.gain;
+            g.cancelScheduledValues(now);
+            g.setValueAtTime(g.value, now);
+            g.linearRampToValueAtTime(on ? 1 : 0, now + (on ? 0.8 : 0.25));
+        }
+        if (live) {
+            for (var name in this.cues) this.catchUp(name);
+        }
+        var waiting = this.wantSound && !live;
+        var hint = window.matchMedia && window.matchMedia('(hover: none)').matches ? this.t.tapSound : this.t.clickSound;
+        var label = waiting ? hint : this.wantSound ? this.t.soundOff : this.t.soundOn;
+        this.soundBtn.setAttribute('aria-pressed', String(this.wantSound));
+        this.soundBtn.classList.toggle('is-waiting', waiting);
+        this.soundBtn.querySelector('.wsa-intro-sound-hint').textContent = waiting ? hint : '';
+        this.soundBtn.setAttribute('aria-label', label);
+        this.soundBtn.title = label;
+    };
+
+    // The visitor's own choice, from the button: kept for later visits
+    Intro.prototype.setSound = function (on, byVisitor) {
+        if (!this.audio) return;
+        this.wantSound = on;
+        if (byVisitor) soundChoice(on ? 'on' : 'off');
+        if (on) this.unlock();
+        this.syncSound();
     };
 
     Intro.prototype.startAmbient = function () {
@@ -1026,50 +1216,41 @@
         g.linearRampToValueAtTime(to, now + secs);
     };
 
-    // A cue plays only while the audio clock is running: one started while sound is blocked would wait and
-    // then play late, out of step with the picture. Returns whether it started.
+    // Each cue is placed on the picture's timeline when its moment comes (cue), whether or not sound is allowed
+    // yet; it is heard from that moment if it is, and otherwise joins in from where the picture is once it is
+    // (catchUp). A cue never plays twice over itself.
     Intro.prototype.cue = function (name, offset) {
-        var a = this.audio;
-        if (!a || !a.buffers[name] || this.done || a.ctx.state !== 'running') return false;
-        if (offset && offset >= a.buffers[name].duration - 0.05) return false;
+        if (this.done || !this.cues) return;
+        var c = this.cues[name];
+        if (c && c.src) return;
+        this.cues[name] = { at: performance.now() - (offset || 0) * 1000 };
+        this.catchUp(name);
+    };
+
+    Intro.prototype.catchUp = function (name) {
+        var a = this.audio, c = this.cues && this.cues[name];
+        if (!a || !c || c.src || c.over || this.done || a.ctx.state !== 'running' || !a.buffers[name]) return;
+        var buf = a.buffers[name];
+        var offset = Math.max(0, (performance.now() - c.at) / 1000);
+        if (offset >= buf.duration - 0.05) { c.over = true; return; }
         var src = a.ctx.createBufferSource();
-        src.buffer = a.buffers[name];
-        src.connect(a.master);
-        src.start(a.ctx.currentTime, Math.max(0, offset || 0));
-        return true;
+        src.buffer = buf;
+        var g = a.ctx.createGain();
+        src.connect(g).connect(a.master);
+        src.start(a.ctx.currentTime, offset);
+        c.src = src;
+        c.gain = g;
     };
 
-    // The title's cue, if the title is still on and its sound didn't start with it (the cue arrived late, or the
-    // browser only now allows sound): from where the picture is, never from the top
-    Intro.prototype.catchUpNova = function () {
-        if (!this.novaActive || this.novaCue || this.done) return;
-        this.novaCue = this.cue('nova', (performance.now() - this.novaT0) / 1000);
-    };
-
-    Intro.prototype.setSound = function (on, byVisitor) {
-        var a = this.audio;
-        if (!a) return;
-        var self = this;
-        this.soundOn = on;
-        if (byVisitor) soundChoice(on ? 'on' : 'off');
-        if (on && a.ctx.state !== 'running') {
-            var p = a.ctx.resume();
-            if (p && p.then) p.then(function () { self.catchUpNova(); }, function () {});
-        } else if (on) {
-            this.catchUpNova();
-        }
+    Intro.prototype.stopCue = function (name) {
+        var a = this.audio, c = this.cues && this.cues[name];
+        if (!c) return;
+        delete this.cues[name];
+        if (!c.src) return;
         var now = a.ctx.currentTime;
-        a.master.gain.cancelScheduledValues(now);
-        a.master.gain.setValueAtTime(a.master.gain.value, now);
-        a.master.gain.linearRampToValueAtTime(on ? 1 : 0, now + (on ? 0.8 : 0.25));
-        if (this.film) {
-            this.film.muted = !on;
-            if (on) this.film.volume = 0.9;
-        }
-        this.soundBtn.setAttribute('aria-pressed', String(on));
-        var label = on ? this.t.soundOff : this.t.soundOn;
-        this.soundBtn.setAttribute('aria-label', label);
-        this.soundBtn.title = label;
+        c.gain.gain.setValueAtTime(c.gain.gain.value, now);
+        c.gain.gain.linearRampToValueAtTime(0, now + 0.12);
+        try { c.src.stop(now + 0.14); } catch (e) {}
     };
 
     /* ------------------------------------------------------------------ the end, natural or skipped */
@@ -1091,9 +1272,8 @@
             setTimeout(function () { try { a.ctx.close(); } catch (e) {} }, 450);
         }
         window.removeEventListener('keydown', this.onKey, true);
-        if (this.onFirstGesture) {
-            window.removeEventListener('pointerdown', this.onFirstGesture, true);
-            window.removeEventListener('keydown', this.onFirstGesture, true);
+        if (this.onGesture) {
+            GESTURES.forEach(function (t) { window.removeEventListener(t, self.onGesture, true); });
         }
         window.removeEventListener('pageshow', this.onShow);
         document.removeEventListener('visibilitychange', this.onHide);
@@ -1108,6 +1288,9 @@
         function remove() {
             self.anims.forEach(function (x) { try { x.cancel(); } catch (e) {} });
             if (el && el.parentNode) el.parentNode.removeChild(el);
+            // the film and its animated image were held in memory for the intro only
+            if (self.film) { self.film.removeAttribute('src'); try { self.film.load(); } catch (e) {} }
+            [self.filmURL, self.flipURL].forEach(function (u) { if (u) URL.revokeObjectURL(u); });
             running = null;
         }
         if (el && skipped && el.animate) {

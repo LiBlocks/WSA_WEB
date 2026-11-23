@@ -136,17 +136,33 @@ function measureSections() {
     }
 }
 
-// The panels the universe bends under (universe/glass.js): with Liquid Glass on, in page coordinates
+// The panels whose rims bend the universe (universe/glass.js), with Liquid Glass on. Each gets a canvas of its own
+// (home/home.css .home-glass-rim) that the scene copies its rim into, so the rim moves with the panel exactly as the
+// page scrolls; it is measured in page coordinates.
 const GLASS = '.home-pane:not(.featured-programs > .home-pane), .featured-programs .program-card';
 function syncGlass() {
     const u = state.universe;
     if (!u) return;
     const on = root.hasAttribute('data-liquid-glass');
-    const panes = on ? [...document.querySelectorAll(GLASS)].filter(e => e.getClientRects().length).map(e => {
-        const r = e.getBoundingClientRect();
-        return { x: r.left, y: r.top + scrollY, w: r.width, h: r.height, r: parseFloat(getComputedStyle(e).borderTopLeftRadius) || 0 };
-    }) : [];
-    u.setGlass(panes, on);
+    const els = [...document.querySelectorAll(GLASS)];
+    if (!on) {
+        els.forEach(e => { const c = e.querySelector(':scope > .home-glass-rim'); if (c) c.remove(); });
+        u.setGlass([], false);
+        return;
+    }
+    const panes = els.filter(e => e.getClientRects().length).map(e => {
+        let c = e.querySelector(':scope > .home-glass-rim');
+        if (!c) {
+            c = document.createElement('canvas');
+            c.className = 'home-glass-rim';
+            c.setAttribute('aria-hidden', 'true');
+            e.prepend(c);
+        }
+        const r = c.getBoundingClientRect();
+        const radius = parseFloat(getComputedStyle(e).borderTopLeftRadius) || 0;
+        return { x: r.left, y: r.top + scrollY, w: r.width, h: r.height, r: Math.max(0, radius - 1), canvas: c };
+    });
+    u.setGlass(panes, true);
 }
 
 // For each section with panels to avoid: the larger free band beside them (wide screens), or the space above
@@ -251,7 +267,7 @@ function onScroll() {
             u.setFollow(mode);
             u.setScroll(f);
             pushMoods();
-            u.drawNow();             // panels' glass in step with the page, in this same frame
+            u.drawNow();             // the camera and the panels' rims in step with the page, in this same frame
         }
     });
 }

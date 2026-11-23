@@ -76,6 +76,7 @@
 }
 
 /* The typeset title: brushed-silver letters, one slow sheen across them (none when motion is reduced) */
+/* The title set in type (no WebGL, the 'lite' and calm versions): the same clean white lettering, flat */
 .wsa-intro-nova-type {
     position: absolute;
     left: 50%;
@@ -85,31 +86,11 @@
     white-space: nowrap;
     font-family: "Inter Display", Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
     font-size: clamp(2.6rem, 10vw, 7.5rem);
-    font-weight: 650;
+    font-weight: 500;
     line-height: 1.1;
-    letter-spacing: -0.035em;
-    color: #d9dde5;
-    background-image:
-        linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.85) 50%, transparent 62%),
-        linear-gradient(180deg, #f5f7fb 0%, #cfd4dd 36%, #727a88 54%, #d9dee7 72%, #a0a8b6 100%);
-    background-size: 250% 100%, 100% 100%;
-    background-position: 160% 0, 0 0;
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+    color: #e3e6ec;
     opacity: 0;
-    animation: wsa-nova-sheen 1.7s cubic-bezier(0.4, 0, 0.2, 1) 0.45s both;
-}
-
-.wsa-intro-nova-type.is-still {
-    animation: none;
-    background-position: 160% 0, 0 0;
-}
-
-@keyframes wsa-nova-sheen {
-    from { background-position: 160% 0, 0 0; }
-    to { background-position: -60% 0, 0 0; }
 }
 
 /* ---------- The film's frame (poster, video and the orbit drawn over them share one box) ---------- */
@@ -146,6 +127,7 @@
 
 .wsa-intro-still,
 .wsa-intro-film,
+.wsa-intro-flip,
 .wsa-intro-end {
     opacity: 0;
 }
@@ -362,6 +344,20 @@
     display: block;
 }
 
+/* Sound is on, but the browser is holding it back until the visitor interacts: the button says how to hear it */
+.wsa-intro-sound-hint {
+    display: none;
+}
+
+.wsa-intro-sound.is-waiting {
+    width: auto;
+    padding: 0 0.95rem 0 0.8rem;
+}
+
+.wsa-intro-sound.is-waiting .wsa-intro-sound-hint {
+    display: inline;
+}
+
 /* Once the page starts to appear, the intro no longer takes clicks */
 .wsa-intro.is-releasing {
     pointer-events: none;
@@ -388,6 +384,10 @@
 
     .wsa-intro-sound {
         width: 36px;
+    }
+
+    .wsa-intro-sound.is-waiting {
+        width: auto;
     }
 }
 
